@@ -23,11 +23,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-injector/assets"
-	"github.com/gauntface/go-html-asset-injector/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-injector/assets/assetstubs"
-	"github.com/gauntface/go-html-asset-injector/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-injector/manipulations"
+	"github.com/gauntface/go-html-asset-manager/assets"
+	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/assets/assetstubs"
+	"github.com/gauntface/go-html-asset-manager/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )

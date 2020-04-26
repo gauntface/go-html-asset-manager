@@ -20,7 +20,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-injector/assets"
+	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/google/go-cmp/cmp"
 )
 

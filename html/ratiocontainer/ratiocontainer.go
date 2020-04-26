@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-injector/css"
-	"github.com/gauntface/go-html-asset-injector/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/css"
+	"github.com/gauntface/go-html-asset-manager/html/htmlparsing"
 	"golang.org/x/net/html"
 )
 

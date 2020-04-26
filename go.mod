@@ -1,4 +1,4 @@
-module github.com/gauntface/go-html-asset-injector
+module github.com/gauntface/go-html-asset-manager
 
 go 1.13
 
@@ -24,7 +24,7 @@ require (
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1 // indirect
-	golang.org/x/net v0.0.0-20200421231249-e086a090c8fd
+	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

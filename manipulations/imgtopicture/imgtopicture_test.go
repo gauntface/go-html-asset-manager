@@ -26,7 +26,7 @@ import (
 	"testing"
 
 	"github.com/disintegration/imaging"
-	"github.com/gauntface/go-html-asset-injector/manipulations"
+	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )

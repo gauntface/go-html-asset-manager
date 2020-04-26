@@ -25,10 +25,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-injector/assets"
-	"github.com/gauntface/go-html-asset-injector/assets/assetid"
-	"github.com/gauntface/go-html-asset-injector/files"
-	"github.com/gauntface/go-html-asset-injector/stringui"
+	"github.com/gauntface/go-html-asset-manager/assets"
+	"github.com/gauntface/go-html-asset-manager/assets/assetid"
+	"github.com/gauntface/go-html-asset-manager/files"
+	"github.com/gauntface/go-html-asset-manager/stringui"
 )
 
 var (

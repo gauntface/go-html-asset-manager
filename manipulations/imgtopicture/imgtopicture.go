@@ -27,9 +27,9 @@ import (
 	"strings"
 
 	"github.com/disintegration/imaging"
-	"github.com/gauntface/go-html-asset-injector/files"
-	"github.com/gauntface/go-html-asset-injector/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-injector/manipulations"
+	"github.com/gauntface/go-html-asset-manager/files"
+	"github.com/gauntface/go-html-asset-manager/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"golang.org/x/net/html"
 )
 

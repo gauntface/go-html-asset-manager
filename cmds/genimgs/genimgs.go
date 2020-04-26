@@ -33,10 +33,10 @@ import (
 
 	"github.com/chai2010/webp"
 	"github.com/disintegration/imaging"
-	"github.com/gauntface/go-html-asset-injector/assets"
-	"github.com/gauntface/go-html-asset-injector/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-injector/files"
-	"github.com/gauntface/go-html-asset-injector/sets"
+	"github.com/gauntface/go-html-asset-manager/assets"
+	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/files"
+	"github.com/gauntface/go-html-asset-manager/sets"
 	"github.com/mitchellh/go-homedir"
 	"github.com/schollz/progressbar/v3"
 )
