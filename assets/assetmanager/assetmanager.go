@@ -284,7 +284,7 @@ func (l *LocalAsset) IsLocal() bool {
 }
 
 func (l *LocalAsset) Debug(d string) bool {
-	return strings.HasSuffix(l.originalPath, d)
+	return strings.Contains(l.originalPath, d)
 }
 
 func (l *LocalAsset) String() string {
@@ -333,7 +333,7 @@ func (r *RemoteAsset) String() string {
 }
 
 func (r *RemoteAsset) Debug(d string) bool {
-	return strings.HasSuffix(r.url, d)
+	return strings.Contains(r.url, d)
 }
 
 func findLocalAssets(dir string, exts ...string) ([]*LocalAsset, error) {

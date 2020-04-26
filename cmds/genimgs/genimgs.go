@@ -18,7 +18,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"image"
@@ -35,6 +34,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/gauntface/go-html-asset-manager/utils/files"
 	"github.com/gauntface/go-html-asset-manager/utils/sets"
 	"github.com/mitchellh/go-homedir"
@@ -42,8 +42,7 @@ import (
 )
 
 var (
-	assetsdir = flag.String("assets_dir", "", "the path to a directory containing CSS and JS files")
-	outputdir = flag.String("output_dir", "", "the path to a directory to generate sized images too")
+	configPath = flag.String("config", "asset-manager.json", "The path of the Config file.")
 
 	homedirExpand = homedir.Expand
 )
@@ -72,45 +71,38 @@ type client struct {
 func newClient(ctx context.Context) (*client, error) {
 	flag.Parse()
 
-	if *assetsdir == "" {
-		return nil, errors.New("assets_dir is required")
+	absConfigPath, err := homedirExpand(*configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get absolute path for config flag: %w", err)
 	}
+	fmt.Printf("📁 Getting config file: %q\n", absConfigPath)
 
-	if *outputdir == "" {
-		return nil, errors.New("output_dir is required")
-	}
-
-	absStaticDir, err := homedirExpand(*assetsdir)
+	c, err := config.Get(absConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get absolute path for html_dir flag: %w", err)
 	}
 
-	absOutputDir, err := homedirExpand(*outputdir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get absolute path for html_dir flag: %w", err)
-	}
+	fmt.Printf("📁 Looking for Static assets in: %q\n", c.Assets.BinaryDir)
+	fmt.Printf("📁 Will output imgs to: %q\n", c.GenAssets.OutputDir)
 
-	fmt.Printf("📁 Looking for Static assets in: %q\n", absStaticDir)
-	fmt.Printf("📁 Will output imgs to: %q\n", absOutputDir)
-
-	err = os.MkdirAll(absOutputDir, 0777)
+	err = os.MkdirAll(c.GenAssets.OutputDir, 0777)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create output directory: %v", err)
 	}
 
-	staticManager, err := assetmanager.NewManager("", absStaticDir, "")
+	staticManager, err := assetmanager.NewManager("", c.Assets.BinaryDir, "")
 	if err != nil {
 		return nil, err
 	}
 
-	generatedManager, err := assetmanager.NewManager("", absOutputDir, "")
+	generatedManager, err := assetmanager.NewManager("", c.GenAssets.OutputDir, "")
 	if err != nil {
 		return nil, err
 	}
 
 	return &client{
-		staticdir:        absStaticDir,
-		outputdir:        absOutputDir,
+		staticdir:        c.Assets.BinaryDir,
+		outputdir:        c.GenAssets.OutputDir,
 		staticManager:    staticManager,
 		generatedManager: generatedManager,
 	}, nil

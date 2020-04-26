@@ -140,14 +140,14 @@ func PreloadTag(as, url string) *html.Node {
 	}
 }
 
-func FindNode(tag string, node *html.Node) *html.Node {
+func FindNodeByTag(tag string, node *html.Node) *html.Node {
 	if node.Type == html.ElementNode {
 		if node.Data == tag {
 			return node
 		}
 	}
 	for child := node.FirstChild; child != nil; child = child.NextSibling {
-		e := FindNode(tag, child)
+		e := FindNodeByTag(tag, child)
 		if e != nil {
 			return e
 		}
@@ -155,7 +155,7 @@ func FindNode(tag string, node *html.Node) *html.Node {
 	return nil
 }
 
-func FindNodes(tag string, node *html.Node) []*html.Node {
+func FindNodesByTag(tag string, node *html.Node) []*html.Node {
 	elements := []*html.Node{}
 	if node.Type == html.ElementNode {
 		if node.Data == tag {
@@ -163,7 +163,28 @@ func FindNodes(tag string, node *html.Node) []*html.Node {
 		}
 	}
 	for child := node.FirstChild; child != nil; child = child.NextSibling {
-		ce := FindNodes(tag, child)
+		ce := FindNodesByTag(tag, child)
+		elements = append(elements, ce...)
+	}
+	return elements
+}
+
+func FindNodesByClassname(classname string, node *html.Node) []*html.Node {
+	elements := []*html.Node{}
+	if node.Type == html.ElementNode {
+		for _, a := range node.Attr {
+			if a.Key == "class" {
+				classes := strings.Split(a.Val, " ")
+				for _, c := range classes {
+					if c == classname {
+						elements = append(elements, node)
+					}
+				}
+			}
+		}
+	}
+	for child := node.FirstChild; child != nil; child = child.NextSibling {
+		ce := FindNodesByClassname(classname, child)
 		elements = append(elements, ce...)
 	}
 	return elements

@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	htmlparsingFindNode = htmlparsing.FindNode
+	htmlparsingFindNodeByTag = htmlparsing.FindNodeByTag
 
 	errElementNotFound = errors.New("html element not found")
 )
@@ -42,11 +42,11 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 
 	prettyPrintKeys(runtime.Debug, keys.Slice())
 
-	headNode := htmlparsingFindNode("head", doc)
+	headNode := htmlparsingFindNodeByTag("head", doc)
 	if headNode == nil {
 		return fmt.Errorf("%w: failed to find head element", errElementNotFound)
 	}
-	bodyNode := htmlparsingFindNode("body", doc)
+	bodyNode := htmlparsingFindNodeByTag("body", doc)
 	if bodyNode == nil {
 		return fmt.Errorf("%w: failed to find body element", errElementNotFound)
 	}

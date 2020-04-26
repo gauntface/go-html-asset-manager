@@ -18,11 +18,11 @@ package main
 
 import (
 	"errors"
-
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -32,6 +32,7 @@ import (
 	"github.com/gauntface/go-html-asset-manager/assets/assetstubs"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"github.com/gauntface/go-html-asset-manager/preprocessors"
+	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/mitchellh/go-homedir"
@@ -45,21 +46,17 @@ var reset func()
 
 func TestMain(m *testing.M) {
 	origDebug := debug
-	origHTMLDir := htmldir
-	origAssetsDir := assetsdir
-	origJsonAssetsDir := jsonAssetsdir
-	origGenerateDir := generateddir
+	origConfigPath := configPath
 	origNewManager := assetmanagerNewManager
 	origHomeDirExpand := homedirExpand
+	origConfigGet := configGet
 
 	reset = func() {
 		debug = origDebug
-		htmldir = origHTMLDir
-		assetsdir = origAssetsDir
-		jsonAssetsdir = origJsonAssetsDir
-		generateddir = origGenerateDir
+		configPath = origConfigPath
 		assetmanagerNewManager = origNewManager
 		homedirExpand = origHomeDirExpand
+		configGet = origConfigGet
 	}
 
 	os.Exit(m.Run())
@@ -96,20 +93,18 @@ func Test_prettyPrintAssets(t *testing.T) {
 func Test_newClient(t *testing.T) {
 	tests := []struct {
 		description   string
-		htmlDir       string
-		assetsDir     string
-		jsonDir       string
-		genDir        string
+		configPath    string
 		newManager    func(htmlDir, staticDir, jsonDir string) (*assetmanager.Manager, error)
 		homedirExpand func(path string) (string, error)
+		configGet     func(path string) (*config.Config, error)
 		want          *client
 		wantError     error
 	}{
 		{
-			description: "return error if expanding the html path fails",
-			htmlDir:     "/html/",
+			description: "return error if expanding the config path fails",
+			configPath:  "/config.json",
 			homedirExpand: func(path string) (string, error) {
-				if path == "/html/" {
+				if path == "/config.json" {
 					return "", errInjected
 				}
 				return "", nil
@@ -117,49 +112,13 @@ func Test_newClient(t *testing.T) {
 			wantError: errInjected,
 		},
 		{
-			description: "return error if expanding the assets path fails",
-			htmlDir:     "/html/",
-			assetsDir:   "/assets/",
-			homedirExpand: func(path string) (string, error) {
-				if path == "/assets/" {
-					return "", errInjected
-				}
-				return "", nil
+			description: "return error if creating new manager fails",
+			configPath:  "/config.json",
+			configGet: func(path string) (*config.Config, error) {
+				return &config.Config{
+					Assets: &config.AssetsConfig{},
+				}, nil
 			},
-			wantError: errInjected,
-		},
-		{
-			description: "return error if expanding the json path fails",
-			htmlDir:     "/html/",
-			assetsDir:   "/assets/",
-			jsonDir:     "/json/",
-			homedirExpand: func(path string) (string, error) {
-				if path == "/json/" {
-					return "", errInjected
-				}
-				return "", nil
-			},
-			wantError: errInjected,
-		},
-		{
-			description: "return error if expanding the generate dir path fails",
-			htmlDir:     "/html/",
-			assetsDir:   "/assets/",
-			jsonDir:     "/json/",
-			genDir:      "/generated/",
-			homedirExpand: func(path string) (string, error) {
-				if path == "/generated/" {
-					return "", errInjected
-				}
-				return "", nil
-			},
-			wantError: errInjected,
-		},
-		{
-			description:   "return error if creating new manager fails",
-			htmlDir:       "/html/",
-			assetsDir:     "/assets/",
-			jsonDir:       "/json/",
 			homedirExpand: homedir.Expand,
 			newManager: func(htmlDir, staticDir, jsonDir string) (*assetmanager.Manager, error) {
 				return nil, errInjected
@@ -167,10 +126,13 @@ func Test_newClient(t *testing.T) {
 			wantError: errInjected,
 		},
 		{
-			description:   "return client",
-			htmlDir:       "/html/",
-			assetsDir:     "/assets/",
-			jsonDir:       "/json/",
+			description: "return client",
+			configPath:  "/config.json",
+			configGet: func(path string) (*config.Config, error) {
+				return &config.Config{
+					Assets: &config.AssetsConfig{},
+				}, nil
+			},
 			homedirExpand: homedir.Expand,
 			newManager: func(htmlDir, staticDir, jsonDir string) (*assetmanager.Manager, error) {
 				return &assetmanager.Manager{}, nil
@@ -183,12 +145,10 @@ func Test_newClient(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			defer reset()
 
-			htmldir = &tt.htmlDir
-			assetsdir = &tt.assetsDir
-			jsonAssetsdir = &tt.jsonDir
-			generateddir = &tt.genDir
+			configPath = &tt.configPath
 			assetmanagerNewManager = tt.newManager
 			homedirExpand = tt.homedirExpand
+			configGet = tt.configGet
 
 			got, err := newClient()
 			if !errors.Is(err, tt.wantError) {
@@ -498,8 +458,8 @@ func Test_integration_noassets(t *testing.T) {
 		t.Fatalf("Fatal to copy files to temporary directory: %v", err)
 	}
 
-	htmldir = &tmpDir
-	assetsdir = &tmpDir
+	tmpConf := filepath.Join(tmpDir, "asset-manager.json")
+	configPath = &tmpConf
 
 	start := readTestFile(t, path.Join(tmpDir, "index.html"))
 

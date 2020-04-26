@@ -51,7 +51,7 @@ func getElementsToLazyLoad(doc *html.Node) []*html.Node {
 	}
 	all := []*html.Node{}
 	for _, t := range tags {
-		els := htmlparsing.FindNodes(t, doc)
+		els := htmlparsing.FindNodesByTag(t, doc)
 		all = append(all, els...)
 	}
 	return all

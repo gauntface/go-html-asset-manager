@@ -41,7 +41,7 @@ func wrap(ele *html.Node, width, height int64, containerStyles []string) *html.N
 	eleToWrap := ele
 	eleToSize := ele
 	if ele.Type == html.ElementNode && ele.Data == "picture" {
-		eleToSize = htmlparsing.FindNode("img", ele)
+		eleToSize = htmlparsing.FindNodeByTag("img", ele)
 	}
 
 	var ok bool

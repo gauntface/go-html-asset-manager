@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/gauntface/go-html-asset-manager/manipulations"
+	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )
@@ -31,51 +32,61 @@ func Test_Manipulator(t *testing.T) {
 	tests := []struct {
 		description string
 		doc         *html.Node
+		selectors   []string
 		want        string
 		wantError   error
 	}{
 		{
 			description: "do not wrap iframe with no width and height using default ratio",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe src="/example.html"></iframe></div>`),
 			want:        `<html><head></head><body><div><iframe src="/example.html"></iframe></div></body></html>`,
 		},
 		{
 			description: "do not wrap iframe with no width using default ratio",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe height="1" src="/example.html"></iframe></div>`),
 			want:        `<html><head></head><body><div><iframe height="1" src="/example.html"></iframe></div></body></html>`,
 		},
 		{
 			description: "do not wrap iframe with no height using default ratio",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe width="1" src="/example.html"></iframe></div>`),
 			want:        `<html><head></head><body><div><iframe width="1" src="/example.html"></iframe></div></body></html>`,
 		},
 		{
 			description: "wrap iframe with width and height",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe width="4" height="3" src="/example.html"></iframe></div>`),
 			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><iframe src="/example.html" style="position:absolute;width:100%;height:100%;"></iframe></div></div></div></body></html>`,
 		},
 		{
 			description: "wrap all iframes with width and height",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe width="4" height="3" src="/example.html"></iframe></div><div><iframe width="16" height="9" src="/example.html"></iframe></div>`),
 			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><iframe src="/example.html" style="position:absolute;width:100%;height:100%;"></iframe></div></div></div><div><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:56.25%;"><iframe src="/example.html" style="position:absolute;width:100%;height:100%;"></iframe></div></div></div></body></html>`,
 		},
 		{
 			description: "do not wrap if width cannot be parsed",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe width="abc" height="3" src="/example.html"></iframe></div>`),
 			want:        `<html><head></head><body><div><iframe width="abc" height="3" src="/example.html"></iframe></div></body></html>`,
 		},
 		{
 			description: "do not wrap iframe if height cannot be parsed",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe width="4" height="abc" src="/example.html"></iframe></div>`),
 			want:        `<html><head></head><body><div><iframe width="4" height="abc" src="/example.html"></iframe></div></body></html>`,
 		},
 		{
 			description: "wrap picture with max size applied",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><picture width="2" height="1"><img/></picture></div>`),
 			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container" style="max-width: 2px;"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:50%;"><picture><img style="position:absolute;width:100%;height:100%;"/></picture></div></div></div></body></html>`,
 		},
 		{
 			description: "wrap img with max size applied",
+			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><img width="2" height="1"/></div>`),
 			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container" style="max-width: 2px;"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:50%;"><img style="position:absolute;width:100%;height:100%;"/></div></div></div></body></html>`,
 		},
@@ -83,7 +94,11 @@ func Test_Manipulator(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			r := manipulations.Runtime{}
+			r := manipulations.Runtime{
+				Config: &config.Config{
+					RatioWrapper: tt.selectors,
+				},
+			}
 
 			err := Manipulator(r, tt.doc)
 			if !errors.Is(err, tt.wantError) {

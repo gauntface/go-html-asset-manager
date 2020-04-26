@@ -37,10 +37,10 @@ var errInjected = errors.New("injected error")
 var reset func()
 
 func TestMain(m *testing.M) {
-	origHTMLparsingFindNode := htmlparsingFindNode
+	origHTMLparsingFindNodeByTag := htmlparsingFindNodeByTag
 
 	reset = func() {
-		htmlparsingFindNode = origHTMLparsingFindNode
+		htmlparsingFindNodeByTag = origHTMLparsingFindNodeByTag
 	}
 
 	os.Exit(m.Run())
@@ -86,7 +86,7 @@ func TestManipulator(t *testing.T) {
 	}{
 		{
 			description: "return error if adding async css asset fails",
-			findNode:    htmlparsing.FindNode,
+			findNode:    htmlparsing.FindNodeByTag,
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
@@ -129,7 +129,7 @@ func TestManipulator(t *testing.T) {
 		},
 		{
 			description: "return error if adding inline css asset fails",
-			findNode:    htmlparsing.FindNode,
+			findNode:    htmlparsing.FindNodeByTag,
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
@@ -146,7 +146,7 @@ func TestManipulator(t *testing.T) {
 		},
 		{
 			description: "return error if adding inline js asset fails",
-			findNode:    htmlparsing.FindNode,
+			findNode:    htmlparsing.FindNodeByTag,
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
@@ -163,7 +163,7 @@ func TestManipulator(t *testing.T) {
 		},
 		{
 			description: "add assets for all keys",
-			findNode:    htmlparsing.FindNode,
+			findNode:    htmlparsing.FindNodeByTag,
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
@@ -192,7 +192,7 @@ func TestManipulator(t *testing.T) {
 		},
 		{
 			description: "add preload assets",
-			findNode:    htmlparsing.FindNode,
+			findNode:    htmlparsing.FindNodeByTag,
 			doc:         MustGetNode(t, `<div></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
@@ -215,7 +215,7 @@ func TestManipulator(t *testing.T) {
 		{
 			description: "log keys if html file matches debug key",
 			debug:       true,
-			findNode:    htmlparsing.FindNode,
+			findNode:    htmlparsing.FindNodeByTag,
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
@@ -241,7 +241,7 @@ func TestManipulator(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			defer reset()
 
-			htmlparsingFindNode = tt.findNode
+			htmlparsingFindNodeByTag = tt.findNode
 
 			r := manipulations.Runtime{
 				Assets: tt.assets,
@@ -294,7 +294,7 @@ func TestAddInlineCSS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			doc := MustGetNode(t, "")
-			head := htmlparsing.FindNode("head", doc)
+			head := htmlparsing.FindNodeByTag("head", doc)
 
 			err := addInlineCSS(head, tt.assets)
 			if !errors.Is(err, tt.wantError) {
@@ -339,8 +339,8 @@ func TestSyncCSS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			doc := MustGetNode(t, "")
-			head := htmlparsing.FindNode("head", doc)
-			body := htmlparsing.FindNode("body", doc)
+			head := htmlparsing.FindNodeByTag("head", doc)
+			body := htmlparsing.FindNodeByTag("body", doc)
 
 			err := addSyncCSS(head, body, tt.asset)
 			if !errors.Is(err, tt.wantError) {
@@ -385,8 +385,8 @@ func TestAddInlineJS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			doc := MustGetNode(t, "")
-			head := htmlparsing.FindNode("head", doc)
-			body := htmlparsing.FindNode("body", doc)
+			head := htmlparsing.FindNodeByTag("head", doc)
+			body := htmlparsing.FindNodeByTag("body", doc)
 
 			err := addInlineJS(head, body, tt.asset)
 			if !errors.Is(err, tt.wantError) {
@@ -431,8 +431,8 @@ func TestAddSyncJS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			doc := MustGetNode(t, "")
-			head := htmlparsing.FindNode("head", doc)
-			body := htmlparsing.FindNode("body", doc)
+			head := htmlparsing.FindNodeByTag("head", doc)
+			body := htmlparsing.FindNodeByTag("body", doc)
 
 			err := addSyncJS(head, body, tt.asset)
 			if !errors.Is(err, tt.wantError) {
@@ -477,8 +477,8 @@ func TestAddAsyncJS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			doc := MustGetNode(t, "")
-			head := htmlparsing.FindNode("head", doc)
-			body := htmlparsing.FindNode("body", doc)
+			head := htmlparsing.FindNodeByTag("head", doc)
+			body := htmlparsing.FindNodeByTag("body", doc)
 
 			err := addAsyncJS(head, body, tt.asset)
 			if !errors.Is(err, tt.wantError) {
@@ -527,7 +527,7 @@ func TestAddAsyncCSS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			doc := MustGetNode(t, "")
-			body := htmlparsing.FindNode("body", doc)
+			body := htmlparsing.FindNodeByTag("body", doc)
 
 			err := addAsyncCSS(body, tt.assets)
 			if !errors.Is(err, tt.wantError) {
@@ -572,8 +572,8 @@ func TestAddPreloadCSS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			doc := MustGetNode(t, "")
-			head := htmlparsing.FindNode("head", doc)
-			body := htmlparsing.FindNode("body", doc)
+			head := htmlparsing.FindNodeByTag("head", doc)
+			body := htmlparsing.FindNodeByTag("body", doc)
 
 			err := addPreloadCSS(head, body, tt.asset)
 			if !errors.Is(err, tt.wantError) {
@@ -618,8 +618,8 @@ func TestAddPreloadJS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			doc := MustGetNode(t, "")
-			head := htmlparsing.FindNode("head", doc)
-			body := htmlparsing.FindNode("body", doc)
+			head := htmlparsing.FindNodeByTag("head", doc)
+			body := htmlparsing.FindNodeByTag("body", doc)
 
 			err := addPreloadJS(head, body, tt.asset)
 			if !errors.Is(err, tt.wantError) {

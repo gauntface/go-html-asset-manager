@@ -46,7 +46,7 @@ var (
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
-	els := htmlparsing.FindNodes("iframe", doc)
+	els := htmlparsing.FindNodesByTag("iframe", doc)
 	for _, ele := range els {
 		// Create a map of the element attributes
 		attributes := map[string]html.Attribute{}

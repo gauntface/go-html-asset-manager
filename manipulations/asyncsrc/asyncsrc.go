@@ -23,7 +23,7 @@ import (
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
-	allElements := htmlparsing.FindNodes("iframe", doc)
+	allElements := htmlparsing.FindNodesByTag("iframe", doc)
 	for _, ele := range allElements {
 		for i, a := range ele.Attr {
 			if a.Key != "src" {

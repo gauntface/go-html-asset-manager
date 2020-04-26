@@ -262,7 +262,7 @@ func Test_PreloadTag(t *testing.T) {
 	}
 }
 
-func Test_FindNode(t *testing.T) {
+func Test_FindNodeByTag(t *testing.T) {
 	tests := []struct {
 		description string
 		tag         string
@@ -285,7 +285,7 @@ func Test_FindNode(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got := FindNode(tt.tag, MustGetNode(t, tt.input))
+			got := FindNodeByTag(tt.tag, MustGetNode(t, tt.input))
 			if diff := cmp.Diff(MustRenderNode(t, got), tt.want); diff != "" {
 				t.Fatalf("Unexpected result; diff %v", diff)
 			}
@@ -293,7 +293,7 @@ func Test_FindNode(t *testing.T) {
 	}
 }
 
-func Test_FindNodes(t *testing.T) {
+func Test_FindNodesByTag(t *testing.T) {
 	tests := []struct {
 		description string
 		tag         string
@@ -316,7 +316,7 @@ func Test_FindNodes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			gotEle := FindNodes(tt.tag, MustGetNode(t, tt.input))
+			gotEle := FindNodesByTag(tt.tag, MustGetNode(t, tt.input))
 			got := []string{}
 			for _, g := range gotEle {
 				got = append(got, MustRenderNode(t, g))
@@ -331,7 +331,7 @@ func Test_FindNodes(t *testing.T) {
 func Test_SwapNodes(t *testing.T) {
 	doc := MustGetNode(t, `<div></div>`)
 
-	div := FindNode("div", doc)
+	div := FindNodeByTag("div", doc)
 
 	SwapNodes(div, &html.Node{
 		Type: html.ElementNode,
