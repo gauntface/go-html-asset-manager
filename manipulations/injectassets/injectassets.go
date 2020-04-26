@@ -24,10 +24,10 @@ import (
 
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/html/htmlparsing"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
-	"github.com/gauntface/go-html-asset-manager/sets"
-	"github.com/gauntface/go-html-asset-manager/stringui"
+	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/utils/sets"
+	"github.com/gauntface/go-html-asset-manager/utils/stringui"
 	"golang.org/x/net/html"
 )
 

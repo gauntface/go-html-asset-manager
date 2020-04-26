@@ -29,7 +29,6 @@ import (
 
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/html/htmlencoding"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"github.com/gauntface/go-html-asset-manager/manipulations/asyncsrc"
 	"github.com/gauntface/go-html-asset-manager/manipulations/iframedefaultsize"
@@ -41,6 +40,7 @@ import (
 	"github.com/gauntface/go-html-asset-manager/preprocessors"
 	"github.com/gauntface/go-html-asset-manager/preprocessors/jsonassets"
 	"github.com/gauntface/go-html-asset-manager/preprocessors/revisionassets"
+	"github.com/gauntface/go-html-asset-manager/utils/html/htmlencoding"
 	"github.com/mitchellh/go-homedir"
 	"golang.org/x/net/html"
 )

@@ -27,8 +27,8 @@ import (
 
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetid"
-	"github.com/gauntface/go-html-asset-manager/files"
-	"github.com/gauntface/go-html-asset-manager/stringui"
+	"github.com/gauntface/go-html-asset-manager/utils/files"
+	"github.com/gauntface/go-html-asset-manager/utils/stringui"
 )
 
 var (

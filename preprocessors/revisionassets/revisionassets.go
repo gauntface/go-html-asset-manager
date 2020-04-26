@@ -24,8 +24,8 @@ import (
 
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/files"
 	"github.com/gauntface/go-html-asset-manager/preprocessors"
+	"github.com/gauntface/go-html-asset-manager/utils/files"
 )
 
 var (

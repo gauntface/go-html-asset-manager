@@ -35,8 +35,8 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/files"
-	"github.com/gauntface/go-html-asset-manager/sets"
+	"github.com/gauntface/go-html-asset-manager/utils/files"
+	"github.com/gauntface/go-html-asset-manager/utils/sets"
 	"github.com/mitchellh/go-homedir"
 	"github.com/schollz/progressbar/v3"
 )

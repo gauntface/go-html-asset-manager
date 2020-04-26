@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/sets"
+	"github.com/gauntface/go-html-asset-manager/utils/sets"
 	"golang.org/x/net/html"
 )
 
