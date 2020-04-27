@@ -32,7 +32,11 @@ const (
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
-	allElements := getElementsToWrap(doc)
+	if runtime.Config == nil || len(runtime.Config.RatioWrapper) == 0 {
+		return nil
+	}
+
+	allElements := getElementsToWrap(runtime.Config.RatioWrapper, doc)
 	for _, ele := range allElements {
 		// Create a map of the iframes attributes
 		attributes := map[string]html.Attribute{}
@@ -96,16 +100,25 @@ func widthAndHeight(attributes map[string]html.Attribute) (int64, int64, error) 
 	return width, height, nil
 }
 
-func getElementsToWrap(doc *html.Node) []*html.Node {
+func getElementsToWrap(queries []string, doc *html.Node) []*html.Node {
+	var rawElements []*html.Node
+	for _, q := range queries {
+		rawElements = append(rawElements, htmlparsing.FindNodesByTag(q, doc)...)
+		rawElements = append(rawElements, htmlparsing.FindNodesByClassname(q, doc)...)
+	}
+
 	tags := []string{
 		"iframe",
 		"picture",
 		"img",
 	}
 	all := []*html.Node{}
-	for _, t := range tags {
-		els := htmlparsing.FindNodes(t, doc)
-		all = append(all, els...)
+
+	for _, e := range rawElements {
+		for _, t := range tags {
+			els := htmlparsing.FindNodesByTag(t, e)
+			all = append(all, els...)
+		}
 	}
 	return all
 }

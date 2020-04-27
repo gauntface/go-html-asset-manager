@@ -40,22 +40,21 @@ import (
 	"github.com/gauntface/go-html-asset-manager/preprocessors"
 	"github.com/gauntface/go-html-asset-manager/preprocessors/jsonassets"
 	"github.com/gauntface/go-html-asset-manager/preprocessors/revisionassets"
+	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/gauntface/go-html-asset-manager/utils/html/htmlencoding"
 	"github.com/mitchellh/go-homedir"
 	"golang.org/x/net/html"
 )
 
 var (
-	htmldir       = flag.String("html_dir", "", "the path to a directory containing HTML files")
-	assetsdir     = flag.String("assets_dir", "", "the path to a directory containing CSS and JS files")
-	jsonAssetsdir = flag.String("json_assets_dir", "", "the path to a directory containing JSON files for asset injection")
-	generateddir  = flag.String("gen_dir", "", "the path to a directory containing generated files")
-	debug         = flag.String("debug", "", "Provide a HTML file name to log debug info as required")
+	configPath = flag.String("config", "asset-manager.json", "The path of the Config file.")
+	debug      = flag.String("debug", "", "Provide a HTML file name to log debug info as required")
 
 	errRunFailed  = errors.New("failed to run successfully")
 	errRelPath    = errors.New("unable to calculate relative path")
 	errManipulate = errors.New("failed to manipulate HTML")
 
+	configGet              = config.Get
 	homedirExpand          = homedir.Expand
 	assetmanagerNewManager = assetmanager.NewManager
 )
@@ -79,9 +78,8 @@ type client struct {
 	ioutilWriteFile        func(filename string, data []byte, perm os.FileMode) error
 	assetmanagerNewManager func(htmlDir, staticDir, jsonDir string) (*assetmanager.Manager, error)
 
+	config        *config.Config
 	manager       assetmanagerManager
-	staticDir     string
-	generatedDir  string
 	preprocessors []preprocessors.Preprocessor
 	manipulators  []manipulations.Manipulator
 }
@@ -89,33 +87,26 @@ type client struct {
 func newClient() (*client, error) {
 	flag.Parse()
 
-	absHTMLDir, err := homedirExpand(*htmldir)
+	absConfigPath, err := homedirExpand(*configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get absolute path for config flag: %w", err)
+	}
+	fmt.Printf("📁 Getting config file: %q\n", absConfigPath)
+
+	c, err := configGet(absConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get absolute path for html_dir flag: %w", err)
 	}
 
-	absStaticDir, err := homedirExpand(*assetsdir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get absolute path for assets_dir flag: %w", err)
+	fmt.Printf("📁 Looking for HTML files in:   %q\n", c.HTMLDir)
+	fmt.Printf("📁 Looking for Static assets in: %q\n", c.Assets.BinaryDir)
+	fmt.Printf("📁 Looking for JSON assets in: %q\n", c.Assets.JSONDir)
+	if c.GenAssets != nil {
+		fmt.Printf("📁 Looking for generated assets in: %q\n", c.GenAssets.OutputDir)
 	}
-
-	absJSONAssetsDir, err := homedirExpand(*jsonAssetsdir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get absolute path for json_assets_dir flag: %w", err)
-	}
-
-	absGeneratedDir, err := homedirExpand(*generateddir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get absolute path for gen_dir flag: %w", err)
-	}
-
-	fmt.Printf("📁 Looking for HTML files in:   %q\n", absHTMLDir)
-	fmt.Printf("📁 Looking for Static assets in: %q\n", absStaticDir)
-	fmt.Printf("📁 Looking for JSON assets in: %q\n", absJSONAssetsDir)
-	fmt.Printf("📁 Looking for generated assets in: %q\n", absGeneratedDir)
 	fmt.Println("")
 
-	manager, err := assetmanagerNewManager(absHTMLDir, absStaticDir, absJSONAssetsDir)
+	manager, err := assetmanagerNewManager(c.HTMLDir, c.Assets.BinaryDir, c.Assets.JSONDir)
 	if err != nil {
 		return nil, err
 	}
@@ -125,9 +116,8 @@ func newClient() (*client, error) {
 		htmlParse:       html.Parse,
 		ioutilWriteFile: ioutil.WriteFile,
 
-		manager:      manager,
-		staticDir:    absStaticDir,
-		generatedDir: absGeneratedDir,
+		config:  c,
+		manager: manager,
 		preprocessors: []preprocessors.Preprocessor{
 			jsonassets.Preprocessor,
 			revisionassets.Preprocessor,
@@ -201,7 +191,7 @@ func (c *client) manipulateHTMLFiles(assets []assetmanagerLocalAsset, manager as
 	errs := []error{}
 	var errMu sync.Mutex
 
-	for _, a := range assets {
+	for _, htmlAsset := range assets {
 		go func(htmlAsset assetmanagerLocalAsset) {
 			defer wg.Done()
 
@@ -211,7 +201,7 @@ func (c *client) manipulateHTMLFiles(assets []assetmanagerLocalAsset, manager as
 				defer errMu.Unlock()
 				errs = append(errs, fmt.Errorf("%w %q: %v", errManipulate, htmlAsset.Path(), err))
 			}
-		}(a)
+		}(htmlAsset)
 	}
 
 	wg.Wait()
@@ -232,10 +222,9 @@ func (c *client) manipulateHTMLFile(asset assetmanagerLocalAsset, manager assetm
 
 	debug := *debug != "" && asset.Debug(*debug)
 	r := manipulations.Runtime{
-		Debug:        debug,
-		Assets:       manager,
-		StaticDir:    c.staticDir,
-		GeneratedDir: c.generatedDir,
+		Debug:  debug,
+		Assets: manager,
+		Config: c.config,
 	}
 	for i, m := range manips {
 		if err := m(r, doc); err != nil {

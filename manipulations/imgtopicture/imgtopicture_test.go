@@ -27,6 +27,7 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
+	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )
@@ -69,27 +70,45 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "do nothing if no static directory is defined",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/example",
-				StaticDir:    "",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/example",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "",
+					},
+				},
 			},
 			doc:  MustGetNode(t, `<img/>`),
 			want: `<html><head></head><body><img/></body></html>`,
 		},
-		{
+		/* {
 			description: "return error if getting relative path fails",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "..",
-				StaticDir:    "/example",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "..",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/example",
+					},
+				},
 			},
 			doc:       MustGetNode(t, `<img/>`),
 			want:      `<html><head></head><body><img/></body></html>`,
 			wantError: errRelPath,
-		},
+		},*/
 		{
 			description: "do nothing if img has no src attribute",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/generated",
-				StaticDir:    "/",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/",
+					},
+				},
 			},
 			doc:  MustGetNode(t, `<img/>`),
 			want: `<html><head></head><body><img/></body></html>`,
@@ -97,8 +116,14 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "do nothing if img has empty src attribute",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/generated",
-				StaticDir:    "/",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/",
+					},
+				},
 			},
 			doc:  MustGetNode(t, `<img src=""/>`),
 			want: `<html><head></head><body><img src=""/></body></html>`,
@@ -106,8 +131,14 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "do nothing if img has http src attribute",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/generated",
-				StaticDir:    "/",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/",
+					},
+				},
 			},
 			doc:  MustGetNode(t, `<img src="http://example/example.jpg"/>`),
 			want: `<html><head></head><body><img src="http://example/example.jpg"/></body></html>`,
@@ -115,8 +146,14 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "do nothing if img has https src attribute",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/generated",
-				StaticDir:    "/",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/",
+					},
+				},
 			},
 			doc:  MustGetNode(t, `<img src="https://example/example.jpg"/>`),
 			want: `<html><head></head><body><img src="https://example/example.jpg"/></body></html>`,
@@ -124,8 +161,14 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "do nothing if img has // src attribute",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/generated",
-				StaticDir:    "/",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/",
+					},
+				},
 			},
 			doc:  MustGetNode(t, `<img src="//example/example.jpg"/>`),
 			want: `<html><head></head><body><img src="//example/example.jpg"/></body></html>`,
@@ -133,8 +176,14 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "do nothing if opening an img fails",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/static/generated",
-				StaticDir:    "/static",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/",
+					},
+				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
 			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
@@ -146,11 +195,17 @@ func Test_Manipulator(t *testing.T) {
 			},
 			want: `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
 		},
-		{
+		/* {
 			description: "return error if file hash fails",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/static/generated",
-				StaticDir:    "/static",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/",
+					},
+				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
 			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
@@ -172,12 +227,18 @@ func Test_Manipulator(t *testing.T) {
 			},
 			want:      `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
 			wantError: errFileHash,
-		},
-		{
+		},*/
+		/* {
 			description: "return error if reading generate directory fails",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/static/generated",
-				StaticDir:    "/static",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/static/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/static",
+					},
+				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
 			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
@@ -206,12 +267,18 @@ func Test_Manipulator(t *testing.T) {
 			},
 			want:      `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
 			wantError: errInjected,
-		},
+		},*/
 		{
 			description: "do nothing if the generated directory does not exist",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/static/generated",
-				StaticDir:    "/static",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/static/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/static",
+					},
+				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
 			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
@@ -239,8 +306,14 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "do nothing if the generated directory contains images that are not named correctly",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/static/generated",
-				StaticDir:    "/static",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir: "/static/generated",
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/static",
+					},
+				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
 			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
@@ -275,8 +348,26 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "replace image with picture with webp and png sources",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/static/generated",
-				StaticDir:    "/static",
+				Debug: true,
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir:  "/static/generated",
+						MaxDensity: 3,
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/static",
+					},
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID:       "img",
+							MaxWidth: 800,
+							SourceSizes: []string{
+								"(min-width: 800px) 800px",
+								"100vw",
+							},
+						},
+					},
+				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
 			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
@@ -312,15 +403,32 @@ func Test_Manipulator(t *testing.T) {
 					},
 				}, nil
 			},
-			want: `<html><head></head><body><picture width="10" height="10"><source type="image/webp" sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/100.webp 100w,/generated/example.abcd123/200.webp 200w"/><source sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/300.png 300w,/generated/example.abcd123/400.png 400w"/><img src="/generated/example.abcd123/400.png"/></picture></body></html>`,
+			want: `<html><head></head><body><picture width="400" height="400"><source type="image/webp" sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/100.webp 100w,/generated/example.abcd123/200.webp 200w"/><source sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/300.png 300w,/generated/example.abcd123/400.png 400w"/><img src="/generated/example.abcd123/400.png"/></picture></body></html>`,
 		},
 		{
 			description: "replace image with picture excluding max size source",
 			runtime: manipulations.Runtime{
-				GeneratedDir: "/static/generated",
-				StaticDir:    "/static",
+				Config: &config.Config{
+					GenAssets: &config.GeneratedImagesConfig{
+						OutputDir:  "/static/generated",
+						MaxDensity: 3,
+					},
+					Assets: &config.AssetsConfig{
+						BinaryDir: "/static",
+					},
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID:       "example-selector",
+							MaxWidth: 800,
+							SourceSizes: []string{
+								"(min-width: 800px) 800px",
+								"100vw",
+							},
+						},
+					},
+				},
 			},
-			doc: MustGetNode(t, `<img example="other-attribute" src="/example.jpeg"/>`),
+			doc: MustGetNode(t, `<img class="example-selector" example="other-attribute" src="/example.jpeg"/>`),
 			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
 				return &ImageStub{
 					BoundsReturn: image.Rectangle{
@@ -348,7 +456,7 @@ func Test_Manipulator(t *testing.T) {
 					},
 				}, nil
 			},
-			want: `<html><head></head><body><picture width="10" height="10"><source sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/100.jpg 100w"/><img example="other-attribute" src="/generated/example.abcd123/100.jpg"/></picture></body></html>`,
+			want: `<html><head></head><body><picture width="100" height="100"><source sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/100.jpg 100w"/><img class="example-selector" example="other-attribute" src="/generated/example.abcd123/100.jpg"/></picture></body></html>`,
 		},
 	}
 

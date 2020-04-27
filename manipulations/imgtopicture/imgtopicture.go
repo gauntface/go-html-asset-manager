@@ -28,6 +28,7 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
+	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/gauntface/go-html-asset-manager/utils/files"
 	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
 	"golang.org/x/net/html"
@@ -74,11 +75,11 @@ import (
 */
 
 var (
-	maxSize     int64 = 2400 // (800 x 3) (<max width> * <max density>)
+	/* maxSize     int64 = 2400 // (800 x 3) (<max width> * <max density>)
 	sourceSizes       = []string{
 		"(min-width: 800px) 800px",
 		"100vw",
-	}
+	}*/
 
 	errRelPath  = errors.New("unable to get relative path")
 	errFileHash = errors.New("failed to get file hash")
@@ -89,22 +90,32 @@ var (
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
-	if runtime.GeneratedDir == "" {
+	if runtime.Config == nil {
 		return nil
 	}
 
-	if runtime.StaticDir == "" {
+	if runtime.Config.GenAssets == nil || runtime.Config.GenAssets.OutputDir == "" {
 		return nil
 	}
 
-	generatedDirURL, err := filepath.Rel(runtime.StaticDir, runtime.GeneratedDir)
+	if runtime.Config.Assets == nil || runtime.Config.Assets.BinaryDir == "" {
+		return nil
+	}
+
+	if len(runtime.Config.ImgToPicture) == 0 {
+		return nil
+	}
+
+	genDir := runtime.Config.GenAssets.OutputDir
+	staticDir := runtime.Config.Assets.BinaryDir
+
+	generatedDirURL, err := filepath.Rel(staticDir, genDir)
 	if err != nil {
-		return fmt.Errorf("%w from %q to %q: %v", errRelPath, runtime.StaticDir, runtime.GeneratedDir, err)
+		return fmt.Errorf("%w from %q to %q: %v", errRelPath, staticDir, genDir, err)
 	}
 
-	imgElements := htmlparsing.FindNodes("img", doc)
-	for _, ie := range imgElements {
-		err := manipulateImg(runtime, generatedDirURL, ie)
+	for _, i := range runtime.Config.ImgToPicture {
+		err := manipulateWithConfig(runtime.Debug, runtime.Config.GenAssets, i, doc, staticDir, genDir, generatedDirURL)
 		if err != nil {
 			return err
 		}
@@ -112,7 +123,35 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 	return nil
 }
 
-func manipulateImg(runtime manipulations.Runtime, generatedDirURL string, ie *html.Node) error {
+func manipulateWithConfig(debug bool, genConf *config.GeneratedImagesConfig, conf *config.ImgToPicConfig, doc *html.Node, staticDir, genDir, generatedDirURL string) error {
+	rawElements := htmlparsing.FindNodesByTag(conf.ID, doc)
+	if len(rawElements) == 0 {
+		rawElements = htmlparsing.FindNodesByClassname(conf.ID, doc)
+	}
+
+	if debug {
+		fmt.Printf("Found %v raw elements for %q\n", len(rawElements), conf.ID)
+	}
+
+	var imgs []*html.Node
+	for _, e := range rawElements {
+		imgs = append(imgs, htmlparsing.FindNodesByTag("img", e)...)
+	}
+
+	if debug {
+		fmt.Printf("Found %v img elements for %q\n", len(imgs), conf.ID)
+	}
+
+	for _, ie := range imgs {
+		err := manipulateImg(debug, genConf, conf, staticDir, genDir, generatedDirURL, conf.Class, ie)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func manipulateImg(debug bool, genConf *config.GeneratedImagesConfig, conf *config.ImgToPicConfig, staticDir, genDir, generatedDirURL, pictureClass string, ie *html.Node) error {
 	// Create a map of the img attributes
 	attributes := map[string]html.Attribute{}
 	for _, a := range ie.Attr {
@@ -120,18 +159,27 @@ func manipulateImg(runtime manipulations.Runtime, generatedDirURL string, ie *ht
 	}
 	srcAttr, ok := attributes["src"]
 	if !ok || srcAttr.Val == "" {
+		if debug {
+			fmt.Printf("Skipping img without src\n")
+		}
 		return nil
 	}
 
 	if strings.HasPrefix(srcAttr.Val, "http") || strings.HasPrefix(srcAttr.Val, "//") {
+		if debug {
+			fmt.Printf("Skipping img with abs URL %q\n", srcAttr.Val)
+		}
 		return nil
 	}
 
-	srcPath := filepath.Join(runtime.StaticDir, srcAttr.Val)
+	srcPath := filepath.Join(staticDir, srcAttr.Val)
 
 	// Get the src image
 	i, err := imagingOpen(srcPath)
 	if err != nil {
+		if debug {
+			fmt.Printf("Failed to open img: %v\n", err)
+		}
 		return nil
 	}
 
@@ -144,12 +192,15 @@ func manipulateImg(runtime manipulations.Runtime, generatedDirURL string, ie *ht
 	}
 
 	// Get available sizes of the image
-	sizes, err := getImageSizes(runtime.GeneratedDir, srcPath, hash, generatedDirURL)
+	sizes, err := getImageSizes(debug, genConf, conf, genDir, srcPath, hash, generatedDirURL)
 	if err != nil {
 		return err
 	}
 
 	if len(sizes) == 0 {
+		if debug {
+			fmt.Printf("No sizes found for %q\n", srcPath)
+		}
 		return nil
 	}
 
@@ -158,17 +209,21 @@ func manipulateImg(runtime manipulations.Runtime, generatedDirURL string, ie *ht
 	s := ie.NextSibling
 	p.RemoveChild(ie)
 
-	pe := pictureElement(ie, sizes, width, height)
+	pe := pictureElement(conf, ie, sizes, width, height, pictureClass)
 
 	p.InsertBefore(pe, s)
 	return nil
 }
 
-func getImageSizes(generatedDir, src, hash, generatedDirURL string) ([]generatedImage, error) {
+func getImageSizes(debug bool, genConf *config.GeneratedImagesConfig, conf *config.ImgToPicConfig, generatedDir, src, hash, generatedDirURL string) ([]generatedImage, error) {
 	filename := filepath.Base(src)
 	filename = strings.TrimSuffix(filename, filepath.Ext(filename))
 	genSubDir := fmt.Sprintf("%v.%v", filename, hash)
 	dirPath := filepath.Join(generatedDir, genSubDir)
+
+	if debug {
+		fmt.Printf("Looking for generated images in %q\n", dirPath)
+	}
 
 	contents, err := ioutilReadDir(dirPath)
 	if err != nil {
@@ -178,6 +233,11 @@ func getImageSizes(generatedDir, src, hash, generatedDirURL string) ([]generated
 		return nil, err
 	}
 
+	if debug {
+		fmt.Printf("Found %v files and directories in the generated directory\n", len(contents))
+	}
+
+	maxSize := conf.MaxWidth * genConf.MaxDensity
 	imgs := []generatedImage{}
 	for _, c := range contents {
 		if c.IsDir() {
@@ -212,23 +272,21 @@ func getImageSizes(generatedDir, src, hash, generatedDirURL string) ([]generated
 	return imgs, nil
 }
 
-func pictureElement(imgElement *html.Node, sizes []generatedImage, width, height int) *html.Node {
+func pictureElement(conf *config.ImgToPicConfig, imgElement *html.Node, sizes []generatedImage, width, height int, class string) *html.Node {
 	// H/T to Jack Archibald for a simple and concise explainer of picture
 	// https://jakearchibald.com/2015/anatomy-of-responsive-images/
 
 	picture := &html.Node{
 		Type: html.ElementNode,
 		Data: "picture",
-		Attr: []html.Attribute{
-			{
-				Key: "width",
-				Val: fmt.Sprintf("%v", width),
-			},
-			{
-				Key: "height",
-				Val: fmt.Sprintf("%v", height),
-			},
-		},
+		Attr: []html.Attribute{},
+	}
+
+	if class != "" {
+		picture.Attr = append(picture.Attr, html.Attribute{
+			Key: "class",
+			Val: class,
+		})
 	}
 
 	sourceSetByType := map[string][]generatedImage{}
@@ -258,7 +316,7 @@ func pictureElement(imgElement *html.Node, sizes []generatedImage, width, height
 
 		source.Attr = append(source.Attr, html.Attribute{
 			Key: "sizes",
-			Val: strings.Join(sourceSizes, ","),
+			Val: strings.Join(conf.SourceSizes, ","),
 		})
 
 		sort.Slice(imgs, func(i, j int) bool {
@@ -278,14 +336,25 @@ func pictureElement(imgElement *html.Node, sizes []generatedImage, width, height
 		picture.AppendChild(source)
 	}
 
-	if len(sourceSetByType[""]) > 0 {
-		for i, a := range imgElement.Attr {
-			if a.Key != "src" {
-				continue
-			}
-			// Change the src of the img to the largest, generated, default URL
-			imgElement.Attr[i].Val = sourceSetByType[""][len(sourceSetByType[""])-1].URL
+	ratio := float64(height) / float64(width)
+	for i, a := range imgElement.Attr {
+		if a.Key != "src" {
+			continue
 		}
+		// Change the src of the img to the largest, generated, default URL
+		largest := sourceSetByType[""][len(sourceSetByType[""])-1]
+		imgElement.Attr[i].Val = largest.URL
+
+		picture.Attr = append(picture.Attr, []html.Attribute{
+			{
+				Key: "width",
+				Val: fmt.Sprintf("%v", largest.Size),
+			},
+			{
+				Key: "height",
+				Val: fmt.Sprintf("%v", int64(ratio*float64(largest.Size))),
+			},
+		}...)
 	}
 
 	picture.AppendChild(imgElement)

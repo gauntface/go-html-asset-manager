@@ -32,7 +32,7 @@ const (
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
-	allElements := htmlparsing.FindNodes("iframe", doc)
+	allElements := htmlparsing.FindNodesByTag("iframe", doc)
 	for _, ele := range allElements {
 		// Create a map of the iframes attributes
 		attributes := map[string]html.Attribute{}
