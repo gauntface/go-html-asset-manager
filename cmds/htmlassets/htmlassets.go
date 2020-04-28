@@ -35,6 +35,7 @@ import (
 	"github.com/gauntface/go-html-asset-manager/manipulations/imgtopicture"
 	"github.com/gauntface/go-html-asset-manager/manipulations/injectassets"
 	"github.com/gauntface/go-html-asset-manager/manipulations/lazyload"
+	"github.com/gauntface/go-html-asset-manager/manipulations/opengraphimg"
 	"github.com/gauntface/go-html-asset-manager/manipulations/ratiowrapper"
 	"github.com/gauntface/go-html-asset-manager/manipulations/youtubeclean"
 	"github.com/gauntface/go-html-asset-manager/preprocessors"
@@ -123,8 +124,8 @@ func newClient() (*client, error) {
 			revisionassets.Preprocessor,
 		},
 		manipulators: []manipulations.Manipulator{
+			opengraphimg.Manipulator,
 			youtubeclean.Manipulator,
-
 			iframedefaultsize.Manipulator,
 			imgtopicture.Manipulator,
 			ratiowrapper.Manipulator,
