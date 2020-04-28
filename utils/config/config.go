@@ -18,6 +18,9 @@ type Config struct {
 	// The path to a directory containing HTML files
 	HTMLDir string `json:"html-dir"`
 
+	// The base URL of the site
+	BaseURL string `json:"base-url"`
+
 	// The assets to be used by the html-asset-manager
 	Assets *AssetsConfig `json:"assets"`
 

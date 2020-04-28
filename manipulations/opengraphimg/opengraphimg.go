@@ -17,6 +17,7 @@
 package opengraphimg
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gauntface/go-html-asset-manager/assets/genimgs"
@@ -61,7 +62,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 
 		largestImg := imgsByType[len(imgsByType)-1]
 
-		c.Val = largestImg.URL
+		c.Val = fmt.Sprintf("%v%v", runtime.Config.BaseURL, largestImg.URL)
 		attributes["content"] = c
 		ele.Attr = []html.Attribute{}
 		for _, a := range attributes {
