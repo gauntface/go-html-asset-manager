@@ -26,14 +26,14 @@ var (
 )
 
 func getPath(conf *config.Config, imgPath string) string {
-	return filepath.Join(conf.Assets.BinaryDir, imgPath)
+	return filepath.Join(conf.Assets.StaticDir, imgPath)
 }
 
 func Open(conf *config.Config, imgPath string) (image.Image, error) {
 	return imagingOpen(getPath(conf, imgPath))
 }
 
-func Lookup(conf *config.Config, imgPath string) ([]GenImg, error) {
+func LookupSizes(conf *config.Config, imgPath string) ([]GenImg, error) {
 	srcPath := getPath(conf, imgPath)
 
 	hash, err := filesHash(srcPath)
@@ -62,7 +62,7 @@ func getImageSizes(conf *config.Config, srcPath, hash string) ([]GenImg, error) 
 		return nil, err
 	}
 
-	generatedDirURL, err := filepath.Rel(conf.Assets.BinaryDir, dirPath)
+	generatedDirURL, err := filepath.Rel(conf.Assets.StaticDir, dirPath)
 	if err != nil {
 		return nil, fmt.Errorf("%w from %q to %q: %v", errRelPath, conf.GenAssets.OutputDir, dirPath, err)
 	}

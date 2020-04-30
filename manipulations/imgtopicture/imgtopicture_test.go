@@ -24,8 +24,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/google/go-cmp/cmp"
@@ -37,14 +35,7 @@ var errInjected = errors.New("injected error")
 var reset func()
 
 func TestMain(m *testing.M) {
-	origImagingOpen := imagingOpen
-	origFileHash := filesHash
-	origReadDir := ioutilReadDir
-
 	reset = func() {
-		imagingOpen = origImagingOpen
-		filesHash = origFileHash
-		ioutilReadDir = origReadDir
 	}
 
 	os.Exit(m.Run())
@@ -55,49 +46,16 @@ func Test_Manipulator(t *testing.T) {
 		description string
 		runtime     manipulations.Runtime
 		doc         *html.Node
-		imagingOpen func(filename string, opts ...imaging.DecodeOption) (image.Image, error)
-		fileHash    func(filepath string) (string, error)
-		readDir     func(dirname string) ([]os.FileInfo, error)
 		want        string
 		wantError   error
 	}{
 		{
-			description: "do nothing if no generated directory is defined",
+			description: "do nothing if should not run",
 			runtime:     manipulations.Runtime{},
 			doc:         MustGetNode(t, `<img/>`),
 			want:        `<html><head></head><body><img/></body></html>`,
 		},
-		{
-			description: "do nothing if no static directory is defined",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/example",
-					},
-					Assets: &config.AssetsConfig{
-						BinaryDir: "",
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img/>`),
-			want: `<html><head></head><body><img/></body></html>`,
-		},
-		/* {
-			description: "return error if getting relative path fails",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "..",
-					},
-					Assets: &config.AssetsConfig{
-						BinaryDir: "/example",
-					},
-				},
-			},
-			doc:       MustGetNode(t, `<img/>`),
-			want:      `<html><head></head><body><img/></body></html>`,
-			wantError: errRelPath,
-		},*/
+		
 		{
 			description: "do nothing if img has no src attribute",
 			runtime: manipulations.Runtime{
@@ -106,7 +64,7 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/",
+						StaticDir: "/",
 					},
 				},
 			},
@@ -117,11 +75,16 @@ func Test_Manipulator(t *testing.T) {
 			description: "do nothing if img has empty src attribute",
 			runtime: manipulations.Runtime{
 				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/generated",
-					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/",
+						StaticDir: "/",
+						GeneratedDir: "/generated",
+					},
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID: ".example",
+							MaxWidth: 800,
+							SourceSizes: []string{"(min-width: 800px) 800px", "100vw"},
+						},
 					},
 				},
 			},
@@ -136,7 +99,7 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/",
+						StaticDir: "/",
 					},
 				},
 			},
@@ -151,7 +114,7 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/",
+						StaticDir: "/",
 					},
 				},
 			},
@@ -166,7 +129,7 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/",
+						StaticDir: "/",
 					},
 				},
 			},
@@ -181,18 +144,11 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/",
+						StaticDir: "/",
 					},
 				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
-				wantFilename := "/static/example.jpeg"
-				if filename != wantFilename {
-					t.Fatalf("Unexpected filename; got %v, want %v", filename, wantFilename)
-				}
-				return nil, errInjected
-			},
 			want: `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
 		},
 		/* {
@@ -203,28 +159,11 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/",
+						StaticDir: "/",
 					},
 				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
-				return &ImageStub{
-					BoundsReturn: image.Rectangle{
-						Min: image.Point{
-							X: 0,
-							Y: 0,
-						},
-						Max: image.Point{
-							X: 10,
-							Y: 10,
-						},
-					},
-				}, nil
-			},
-			fileHash: func(filepath string) (string, error) {
-				return "", errInjected
-			},
 			want:      `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
 			wantError: errFileHash,
 		},*/
@@ -236,35 +175,11 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/static/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/static",
+						StaticDir: "/static",
 					},
 				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
-				return &ImageStub{
-					BoundsReturn: image.Rectangle{
-						Min: image.Point{
-							X: 0,
-							Y: 0,
-						},
-						Max: image.Point{
-							X: 10,
-							Y: 10,
-						},
-					},
-				}, nil
-			},
-			fileHash: func(filepath string) (string, error) {
-				return "abcd123", nil
-			},
-			readDir: func(dirname string) ([]os.FileInfo, error) {
-				wantDirname := "/static/generated/example.abcd123"
-				if dirname != wantDirname {
-					t.Fatalf("unexpected dirname; got %v, want %v", dirname, wantDirname)
-				}
-				return nil, errInjected
-			},
 			want:      `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
 			wantError: errInjected,
 		},*/
@@ -276,31 +191,11 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/static/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/static",
+						StaticDir: "/static",
 					},
 				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
-				return &ImageStub{
-					BoundsReturn: image.Rectangle{
-						Min: image.Point{
-							X: 0,
-							Y: 0,
-						},
-						Max: image.Point{
-							X: 10,
-							Y: 10,
-						},
-					},
-				}, nil
-			},
-			fileHash: func(filepath string) (string, error) {
-				return "abcd123", nil
-			},
-			readDir: func(dirname string) ([]os.FileInfo, error) {
-				return nil, os.ErrNotExist
-			},
 			want: `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
 		},
 		{
@@ -311,41 +206,14 @@ func Test_Manipulator(t *testing.T) {
 						OutputDir: "/static/generated",
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/static",
+						StaticDir: "/static",
 					},
 				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
-				return &ImageStub{
-					BoundsReturn: image.Rectangle{
-						Min: image.Point{
-							X: 0,
-							Y: 0,
-						},
-						Max: image.Point{
-							X: 10,
-							Y: 10,
-						},
-					},
-				}, nil
-			},
-			fileHash: func(filepath string) (string, error) {
-				return "abcd123", nil
-			},
-			readDir: func(dirname string) ([]os.FileInfo, error) {
-				return []os.FileInfo{
-					&fileInfoStub{
-						IsDirReturn: true,
-					},
-					&fileInfoStub{
-						NameReturn: "not-a-number.jpeg",
-					},
-				}, nil
-			},
 			want: `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
 		},
-		{
+		/*{
 			description: "replace image with picture with webp and png sources",
 			runtime: manipulations.Runtime{
 				Debug: true,
@@ -355,7 +223,7 @@ func Test_Manipulator(t *testing.T) {
 						MaxDensity: 3,
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/static",
+						StaticDir: "/static",
 					},
 					ImgToPicture: []*config.ImgToPicConfig{
 						{
@@ -370,39 +238,6 @@ func Test_Manipulator(t *testing.T) {
 				},
 			},
 			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
-				return &ImageStub{
-					BoundsReturn: image.Rectangle{
-						Min: image.Point{
-							X: 0,
-							Y: 0,
-						},
-						Max: image.Point{
-							X: 10,
-							Y: 10,
-						},
-					},
-				}, nil
-			},
-			fileHash: func(filepath string) (string, error) {
-				return "abcd123", nil
-			},
-			readDir: func(dirname string) ([]os.FileInfo, error) {
-				return []os.FileInfo{
-					&fileInfoStub{
-						NameReturn: "100.webp",
-					},
-					&fileInfoStub{
-						NameReturn: "200.webp",
-					},
-					&fileInfoStub{
-						NameReturn: "400.png",
-					},
-					&fileInfoStub{
-						NameReturn: "300.png",
-					},
-				}, nil
-			},
 			want: `<html><head></head><body><picture width="400" height="400"><source type="image/webp" sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/100.webp 100w,/generated/example.abcd123/200.webp 200w"/><source sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/300.png 300w,/generated/example.abcd123/400.png 400w"/><img src="/generated/example.abcd123/400.png"/></picture></body></html>`,
 		},
 		{
@@ -414,7 +249,7 @@ func Test_Manipulator(t *testing.T) {
 						MaxDensity: 3,
 					},
 					Assets: &config.AssetsConfig{
-						BinaryDir: "/static",
+						StaticDir: "/static",
 					},
 					ImgToPicture: []*config.ImgToPicConfig{
 						{
@@ -429,44 +264,13 @@ func Test_Manipulator(t *testing.T) {
 				},
 			},
 			doc: MustGetNode(t, `<img class="example-selector" example="other-attribute" src="/example.jpeg"/>`),
-			imagingOpen: func(filename string, opts ...imaging.DecodeOption) (image.Image, error) {
-				return &ImageStub{
-					BoundsReturn: image.Rectangle{
-						Min: image.Point{
-							X: 0,
-							Y: 0,
-						},
-						Max: image.Point{
-							X: 10,
-							Y: 10,
-						},
-					},
-				}, nil
-			},
-			fileHash: func(filepath string) (string, error) {
-				return "abcd123", nil
-			},
-			readDir: func(dirname string) ([]os.FileInfo, error) {
-				return []os.FileInfo{
-					&fileInfoStub{
-						NameReturn: "100.jpg",
-					},
-					&fileInfoStub{
-						NameReturn: "100000.jpg",
-					},
-				}, nil
-			},
 			want: `<html><head></head><body><picture width="100" height="100"><source sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/100.jpg 100w"/><img class="example-selector" example="other-attribute" src="/generated/example.abcd123/100.jpg"/></picture></body></html>`,
-		},
+		},*/
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			defer reset()
-
-			imagingOpen = tt.imagingOpen
-			filesHash = tt.fileHash
-			ioutilReadDir = tt.readDir
 
 			err := Manipulator(tt.runtime, tt.doc)
 			if !errors.Is(err, tt.wantError) {
@@ -475,6 +279,83 @@ func Test_Manipulator(t *testing.T) {
 
 			if diff := cmp.Diff(MustRenderNode(t, tt.doc), tt.want); diff != "" {
 				t.Fatalf("Unexpected HTML files; diff %v", diff)
+			}
+		})
+	}
+}
+
+func Test_shouldRun(t *testing.T) {
+	tests := []struct {
+		description string
+		conf     *config.Config
+		want        bool
+	}{
+		{
+			description: "return false for nil conf",
+			conf: nil,
+			want: false,
+		},
+		{
+			description: "return false for config without Assets",
+			conf: &config.Config{
+				Assets: nil,
+			},
+			want: false,
+		},
+		{
+			description: "return false for config without static dir",
+			conf: &config.Config{
+				Assets: &config.AssetsConfig{
+					StaticDir: "",
+				},
+			},
+			want: false,
+		},
+		{
+			description: "return false for config without generated dir",
+			conf: &config.Config{
+				Assets: &config.AssetsConfig{
+					StaticDir: "/",
+					GeneratedDir: "",
+				},
+			},
+			want: false,
+		},
+		{
+			description: "return false for config without ImgToPicture",
+			conf: &config.Config{
+				Assets: &config.AssetsConfig{
+					StaticDir: "/",
+					GeneratedDir: "/generated",
+				},
+				ImgToPicture: nil,
+			},
+			want: false,
+		},
+		{
+			description: "return true for config required params",
+			conf: &config.Config{
+				Assets: &config.AssetsConfig{
+					StaticDir: "/",
+					GeneratedDir: "/generated",
+				},
+				ImgToPicture: []*config.ImgToPicConfig{
+					{
+						ID: ".example",
+						MaxWidth: 800,
+						SourceSizes: []string{"(min-width: 800px) 800px", "100vw"},
+					},
+				},
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			got := shouldRun(tt.conf)
+			if got != tt.want {
+				t.Errorf("Unexpected result; got %v, want %v", got, tt.want)
 			}
 		})
 	}

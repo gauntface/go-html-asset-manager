@@ -197,3 +197,11 @@ func SwapNodes(original, new *html.Node) {
 
 	p.InsertBefore(new, s)
 }
+
+func Attributes(e *html.Node) map[string]html.Attribute {
+	attributes := map[string]html.Attribute{}
+	for _, a := range e.Attr {
+		attributes[a.Key] = a
+	}
+	return attributes
+}
