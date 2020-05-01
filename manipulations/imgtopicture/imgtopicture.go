@@ -163,25 +163,27 @@ func pictureElement(imgtopic *config.ImgToPicConfig, imgElement *html.Node, size
 	}
 
 	// Replace the img src="..." attribute to point to the largest generated asset
-	ratio := float64(origHeight) / float64(origWidth)
-	for i, a := range imgElement.Attr {
-		if a.Key != "src" {
-			continue
-		}
-		// Change the src of the img to the largest, generated, default URL
-		largest := sourceSetByType[""][len(sourceSetByType[""])-1]
-		imgElement.Attr[i].Val = largest.URL
+	if len(sourceSetByType[""]) > 0 {
+		ratio := float64(origHeight) / float64(origWidth)
+		for i, a := range imgElement.Attr {
+			if a.Key != "src" {
+				continue
+			}
+			// Change the src of the img to the largest, generated, default URL
+			largest := sourceSetByType[""][len(sourceSetByType[""])-1]
+			imgElement.Attr[i].Val = largest.URL
 
-		picture.Attr = append(picture.Attr, []html.Attribute{
-			{
-				Key: "width",
-				Val: fmt.Sprintf("%v", largest.Size),
-			},
-			{
-				Key: "height",
-				Val: fmt.Sprintf("%v", int64(ratio*float64(largest.Size))),
-			},
-		}...)
+			picture.Attr = append(picture.Attr, []html.Attribute{
+				{
+					Key: "width",
+					Val: fmt.Sprintf("%v", largest.Size),
+				},
+				{
+					Key: "height",
+					Val: fmt.Sprintf("%v", int64(ratio*float64(largest.Size))),
+				},
+			}...)
+		}
 	}
 
 	picture.AppendChild(imgElement)
@@ -194,6 +196,10 @@ func createSourceElement(imgtopic *config.ImgToPicConfig, imgs []genimgs.GenImg)
 		Type: html.ElementNode,
 		Data: "source",
 		Attr: []html.Attribute{},
+	}
+
+	if len(imgs) == 0 {
+		return source
 	}
 
 	// Add type attribute if appropriate
