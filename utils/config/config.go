@@ -46,6 +46,8 @@ type AssetsConfig struct {
 
 // GeneratedImagesConfig defines config options for gen-imgs cmd
 type GeneratedImagesConfig struct {
+	// path to a directory containing static assets
+	StaticDir string `json:"static-dir"`
 	// The path to a directory containing generated files
 	OutputDir string `json:"output-dir"`
 	// The maximum width in CSS pixels images should be
@@ -88,6 +90,7 @@ func Get(filePath string) (*Config, error) {
 		conf.Assets.GeneratedDir = abs(dir, conf.Assets.GeneratedDir)
 	}
 	if conf.GenAssets != nil {
+		conf.GenAssets.StaticDir = abs(dir, conf.GenAssets.StaticDir)
 		conf.GenAssets.OutputDir = abs(dir, conf.GenAssets.OutputDir)
 	}
 

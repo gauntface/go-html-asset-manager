@@ -63,6 +63,7 @@ func main() {
 type client struct {
 	staticdir string
 	outputdir string
+	maxWidth  int64
 
 	staticManager    *assetmanager.Manager
 	generatedManager *assetmanager.Manager
@@ -82,7 +83,7 @@ func newClient(ctx context.Context) (*client, error) {
 		return nil, fmt.Errorf("failed to get absolute path for html_dir flag: %w", err)
 	}
 
-	fmt.Printf("📁 Looking for Static assets in: %q\n", c.Assets.StaticDir)
+	fmt.Printf("📁 Looking for Static assets in: %q\n", c.GenAssets.StaticDir)
 	fmt.Printf("📁 Will output imgs to: %q\n", c.GenAssets.OutputDir)
 
 	err = os.MkdirAll(c.GenAssets.OutputDir, 0777)
@@ -90,7 +91,7 @@ func newClient(ctx context.Context) (*client, error) {
 		return nil, fmt.Errorf("failed to create output directory: %v", err)
 	}
 
-	staticManager, err := assetmanager.NewManager("", c.Assets.StaticDir, "")
+	staticManager, err := assetmanager.NewManager("", c.GenAssets.StaticDir, "")
 	if err != nil {
 		return nil, err
 	}
@@ -100,9 +101,13 @@ func newClient(ctx context.Context) (*client, error) {
 		return nil, err
 	}
 
+	maxWidth := c.GenAssets.MaxWidth * c.GenAssets.MaxDensity
+	fmt.Printf("📏 Max width will be %v (CSS px) x %v (Density) = %v\n", c.GenAssets.MaxWidth, c.GenAssets.MaxDensity, maxWidth)
+
 	return &client{
-		staticdir:        c.Assets.StaticDir,
+		staticdir:        c.GenAssets.StaticDir,
 		outputdir:        c.GenAssets.OutputDir,
+		maxWidth:         maxWidth,
 		staticManager:    staticManager,
 		generatedManager: generatedManager,
 	}, nil
@@ -309,7 +314,7 @@ func (c *client) generateImageSet(imgPath string) ([]generateImage, error) {
 		return nil, err
 	}
 
-	sizes := generateSizes(srcImg)
+	sizes := generateSizes(srcImg, c.maxWidth)
 
 	genImgs := []generateImage{}
 	for _, s := range sizes {
@@ -343,20 +348,23 @@ func (c *client) generatedDir(imgPath string) (string, error) {
 	return filepath.Join(c.outputdir, fmt.Sprintf("%v.%v", filename, hash)), nil
 }
 
-func generateSizes(img image.Image) []int {
+func generateSizes(img image.Image, maxWidth int64) []int {
 	origSize := img.Bounds().Size()
 
 	widths := []int{}
 	currentWidth := 400
 	interval := 200
 	for {
-		if currentWidth >= origSize.X {
+		if currentWidth >= origSize.X || int64(currentWidth) > maxWidth {
 			break
 		}
 		widths = append(widths, currentWidth)
 		currentWidth += interval
 	}
-	widths = append(widths, origSize.X)
+
+	if int64(origSize.X) <= maxWidth {
+		widths = append(widths, origSize.X)
+	}
 	return widths
 }
 
