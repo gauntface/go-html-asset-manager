@@ -251,9 +251,17 @@ func orderedSourceSets(sourceSetByType map[string][]genimgs.GenImg) [][]genimgs.
 		delete(sourceSetByType, dt)
 	}
 
+	other := [][]genimgs.GenImg{}
 	for _, i := range sourceSetByType {
-		sourceSets = append(sourceSets, i)
+		other = append(other, i)
 	}
+
+	// Sort the other values to ensure tests are reliable
+	sort.Slice(other, func(i, j int) bool {
+		return other[i][0].Type < other[j][0].Type
+	})
+
+	sourceSets = append(sourceSets, other...)
 
 	return sourceSets
 }
