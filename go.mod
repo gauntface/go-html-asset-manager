@@ -19,12 +19,12 @@ require (
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/otiai10/copy v1.1.1
 	github.com/pierrec/lz4 v2.5.1+incompatible // indirect
-	github.com/schollz/progressbar/v3 v3.2.1
+	github.com/schollz/progressbar/v3 v3.3.1
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8 // indirect
-	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
+	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

@@ -49,7 +49,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			continue
 		}
 
-		imgs, err := genimgs.Lookup(runtime.Config, c.Val)
+		imgs, err := genimgs.LookupSizes(runtime.Config, c.Val)
 		if err != nil {
 			return err
 		}

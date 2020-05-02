@@ -100,14 +100,14 @@ func newClient() (*client, error) {
 	}
 
 	fmt.Printf("📁 Looking for HTML files in:   %q\n", c.HTMLDir)
-	fmt.Printf("📁 Looking for Static assets in: %q\n", c.Assets.BinaryDir)
+	fmt.Printf("📁 Looking for Static assets in: %q\n", c.Assets.StaticDir)
 	fmt.Printf("📁 Looking for JSON assets in: %q\n", c.Assets.JSONDir)
 	if c.GenAssets != nil {
 		fmt.Printf("📁 Looking for generated assets in: %q\n", c.GenAssets.OutputDir)
 	}
 	fmt.Println("")
 
-	manager, err := assetmanagerNewManager(c.HTMLDir, c.Assets.BinaryDir, c.Assets.JSONDir)
+	manager, err := assetmanagerNewManager(c.HTMLDir, c.Assets.StaticDir, c.Assets.JSONDir)
 	if err != nil {
 		return nil, err
 	}

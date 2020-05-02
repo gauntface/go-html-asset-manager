@@ -82,7 +82,7 @@ func newClient(ctx context.Context) (*client, error) {
 		return nil, fmt.Errorf("failed to get absolute path for html_dir flag: %w", err)
 	}
 
-	fmt.Printf("📁 Looking for Static assets in: %q\n", c.Assets.BinaryDir)
+	fmt.Printf("📁 Looking for Static assets in: %q\n", c.Assets.StaticDir)
 	fmt.Printf("📁 Will output imgs to: %q\n", c.GenAssets.OutputDir)
 
 	err = os.MkdirAll(c.GenAssets.OutputDir, 0777)
@@ -90,7 +90,7 @@ func newClient(ctx context.Context) (*client, error) {
 		return nil, fmt.Errorf("failed to create output directory: %v", err)
 	}
 
-	staticManager, err := assetmanager.NewManager("", c.Assets.BinaryDir, "")
+	staticManager, err := assetmanager.NewManager("", c.Assets.StaticDir, "")
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func newClient(ctx context.Context) (*client, error) {
 	}
 
 	return &client{
-		staticdir:        c.Assets.BinaryDir,
+		staticdir:        c.Assets.StaticDir,
 		outputdir:        c.GenAssets.OutputDir,
 		staticManager:    staticManager,
 		generatedManager: generatedManager,
