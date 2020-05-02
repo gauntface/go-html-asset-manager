@@ -31,6 +31,9 @@ import (
 
 var (
 	errRelPath = errors.New("unable to get relative path")
+
+	genimgsOpen        = genimgs.Open
+	genimgsLookupSizes = genimgs.LookupSizes
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
@@ -65,9 +68,7 @@ func shouldRun(conf *config.Config) bool {
 
 func manipulateWithConfig(debug bool, conf *config.Config, imgtopic *config.ImgToPicConfig, doc *html.Node) error {
 	rawElements := htmlparsing.FindNodesByTag(imgtopic.ID, doc)
-	if len(rawElements) == 0 {
-		rawElements = htmlparsing.FindNodesByClassname(imgtopic.ID, doc)
-	}
+	rawElements = append(rawElements, htmlparsing.FindNodesByClassname(imgtopic.ID, doc)...)
 
 	if debug {
 		fmt.Printf("Found %v raw elements for %q\n", len(rawElements), imgtopic.ID)
@@ -110,7 +111,7 @@ func manipulateImg(debug bool, conf *config.Config, imgtopic *config.ImgToPicCon
 	}
 
 	// Get the src image
-	i, err := genimgs.Open(conf, srcAttr.Val)
+	i, err := genimgsOpen(conf, srcAttr.Val)
 	if err != nil {
 		return nil
 	}
@@ -118,7 +119,7 @@ func manipulateImg(debug bool, conf *config.Config, imgtopic *config.ImgToPicCon
 	// Get width and height from the image
 	origWidth, origHeight := i.Bounds().Size().X, i.Bounds().Size().Y
 
-	sizes, err := genimgs.LookupSizes(conf, srcAttr.Val)
+	sizes, err := genimgsLookupSizes(conf, srcAttr.Val)
 	if err != nil {
 		return err
 	}

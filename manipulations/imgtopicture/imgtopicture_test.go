@@ -38,253 +38,15 @@ var errInjected = errors.New("injected error")
 var reset func()
 
 func TestMain(m *testing.M) {
+	origGenimgsOpen := genimgsOpen
+	origGenimgsLookupSizes := genimgsLookupSizes
+
 	reset = func() {
+		genimgsOpen = origGenimgsOpen
+		genimgsLookupSizes = origGenimgsLookupSizes
 	}
 
 	os.Exit(m.Run())
-}
-
-func Test_Manipulator(t *testing.T) {
-	tests := []struct {
-		description string
-		runtime     manipulations.Runtime
-		doc         *html.Node
-		want        string
-		wantError   error
-	}{
-		{
-			description: "do nothing if should not run",
-			runtime:     manipulations.Runtime{},
-			doc:         MustGetNode(t, `<img/>`),
-			want:        `<html><head></head><body><img/></body></html>`,
-		},
-
-		{
-			description: "do nothing if img has no src attribute",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/",
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img/>`),
-			want: `<html><head></head><body><img/></body></html>`,
-		},
-		{
-			description: "do nothing if img has empty src attribute",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					Assets: &config.AssetsConfig{
-						StaticDir:    "/",
-						GeneratedDir: "/generated",
-					},
-					ImgToPicture: []*config.ImgToPicConfig{
-						{
-							ID:          ".example",
-							MaxWidth:    800,
-							SourceSizes: []string{"(min-width: 800px) 800px", "100vw"},
-						},
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img src=""/>`),
-			want: `<html><head></head><body><img src=""/></body></html>`,
-		},
-		{
-			description: "do nothing if img has http src attribute",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/",
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img src="http://example/example.jpg"/>`),
-			want: `<html><head></head><body><img src="http://example/example.jpg"/></body></html>`,
-		},
-		{
-			description: "do nothing if img has https src attribute",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/",
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img src="https://example/example.jpg"/>`),
-			want: `<html><head></head><body><img src="https://example/example.jpg"/></body></html>`,
-		},
-		{
-			description: "do nothing if img has // src attribute",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/",
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img src="//example/example.jpg"/>`),
-			want: `<html><head></head><body><img src="//example/example.jpg"/></body></html>`,
-		},
-		{
-			description: "do nothing if opening an img fails",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/",
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img src="/example.jpeg"/>`),
-			want: `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
-		},
-		/* {
-			description: "return error if file hash fails",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/",
-					},
-				},
-			},
-			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			want:      `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
-			wantError: errFileHash,
-		},*/
-		/* {
-			description: "return error if reading generate directory fails",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/static/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/static",
-					},
-				},
-			},
-			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			want:      `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
-			wantError: errInjected,
-		},*/
-		{
-			description: "do nothing if the generated directory does not exist",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/static/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/static",
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img src="/example.jpeg"/>`),
-			want: `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
-		},
-		{
-			description: "do nothing if the generated directory contains images that are not named correctly",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir: "/static/generated",
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/static",
-					},
-				},
-			},
-			doc:  MustGetNode(t, `<img src="/example.jpeg"/>`),
-			want: `<html><head></head><body><img src="/example.jpeg"/></body></html>`,
-		},
-		/*{
-			description: "replace image with picture with webp and png sources",
-			runtime: manipulations.Runtime{
-				Debug: true,
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir:  "/static/generated",
-						MaxDensity: 3,
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/static",
-					},
-					ImgToPicture: []*config.ImgToPicConfig{
-						{
-							ID:       "img",
-							MaxWidth: 800,
-							SourceSizes: []string{
-								"(min-width: 800px) 800px",
-								"100vw",
-							},
-						},
-					},
-				},
-			},
-			doc: MustGetNode(t, `<img src="/example.jpeg"/>`),
-			want: `<html><head></head><body><picture width="400" height="400"><source type="image/webp" sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/100.webp 100w,/generated/example.abcd123/200.webp 200w"/><source sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/300.png 300w,/generated/example.abcd123/400.png 400w"/><img src="/generated/example.abcd123/400.png"/></picture></body></html>`,
-		},
-		{
-			description: "replace image with picture excluding max size source",
-			runtime: manipulations.Runtime{
-				Config: &config.Config{
-					GenAssets: &config.GeneratedImagesConfig{
-						OutputDir:  "/static/generated",
-						MaxDensity: 3,
-					},
-					Assets: &config.AssetsConfig{
-						StaticDir: "/static",
-					},
-					ImgToPicture: []*config.ImgToPicConfig{
-						{
-							ID:       "example-selector",
-							MaxWidth: 800,
-							SourceSizes: []string{
-								"(min-width: 800px) 800px",
-								"100vw",
-							},
-						},
-					},
-				},
-			},
-			doc: MustGetNode(t, `<img class="example-selector" example="other-attribute" src="/example.jpeg"/>`),
-			want: `<html><head></head><body><picture width="100" height="100"><source sizes="(min-width: 800px) 800px,100vw" srcset="/generated/example.abcd123/100.jpg 100w"/><img class="example-selector" example="other-attribute" src="/generated/example.abcd123/100.jpg"/></picture></body></html>`,
-		},*/
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			defer reset()
-
-			err := Manipulator(tt.runtime, tt.doc)
-			if !errors.Is(err, tt.wantError) {
-				t.Fatalf("Different error returned; got %v, want %v", err, tt.wantError)
-			}
-
-			if diff := cmp.Diff(MustRenderNode(t, tt.doc), tt.want); diff != "" {
-				t.Fatalf("Unexpected HTML files; diff %v", diff)
-			}
-		})
-	}
 }
 
 func Test_shouldRun(t *testing.T) {
@@ -592,13 +354,15 @@ func Test_pictureElement(t *testing.T) {
 
 func Test_manipulateImg(t *testing.T) {
 	tests := []struct {
-		description string
-		debug       bool
-		conf        *config.Config
-		imgtopic    *config.ImgToPicConfig
-		doc         *html.Node
-		want        string
-		wantError   error
+		description        string
+		debug              bool
+		conf               *config.Config
+		imgtopic           *config.ImgToPicConfig
+		doc                *html.Node
+		genimgsOpen        func(conf *config.Config, imgPath string) (image.Image, error)
+		genimgsLookupSizes func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
+		want               string
+		wantError          error
 	}{
 		{
 			description: "do nothing for img without src",
@@ -610,10 +374,74 @@ func Test_manipulateImg(t *testing.T) {
 			doc:         MustGetNode(t, `<img src="http://example.com/example.png"/>`),
 			want:        `<html><head></head><body><img src="http://example.com/example.png"/></body></html>`,
 		},
+		{
+			description: "do nothing if the img cannot be found",
+			doc:         MustGetNode(t, `<img src="/example.png"/>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				wantImg := "/example.png"
+				if wantImg != imgPath {
+					t.Fatalf("Unexpected img path passed to genimgs.Open; got %v, want %v", imgPath, wantImg)
+				}
+				return nil, errInjected
+			},
+			want: `<html><head></head><body><img src="/example.png"/></body></html>`,
+		},
+		{
+			description: "return error if sizes lookup fails",
+			doc:         MustGetNode(t, `<img src="/example.png"/>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				return &image.RGBA{}, nil
+			},
+			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				wantImg := "/example.png"
+				if wantImg != imgPath {
+					t.Fatalf("Unexpected img path passed to genimgs.LookupSizes; got %v, want %v", imgPath, wantImg)
+				}
+				return nil, errInjected
+			},
+			wantError: errInjected,
+			want:      `<html><head></head><body><img src="/example.png"/></body></html>`,
+		},
+		{
+			description: "do nothing if no sizes are found",
+			doc:         MustGetNode(t, `<img src="/example.png"/>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				return &image.RGBA{}, nil
+			},
+			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				return nil, nil
+			},
+			want: `<html><head></head><body><img src="/example.png"/></body></html>`,
+		},
+		{
+			description: "replace img with picture",
+			imgtopic: &config.ImgToPicConfig{
+				SourceSizes: []string{"100vw"},
+			},
+			doc: MustGetNode(t, `<img src="/example.png"/>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				return &image.RGBA{}, nil
+			},
+			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				return []genimgs.GenImg{
+					{
+						Type: "",
+						Size: 100,
+						URL:  "/example-100.png",
+					},
+				}, nil
+			},
+			want: `<html><head></head><body><picture width="100" height="-9223372036854775808"><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			defer reset()
+
+			genimgsOpen = tt.genimgsOpen
+			genimgsLookupSizes = tt.genimgsLookupSizes
+
 			err := manipulateImg(tt.debug, tt.conf, tt.imgtopic, htmlparsing.FindNodeByTag("img", tt.doc))
 			if !errors.Is(err, tt.wantError) {
 				t.Fatalf("Unexpected error; got %v, want %v", err, tt.wantError)
@@ -621,6 +449,191 @@ func Test_manipulateImg(t *testing.T) {
 
 			if diff := cmp.Diff(MustRenderNode(t, tt.doc), tt.want); diff != "" {
 				t.Fatalf("Unexpected return; diff %v", diff)
+			}
+		})
+	}
+}
+
+func Test_manipulateWithConfig(t *testing.T) {
+	tests := []struct {
+		description        string
+		debug              bool
+		conf               *config.Config
+		imgtopic           *config.ImgToPicConfig
+		doc                *html.Node
+		genimgsOpen        func(conf *config.Config, imgPath string) (image.Image, error)
+		genimgsLookupSizes func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
+		want               string
+		wantError          error
+	}{
+		{
+			description: "replace img with picture for img tag",
+			imgtopic: &config.ImgToPicConfig{
+				ID:          "img",
+				SourceSizes: []string{"100vw"},
+			},
+			doc: MustGetNode(t, `<img src="/example.png"/>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				return &image.RGBA{}, nil
+			},
+			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				return []genimgs.GenImg{
+					{
+						Type: "",
+						Size: 100,
+						URL:  "/example-100.png",
+					},
+				}, nil
+			},
+			want: `<html><head></head><body><picture width="100" height="-9223372036854775808"><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
+		},
+		{
+			description: "replace img with picture for class container",
+			imgtopic: &config.ImgToPicConfig{
+				ID:          "container",
+				SourceSizes: []string{"100vw"},
+			},
+			doc: MustGetNode(t, `<div class="container"><img src="/example.png"/></div>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				return &image.RGBA{}, nil
+			},
+			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				return []genimgs.GenImg{
+					{
+						Type: "",
+						Size: 100,
+						URL:  "/example-100.png",
+					},
+				}, nil
+			},
+			want: `<html><head></head><body><div class="container"><picture width="100" height="-9223372036854775808"><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></div></body></html>`,
+		},
+		{
+			description: "return error if manipulating the elements fails",
+			imgtopic: &config.ImgToPicConfig{
+				ID:          "img",
+				SourceSizes: []string{"100vw"},
+			},
+			doc: MustGetNode(t, `<img src="/example.png"/>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				return &image.RGBA{}, nil
+			},
+			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				return nil, errInjected
+			},
+			wantError: errInjected,
+			want:      `<html><head></head><body><img src="/example.png"/></body></html>`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			defer reset()
+
+			genimgsOpen = tt.genimgsOpen
+			genimgsLookupSizes = tt.genimgsLookupSizes
+
+			err := manipulateWithConfig(tt.debug, tt.conf, tt.imgtopic, tt.doc)
+			if !errors.Is(err, tt.wantError) {
+				t.Fatalf("Unexpected error; got %v, want %v", err, tt.wantError)
+			}
+
+			if diff := cmp.Diff(MustRenderNode(t, tt.doc), tt.want); diff != "" {
+				t.Fatalf("Unexpected return; diff %v", diff)
+			}
+		})
+	}
+}
+
+func Test_Manipulator(t *testing.T) {
+	tests := []struct {
+		description        string
+		runtime            manipulations.Runtime
+		doc                *html.Node
+		genimgsOpen        func(conf *config.Config, imgPath string) (image.Image, error)
+		genimgsLookupSizes func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
+		want               string
+		wantError          error
+	}{
+		{
+			description: "do nothing if should not run",
+			runtime:     manipulations.Runtime{},
+			doc:         MustGetNode(t, `<img/>`),
+			want:        `<html><head></head><body><img/></body></html>`,
+		},
+		{
+			description: "return error if manipulation fails",
+			runtime: manipulations.Runtime{
+				Config: &config.Config{
+					Assets: &config.AssetsConfig{
+						StaticDir:    "/",
+						GeneratedDir: "/generated/",
+					},
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID:          "img",
+							SourceSizes: []string{"100vw"},
+						},
+					},
+				},
+			},
+			doc: MustGetNode(t, `<img src="/example.png"/>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				return &image.RGBA{}, nil
+			},
+			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				return nil, errInjected
+			},
+			wantError: errInjected,
+			want:      `<html><head></head><body><img src="/example.png"/></body></html>`,
+		},
+		{
+			description: "manipulate images",
+			runtime: manipulations.Runtime{
+				Config: &config.Config{
+					Assets: &config.AssetsConfig{
+						StaticDir:    "/",
+						GeneratedDir: "/generated/",
+					},
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID:          "img",
+							SourceSizes: []string{"100vw"},
+						},
+					},
+				},
+			},
+			doc: MustGetNode(t, `<img src="/example.png"/>`),
+			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
+				return &image.RGBA{}, nil
+			},
+			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				return []genimgs.GenImg{
+					{
+						Type: "",
+						Size: 100,
+						URL:  "/example-100.png",
+					},
+				}, nil
+			},
+			want: `<html><head></head><body><picture width="100" height="-9223372036854775808"><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			defer reset()
+
+			genimgsOpen = tt.genimgsOpen
+			genimgsLookupSizes = tt.genimgsLookupSizes
+
+			err := Manipulator(tt.runtime, tt.doc)
+			if !errors.Is(err, tt.wantError) {
+				t.Fatalf("Different error returned; got %v, want %v", err, tt.wantError)
+			}
+
+			if diff := cmp.Diff(MustRenderNode(t, tt.doc), tt.want); diff != "" {
+				t.Fatalf("Unexpected HTML files; diff %v", diff)
 			}
 		})
 	}
