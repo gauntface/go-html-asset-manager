@@ -19,7 +19,6 @@ package imgtopicture
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -29,6 +28,238 @@ import (
 	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
 	"golang.org/x/net/html"
 )
+
+var (
+	errRelPath = errors.New("unable to get relative path")
+
+	genimgsOpen        = genimgs.Open
+	genimgsLookupSizes = genimgs.LookupSizes
+)
+
+func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
+	if !shouldRun(runtime.Config) {
+		return nil
+	}
+
+	for _, i := range runtime.Config.ImgToPicture {
+		err := manipulateWithConfig(runtime.Debug, runtime.Config, i, doc)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func shouldRun(conf *config.Config) bool {
+	if conf == nil {
+		return false
+	}
+
+	if conf.Assets == nil || conf.Assets.StaticDir == "" || conf.Assets.GeneratedDir == "" {
+		return false
+	}
+
+	if len(conf.ImgToPicture) == 0 {
+		return false
+	}
+
+	return true
+}
+
+func manipulateWithConfig(debug bool, conf *config.Config, imgtopic *config.ImgToPicConfig, doc *html.Node) error {
+	rawElements := htmlparsing.FindNodesByTag(imgtopic.ID, doc)
+	rawElements = append(rawElements, htmlparsing.FindNodesByClassname(imgtopic.ID, doc)...)
+
+	if debug {
+		fmt.Printf("Found %v raw elements for %q\n", len(rawElements), imgtopic.ID)
+	}
+
+	var imgs []*html.Node
+	for _, e := range rawElements {
+		imgs = append(imgs, htmlparsing.FindNodesByTag("img", e)...)
+	}
+
+	if debug {
+		fmt.Printf("Found %v img elements for %q\n", len(imgs), imgtopic.ID)
+	}
+
+	for _, ie := range imgs {
+		err := manipulateImg(debug, conf, imgtopic, ie)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func manipulateImg(debug bool, conf *config.Config, imgtopic *config.ImgToPicConfig, ie *html.Node) error {
+	attributes := htmlparsing.Attributes(ie)
+
+	srcAttr, ok := attributes["src"]
+	if !ok || srcAttr.Val == "" {
+		if debug {
+			fmt.Printf("Skipping img without src\n")
+		}
+		return nil
+	}
+
+	if strings.HasPrefix(srcAttr.Val, "http") || strings.HasPrefix(srcAttr.Val, "//") {
+		if debug {
+			fmt.Printf("Skipping img with abs URL %q\n", srcAttr.Val)
+		}
+		return nil
+	}
+
+	// Get the src image
+	i, err := genimgsOpen(conf, srcAttr.Val)
+	if err != nil {
+		return nil
+	}
+
+	// Get width and height from the image
+	origWidth, origHeight := i.Bounds().Size().X, i.Bounds().Size().Y
+
+	sizes, err := genimgsLookupSizes(conf, srcAttr.Val)
+	if err != nil {
+		return err
+	}
+
+	if len(sizes) == 0 {
+		if debug {
+			fmt.Printf("No sizes found for %q\n", srcAttr.Val)
+		}
+		return nil
+	}
+
+	// Remove element from it's parent so it can be wrapped by picture
+	p := ie.Parent
+	s := ie.NextSibling
+	p.RemoveChild(ie)
+
+	pe := pictureElement(imgtopic, ie, sizes, origWidth, origHeight)
+
+	p.InsertBefore(pe, s)
+	return nil
+}
+
+func pictureElement(imgtopic *config.ImgToPicConfig, imgElement *html.Node, sizes []genimgs.GenImg, origWidth, origHeight int) *html.Node {
+	sourceSetByType := genimgs.GroupByType(sizes)
+	sourceSetsArray := orderedSourceSets(sourceSetByType)
+
+	picture := &html.Node{
+		Type: html.ElementNode,
+		Data: "picture",
+		Attr: []html.Attribute{},
+	}
+
+	for _, imgs := range sourceSetsArray {
+		picture.AppendChild(createSourceElement(imgtopic, imgs))
+	}
+
+	if imgtopic.Class != "" {
+		picture.Attr = append(picture.Attr, html.Attribute{
+			Key: "class",
+			Val: imgtopic.Class,
+		})
+	}
+
+	// Replace the img src="..." attribute to point to the largest generated asset
+	if len(sourceSetByType[""]) > 0 {
+		ratio := float64(origHeight) / float64(origWidth)
+		for i, a := range imgElement.Attr {
+			if a.Key != "src" {
+				continue
+			}
+			// Change the src of the img to the largest, generated, default URL
+			largest := sourceSetByType[""][len(sourceSetByType[""])-1]
+			imgElement.Attr[i].Val = largest.URL
+
+			picture.Attr = append(picture.Attr, []html.Attribute{
+				{
+					Key: "width",
+					Val: fmt.Sprintf("%v", largest.Size),
+				},
+				{
+					Key: "height",
+					Val: fmt.Sprintf("%v", int64(ratio*float64(largest.Size))),
+				},
+			}...)
+		}
+	}
+
+	picture.AppendChild(imgElement)
+
+	return picture
+}
+
+func createSourceElement(imgtopic *config.ImgToPicConfig, imgs []genimgs.GenImg) *html.Node {
+	source := &html.Node{
+		Type: html.ElementNode,
+		Data: "source",
+		Attr: []html.Attribute{},
+	}
+
+	if len(imgs) == 0 {
+		return source
+	}
+
+	// Add type attribute if appropriate
+	if imgs[0].Type != "" {
+		source.Attr = append(source.Attr, html.Attribute{
+			Key: "type",
+			Val: imgs[0].Type,
+		})
+	}
+
+	// Add sizes attribute
+	source.Attr = append(source.Attr, html.Attribute{
+		Key: "sizes",
+		Val: strings.Join(imgtopic.SourceSizes, ","),
+	})
+
+	// Sort and add srcset attribute
+	sort.Slice(imgs, func(i, j int) bool {
+		return imgs[i].Size < imgs[j].Size
+	})
+
+	srcsetValues := []string{}
+	for _, s := range imgs {
+		srcsetValues = append(srcsetValues, fmt.Sprintf("%v %vw", s.URL, s.Size))
+	}
+
+	source.Attr = append(source.Attr, html.Attribute{
+		Key: "srcset",
+		Val: strings.Join(srcsetValues, ","),
+	})
+
+	return source
+}
+
+func orderedSourceSets(sourceSetByType map[string][]genimgs.GenImg) [][]genimgs.GenImg {
+	// Order of src-set is important and we prefer webp over other formats
+	desiredOrder := []string{
+		"image/webp",
+	}
+
+	sourceSets := [][]genimgs.GenImg{}
+	for _, dt := range desiredOrder {
+		v, ok := sourceSetByType[dt]
+		if !ok {
+			continue
+		}
+		sourceSets = append(sourceSets, v)
+		delete(sourceSetByType, dt)
+	}
+
+	for _, i := range sourceSetByType {
+		sourceSets = append(sourceSets, i)
+	}
+
+	return sourceSets
+}
+
+// H/T to Jack Archibald for a simple and concise explainer of picture
+// https://jakearchibald.com/2015/anatomy-of-responsive-images/
 
 /*
 
@@ -69,219 +300,3 @@ import (
 </picture>
 
 */
-
-var (
-	errRelPath = errors.New("unable to get relative path")
-)
-
-func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
-	if runtime.Config == nil {
-		return nil
-	}
-
-	if runtime.Config.GenAssets == nil || runtime.Config.GenAssets.OutputDir == "" {
-		return nil
-	}
-
-	if runtime.Config.Assets == nil || runtime.Config.Assets.BinaryDir == "" {
-		return nil
-	}
-
-	if len(runtime.Config.ImgToPicture) == 0 {
-		return nil
-	}
-
-	genDir := runtime.Config.GenAssets.OutputDir
-	staticDir := runtime.Config.Assets.BinaryDir
-
-	generatedDirURL, err := filepath.Rel(staticDir, genDir)
-	if err != nil {
-		return fmt.Errorf("%w from %q to %q: %v", errRelPath, staticDir, genDir, err)
-	}
-
-	for _, i := range runtime.Config.ImgToPicture {
-		err := manipulateWithConfig(runtime.Debug, runtime.Config, runtime.Config.GenAssets, i, doc, staticDir, genDir, generatedDirURL)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func manipulateWithConfig(debug bool, fullConf *config.Config, genConf *config.GeneratedImagesConfig, conf *config.ImgToPicConfig, doc *html.Node, staticDir, genDir, generatedDirURL string) error {
-	rawElements := htmlparsing.FindNodesByTag(conf.ID, doc)
-	if len(rawElements) == 0 {
-		rawElements = htmlparsing.FindNodesByClassname(conf.ID, doc)
-	}
-
-	if debug {
-		fmt.Printf("Found %v raw elements for %q\n", len(rawElements), conf.ID)
-	}
-
-	var imgs []*html.Node
-	for _, e := range rawElements {
-		imgs = append(imgs, htmlparsing.FindNodesByTag("img", e)...)
-	}
-
-	if debug {
-		fmt.Printf("Found %v img elements for %q\n", len(imgs), conf.ID)
-	}
-
-	for _, ie := range imgs {
-		err := manipulateImg(debug, fullConf, genConf, conf, staticDir, genDir, generatedDirURL, conf.Class, ie)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func manipulateImg(debug bool, fullconf *config.Config, genConf *config.GeneratedImagesConfig, conf *config.ImgToPicConfig, staticDir, genDir, generatedDirURL, pictureClass string, ie *html.Node) error {
-	// Create a map of the img attributes
-	attributes := map[string]html.Attribute{}
-	for _, a := range ie.Attr {
-		attributes[a.Key] = a
-	}
-	srcAttr, ok := attributes["src"]
-	if !ok || srcAttr.Val == "" {
-		if debug {
-			fmt.Printf("Skipping img without src\n")
-		}
-		return nil
-	}
-
-	if strings.HasPrefix(srcAttr.Val, "http") || strings.HasPrefix(srcAttr.Val, "//") {
-		if debug {
-			fmt.Printf("Skipping img with abs URL %q\n", srcAttr.Val)
-		}
-		return nil
-	}
-
-	// Get the src image
-	i, err := genimgs.Open(fullconf, srcAttr.Val)
-	if err != nil {
-		return nil
-	}
-
-	// Get width and height from the image
-	width, height := i.Bounds().Size().X, i.Bounds().Size().Y
-
-	sizes, err := genimgs.Lookup(fullconf, srcAttr.Val)
-	if err != nil {
-		return err
-	}
-
-	if len(sizes) == 0 {
-		if debug {
-			fmt.Printf("No sizes found for %q\n", srcAttr.Val)
-		}
-		return nil
-	}
-
-	// Remove element from it's parent so it can be wrapped by picture
-	p := ie.Parent
-	s := ie.NextSibling
-	p.RemoveChild(ie)
-
-	pe := pictureElement(conf, ie, sizes, width, height, pictureClass)
-
-	p.InsertBefore(pe, s)
-	return nil
-}
-
-func pictureElement(conf *config.ImgToPicConfig, imgElement *html.Node, sizes []genimgs.GenImg, width, height int, class string) *html.Node {
-	// H/T to Jack Archibald for a simple and concise explainer of picture
-	// https://jakearchibald.com/2015/anatomy-of-responsive-images/
-
-	picture := &html.Node{
-		Type: html.ElementNode,
-		Data: "picture",
-		Attr: []html.Attribute{},
-	}
-
-	if class != "" {
-		picture.Attr = append(picture.Attr, html.Attribute{
-			Key: "class",
-			Val: class,
-		})
-	}
-
-	sourceSetByType := genimgs.GroupByType(sizes)
-
-	desiredOrder := []string{
-		"image/webp",
-	}
-	sourceSets := [][]genimgs.GenImg{}
-	for _, dt := range desiredOrder {
-		v, ok := sourceSetByType[dt]
-		if !ok {
-			continue
-		}
-		sourceSets = append(sourceSets, v)
-		delete(sourceSetByType, dt)
-	}
-
-	for _, i := range sourceSetByType {
-		sourceSets = append(sourceSets, i)
-	}
-
-	for _, imgs := range sourceSets {
-		source := &html.Node{
-			Type: html.ElementNode,
-			Data: "source",
-			Attr: []html.Attribute{},
-		}
-		if imgs[0].Type != "" {
-			source.Attr = append(source.Attr, html.Attribute{
-				Key: "type",
-				Val: imgs[0].Type,
-			})
-		}
-
-		source.Attr = append(source.Attr, html.Attribute{
-			Key: "sizes",
-			Val: strings.Join(conf.SourceSizes, ","),
-		})
-
-		sort.Slice(imgs, func(i, j int) bool {
-			return imgs[i].Size < imgs[j].Size
-		})
-
-		srcsetValues := []string{}
-		for _, s := range imgs {
-			srcsetValues = append(srcsetValues, fmt.Sprintf("%v %vw", s.URL, s.Size))
-		}
-
-		source.Attr = append(source.Attr, html.Attribute{
-			Key: "srcset",
-			Val: strings.Join(srcsetValues, ","),
-		})
-
-		picture.AppendChild(source)
-	}
-
-	ratio := float64(height) / float64(width)
-	for i, a := range imgElement.Attr {
-		if a.Key != "src" {
-			continue
-		}
-		// Change the src of the img to the largest, generated, default URL
-		largest := sourceSetByType[""][len(sourceSetByType[""])-1]
-		imgElement.Attr[i].Val = largest.URL
-
-		picture.Attr = append(picture.Attr, []html.Attribute{
-			{
-				Key: "width",
-				Val: fmt.Sprintf("%v", largest.Size),
-			},
-			{
-				Key: "height",
-				Val: fmt.Sprintf("%v", int64(ratio*float64(largest.Size))),
-			},
-		}...)
-	}
-
-	picture.AppendChild(imgElement)
-
-	return picture
-}

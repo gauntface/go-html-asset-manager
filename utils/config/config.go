@@ -37,9 +37,11 @@ type Config struct {
 // AssetsConfig defines config options for assets
 type AssetsConfig struct {
 	// path to a directory containing CSS and JS files
-	BinaryDir string `json:"binary-dir"`
-	// The path to a directory containing JSON files for asset injection
+	StaticDir string `json:"static-dir"`
+	// path to a directory containing JSON files for asset injection
 	JSONDir string `json:"json-dir"`
+	// path to a directory containing generate files
+	GeneratedDir string `json:"generated-dir"`
 }
 
 // GeneratedImagesConfig defines config options for gen-imgs cmd
@@ -81,8 +83,9 @@ func Get(filePath string) (*Config, error) {
 	conf.HTMLDir = abs(dir, conf.HTMLDir)
 
 	if conf.Assets != nil {
-		conf.Assets.BinaryDir = abs(dir, conf.Assets.BinaryDir)
+		conf.Assets.StaticDir = abs(dir, conf.Assets.StaticDir)
 		conf.Assets.JSONDir = abs(dir, conf.Assets.JSONDir)
+		conf.Assets.GeneratedDir = abs(dir, conf.Assets.GeneratedDir)
 	}
 	if conf.GenAssets != nil {
 		conf.GenAssets.OutputDir = abs(dir, conf.GenAssets.OutputDir)
