@@ -52,7 +52,7 @@ func LookupSizes(conf *config.Config, imgPath string) ([]GenImg, error) {
 func getImageSizes(conf *config.Config, srcPath, hash string) ([]GenImg, error) {
 	filename := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
 	genDirName := fmt.Sprintf("%v.%v", filename, hash)
-	dirPath := filepath.Join(conf.GenAssets.OutputDir, genDirName)
+	dirPath := filepath.Join(conf.Assets.GeneratedDir, genDirName)
 
 	contents, err := ioutilReadDir(dirPath)
 	if err != nil {
@@ -64,7 +64,7 @@ func getImageSizes(conf *config.Config, srcPath, hash string) ([]GenImg, error) 
 
 	generatedDirURL, err := filepath.Rel(conf.Assets.StaticDir, dirPath)
 	if err != nil {
-		return nil, fmt.Errorf("%w from %q to %q: %v", errRelPath, conf.GenAssets.OutputDir, dirPath, err)
+		return nil, fmt.Errorf("%w from %q to %q: %v", errRelPath, conf.Assets.GeneratedDir, dirPath, err)
 	}
 
 	maxSize := conf.GenAssets.MaxWidth * conf.GenAssets.MaxDensity
