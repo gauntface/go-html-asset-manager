@@ -22,6 +22,7 @@ import (
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
 	"github.com/gauntface/go-html-asset-manager/utils/config"
+	"github.com/gauntface/go-html-asset-manager/utils/vimeoapi"
 	"golang.org/x/net/html"
 )
 
@@ -30,6 +31,7 @@ type Manipulator func(runtime Runtime, doc *html.Node) error
 type Runtime struct {
 	Debug  bool
 	Assets AssetManager
+	Vimeo  *vimeoapi.Client
 	Config *config.Config
 }
 

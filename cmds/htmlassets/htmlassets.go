@@ -37,18 +37,21 @@ import (
 	"github.com/gauntface/go-html-asset-manager/manipulations/lazyload"
 	"github.com/gauntface/go-html-asset-manager/manipulations/opengraphimg"
 	"github.com/gauntface/go-html-asset-manager/manipulations/ratiowrapper"
+	"github.com/gauntface/go-html-asset-manager/manipulations/vimeoclean"
 	"github.com/gauntface/go-html-asset-manager/manipulations/youtubeclean"
 	"github.com/gauntface/go-html-asset-manager/preprocessors"
 	"github.com/gauntface/go-html-asset-manager/preprocessors/jsonassets"
 	"github.com/gauntface/go-html-asset-manager/preprocessors/revisionassets"
 	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/gauntface/go-html-asset-manager/utils/html/htmlencoding"
+	"github.com/gauntface/go-html-asset-manager/utils/vimeoapi"
 	"github.com/mitchellh/go-homedir"
 	"golang.org/x/net/html"
 )
 
 var (
 	configPath = flag.String("config", "asset-manager.json", "The path of the Config file.")
+	vimeoToken = flag.String("vimeo", "", "Personal access token for Vimeo API")
 	debug      = flag.String("debug", "", "Provide a HTML file name to log debug info as required")
 
 	errRunFailed  = errors.New("failed to run successfully")
@@ -81,6 +84,7 @@ type client struct {
 
 	config        *config.Config
 	manager       assetmanagerManager
+	vimeo         *vimeoapi.Client
 	preprocessors []preprocessors.Preprocessor
 	manipulators  []manipulations.Manipulator
 }
@@ -112,6 +116,11 @@ func newClient() (*client, error) {
 		return nil, err
 	}
 
+	var vimeo *vimeoapi.Client
+	if *vimeoToken != "" {
+		vimeo = vimeoapi.New(*vimeoToken)
+	}
+
 	return &client{
 		htmlRender:      html.Render,
 		htmlParse:       html.Parse,
@@ -119,6 +128,7 @@ func newClient() (*client, error) {
 
 		config:  c,
 		manager: manager,
+		vimeo:   vimeo,
 		preprocessors: []preprocessors.Preprocessor{
 			jsonassets.Preprocessor,
 			revisionassets.Preprocessor,
@@ -126,6 +136,7 @@ func newClient() (*client, error) {
 		manipulators: []manipulations.Manipulator{
 			opengraphimg.Manipulator,
 			youtubeclean.Manipulator,
+			vimeoclean.Manipulator,
 			iframedefaultsize.Manipulator,
 			imgtopicture.Manipulator,
 			ratiowrapper.Manipulator,
@@ -225,6 +236,7 @@ func (c *client) manipulateHTMLFile(asset assetmanagerLocalAsset, manager assetm
 	r := manipulations.Runtime{
 		Debug:  debug,
 		Assets: manager,
+		Vimeo:  c.vimeo,
 		Config: c.config,
 	}
 	for i, m := range manips {
