@@ -31,10 +31,16 @@ type Manipulator func(runtime Runtime, doc *html.Node) error
 type Runtime struct {
 	Debug  bool
 	Assets AssetManager
-	Vimeo  *vimeoapi.Client
 	Config *config.Config
+
+	HasVimeo bool
+	Vimeo    vimeoapiClient
 }
 
 type AssetManager interface {
 	WithID(id string) map[assets.Type][]assetmanager.Asset
+}
+
+type vimeoapiClient interface {
+	Video(videoID string) (*vimeoapi.Video, error)
 }

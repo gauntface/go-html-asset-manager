@@ -75,20 +75,32 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 
 	for _, k := range keys.Sorted() {
 		assetsByType := runtime.Assets.WithID(k)
-		for ty, as := range assetsByType {
-			injector, ok := injectMap[ty]
+		assets := toArray(assetsByType)
+		for _, as := range assets {
+			injector, ok := injectMap[as.Type()]
 			if ok {
-				for _, a := range as {
-					err := injector(headNode, bodyNode, a)
-					if err != nil {
-						return err
-					}
+				err := injector(headNode, bodyNode, as)
+				if err != nil {
+					return err
 				}
 			}
 		}
 	}
 
 	return nil
+}
+
+func toArray(assetsByType map[assets.Type][]assetmanager.Asset) []assetmanager.Asset {
+	ar := []assetmanager.Asset{}
+	for _, a := range assetsByType {
+		ar = append(ar, a...)
+	}
+
+	sort.Slice(ar, func(i, j int) bool {
+		return ar[i].ID() < ar[j].ID()
+	})
+
+	return ar
 }
 
 func getAssetsForType(keys sets.StringSet, manager manipulations.AssetManager, aType assets.Type) []assetmanager.Asset {

@@ -1,10 +1,27 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 package vimeoapi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -12,22 +29,31 @@ const (
 	host = "https://api.vimeo.com"
 )
 
+var (
+	errJSONParse = errors.New("unable to parse JSON")
+)
+
 type Client struct {
 	apiKey     string
-	httpClient *http.Client
+	httpClient httpClient
+
+	httpNewRequest func(method, url string, body io.Reader) (*http.Request, error)
+	ioutilReadAll  func(r io.Reader) ([]byte, error)
 }
 
 func New(apiKey string) *Client {
 	return &Client{
-		apiKey:     apiKey,
-		httpClient: http.DefaultClient,
+		apiKey:         apiKey,
+		httpClient:     http.DefaultClient,
+		httpNewRequest: http.NewRequest,
+		ioutilReadAll:  ioutil.ReadAll,
 	}
 }
 
 func (c *Client) Video(videoID string) (*Video, error) {
 	api := fmt.Sprintf("%v/videos/%v", host, videoID)
 
-	req, err := http.NewRequest(http.MethodGet, api, nil)
+	req, err := c.httpNewRequest(http.MethodGet, api, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -40,15 +66,15 @@ func (c *Client) Video(videoID string) (*Video, error) {
 		return nil, err
 	}
 
-	body, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		log.Fatal(readErr)
+	body, err := c.ioutilReadAll(res.Body)
+	if err != nil {
+		return nil, err
 	}
 
 	video := Video{}
-	jsonErr := json.Unmarshal(body, &video)
-	if jsonErr != nil {
-		log.Fatal(jsonErr)
+	err = json.Unmarshal(body, &video)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", errJSONParse, err)
 	}
 
 	return &video, nil
@@ -74,4 +100,8 @@ type Video struct {
 	Width       int      `json:"width,omitempty"`
 	Height      int      `json:"height,omitempty"`
 	Pictures    Pictures `json:"pictures,omitempty"`
+}
+
+type httpClient interface {
+	Do(req *http.Request) (*http.Response, error)
 }
