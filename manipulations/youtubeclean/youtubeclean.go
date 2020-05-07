@@ -29,11 +29,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-/*
- Desired iframe:
- <iframe allow="picture-in-picture" allowfullscreen="" src="https://www.youtube.com/embed/DiIaoIcoKNY?modestbranding=1&rel=0"></iframe>
-*/
-
 const (
 	defaultWidth  int64 = 4
 	defaultHeight int64 = 3

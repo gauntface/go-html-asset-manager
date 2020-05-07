@@ -133,9 +133,10 @@ func TestManipulator(t *testing.T) {
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
-					"example-1": map[assets.Type][]assetmanager.Asset{
+					"example-1": {
 						assets.InlineCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
+								TypeReturn:    assets.InlineCSS,
 								ContentsError: errInjected,
 							},
 						},
@@ -150,9 +151,10 @@ func TestManipulator(t *testing.T) {
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
-					"example-1": map[assets.Type][]assetmanager.Asset{
+					"example-1": {
 						assets.InlineJS: []assetmanager.Asset{
 							&assetstubs.Asset{
+								TypeReturn:    assets.InlineJS,
 								ContentsError: errInjected,
 							},
 						},
@@ -167,15 +169,17 @@ func TestManipulator(t *testing.T) {
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
-					"example-1": map[assets.Type][]assetmanager.Asset{
+					"example-1": {
 						assets.InlineCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
+								TypeReturn:     assets.InlineCSS,
 								ContentsReturn: "example-1 inline contents",
 							},
 						},
 						assets.AsyncCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
-								URLReturn: "/example-1-async.css",
+								TypeReturn: assets.AsyncCSS,
+								URLReturn:  "/example-1-async.css",
 							},
 						},
 					},
@@ -196,15 +200,17 @@ func TestManipulator(t *testing.T) {
 			doc:         MustGetNode(t, `<div></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
-					"div": map[assets.Type][]assetmanager.Asset{
+					"div": {
 						assets.PreloadCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
-								URLReturn: "/div-preload.css",
+								TypeReturn: assets.PreloadCSS,
+								URLReturn:  "/div-preload.css",
 							},
 						},
 						assets.PreloadJS: []assetmanager.Asset{
 							&assetstubs.Asset{
-								URLReturn: "/div-preload.js",
+								TypeReturn: assets.PreloadJS,
+								URLReturn:  "/div-preload.js",
 							},
 						},
 					},
@@ -219,14 +225,16 @@ func TestManipulator(t *testing.T) {
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
-					"example-1": map[assets.Type][]assetmanager.Asset{
+					"example-1": {
 						assets.InlineCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
+								TypeReturn:     assets.InlineCSS,
 								ContentsReturn: "example-1 inline CSS contents",
 							},
 						},
 						assets.InlineJS: []assetmanager.Asset{
 							&assetstubs.Asset{
+								TypeReturn:     assets.InlineJS,
 								ContentsReturn: "example-1 inline JS contents",
 							},
 						},

@@ -22,6 +22,7 @@ import (
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
 	"github.com/gauntface/go-html-asset-manager/utils/config"
+	"github.com/gauntface/go-html-asset-manager/utils/vimeoapi"
 	"golang.org/x/net/html"
 )
 
@@ -31,8 +32,15 @@ type Runtime struct {
 	Debug  bool
 	Assets AssetManager
 	Config *config.Config
+
+	HasVimeo bool
+	Vimeo    vimeoapiClient
 }
 
 type AssetManager interface {
 	WithID(id string) map[assets.Type][]assetmanager.Asset
+}
+
+type vimeoapiClient interface {
+	Video(videoID string) (*vimeoapi.Video, error)
 }

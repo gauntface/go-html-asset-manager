@@ -50,6 +50,7 @@ func TestMain(m *testing.M) {
 	origNewManager := assetmanagerNewManager
 	origHomeDirExpand := homedirExpand
 	origConfigGet := configGet
+	origVimeo := vimeoToken
 
 	reset = func() {
 		debug = origDebug
@@ -57,6 +58,7 @@ func TestMain(m *testing.M) {
 		assetmanagerNewManager = origNewManager
 		homedirExpand = origHomeDirExpand
 		configGet = origConfigGet
+		vimeoToken = origVimeo
 	}
 
 	os.Exit(m.Run())
@@ -94,6 +96,7 @@ func Test_newClient(t *testing.T) {
 	tests := []struct {
 		description   string
 		configPath    string
+		vimeoToken    string
 		newManager    func(htmlDir, staticDir, jsonDir string) (*assetmanager.Manager, error)
 		homedirExpand func(path string) (string, error)
 		configGet     func(path string) (*config.Config, error)
@@ -126,8 +129,23 @@ func Test_newClient(t *testing.T) {
 			wantError: errInjected,
 		},
 		{
-			description: "return client",
+			description: "return client without optional values",
 			configPath:  "/config.json",
+			configGet: func(path string) (*config.Config, error) {
+				return &config.Config{
+					Assets: &config.AssetsConfig{},
+				}, nil
+			},
+			homedirExpand: homedir.Expand,
+			newManager: func(htmlDir, staticDir, jsonDir string) (*assetmanager.Manager, error) {
+				return &assetmanager.Manager{}, nil
+			},
+			want: &client{},
+		},
+		{
+			description: "return client without all values",
+			configPath:  "/config.json",
+			vimeoToken:  "example-vimeo-token",
 			configGet: func(path string) (*config.Config, error) {
 				return &config.Config{
 					Assets: &config.AssetsConfig{},
@@ -149,6 +167,7 @@ func Test_newClient(t *testing.T) {
 			assetmanagerNewManager = tt.newManager
 			homedirExpand = tt.homedirExpand
 			configGet = tt.configGet
+			vimeoToken = &tt.vimeoToken
 
 			got, err := newClient()
 			if !errors.Is(err, tt.wantError) {
