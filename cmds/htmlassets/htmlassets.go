@@ -234,10 +234,11 @@ func (c *client) manipulateHTMLFile(asset assetmanagerLocalAsset, manager assetm
 
 	debug := *debug != "" && asset.Debug(*debug)
 	r := manipulations.Runtime{
-		Debug:  debug,
-		Assets: manager,
-		Vimeo:  c.vimeo,
-		Config: c.config,
+		Debug:    debug,
+		Assets:   manager,
+		Vimeo:    c.vimeo,
+		HasVimeo: c.vimeo != nil,
+		Config:   c.config,
 	}
 	for i, m := range manips {
 		if err := m(r, doc); err != nil {
