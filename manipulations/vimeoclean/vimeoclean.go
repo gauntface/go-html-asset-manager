@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/gauntface/go-html-asset-manager/manipulations"
+	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
 	"github.com/gauntface/go-html-asset-manager/utils/html/ratiocontainer"
 	"github.com/gauntface/go-html-asset-manager/utils/vimeoapi"
@@ -76,6 +77,11 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			return nil
 		}
 
+		sizes := getSizes(runtime.Config, ele)
+		if len(sizes) == 0 {
+			return nil
+		}
+
 		videoID := matches[1]
 		video, err := runtime.Vimeo.Video(videoID)
 		if err != nil {
@@ -85,15 +91,50 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			return nil
 		}
 
-		viElement := vimeoElement(videoID, video)
+		viElement := vimeoElement(videoID, video, sizes)
 
 		htmlparsing.SwapNodes(ele, viElement)
 	}
 	return nil
 }
 
-func vimeoElement(videoID string, video *vimeoapi.Video) *html.Node {
-	imgElement := posterElement(video)
+func getSizes(conf *config.Config, ele *html.Node) []string {
+	var i *config.ImgToPicConfig
+	for e := ele; e != nil; e = e.Parent {
+		if e.Type != html.ElementNode {
+			continue
+		}
+
+		for _, c := range conf.ImgToPicture {
+			if c.ID == e.Data {
+				i = c
+				break
+			}
+
+			attrs := htmlparsing.Attributes(e)
+			a, ok := attrs["class"]
+			if !ok {
+				continue
+			}
+
+			classes := strings.Split(a.Val, " ")
+			for _, cl := range classes {
+				if c.ID == cl {
+					i = c
+					break
+				}
+			}
+		}
+	}
+
+	if i != nil {
+		return i.SourceSizes
+	}
+	return nil
+}
+
+func vimeoElement(videoID string, video *vimeoapi.Video, sizes []string) *html.Node {
+	imgElement := posterElement(video, sizes)
 
 	anchor := &html.Node{
 		Type: html.ElementNode,
@@ -134,7 +175,7 @@ func vimeoElement(videoID string, video *vimeoapi.Video) *html.Node {
 	return ratiocontainer.Wrap(container, int64(video.Width), int64(video.Height))
 }
 
-func posterElement(video *vimeoapi.Video) *html.Node {
+func posterElement(video *vimeoapi.Video, sizes []string) *html.Node {
 	pictures := video.Pictures.Sizes
 
 	// Sort and add srcset attribute
@@ -149,6 +190,10 @@ func posterElement(video *vimeoapi.Video) *html.Node {
 			{
 				Key: "style",
 				Val: "width: 100%; height: 100%; object-fit: contain;",
+			},
+			{
+				Key: "sizes",
+				Val: strings.Join(sizes, ","),
 			},
 		},
 	}
