@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/gauntface/go-html-asset-manager/manipulations"
+	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/gauntface/go-html-asset-manager/utils/vimeoapi"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
@@ -94,12 +95,37 @@ func Test_Manipulator(t *testing.T) {
 			want: `<html><head></head><body><iframe src="https://player.vimeo.com/other/1234567" iframeborder="0" other="test"></iframe></body></html>`,
 		},
 		{
+			description: "return nothing if there are no sizes",
+			runtime: manipulations.Runtime{
+				HasVimeo: true,
+				Vimeo: &vimeoapiStub{
+					VideoError: map[string]error{
+						"1234567": errInjected,
+					},
+				},
+				Config: &config.Config{},
+			},
+			doc:  MustGetNode(t, `<iframe src="player.vimeo.com/video/1234567?random=searchparam" iframeborder="0" other="test"></iframe>`),
+			want: `<html><head></head><body><iframe src="player.vimeo.com/video/1234567?random=searchparam" iframeborder="0" other="test"></iframe></body></html>`,
+		},
+		{
 			description: "return error if looking up vimeo video fails",
 			runtime: manipulations.Runtime{
 				HasVimeo: true,
 				Vimeo: &vimeoapiStub{
 					VideoError: map[string]error{
 						"1234567": errInjected,
+					},
+				},
+				Config: &config.Config{
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID: "body",
+							SourceSizes: []string{
+								"min-width(800px) 800w",
+								"100vw",
+							},
+						},
 					},
 				},
 			},
@@ -114,6 +140,17 @@ func Test_Manipulator(t *testing.T) {
 				Vimeo: &vimeoapiStub{
 					VideoResult: map[string]*vimeoapi.Video{
 						"1234567": {},
+					},
+				},
+				Config: &config.Config{
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID: "body",
+							SourceSizes: []string{
+								"min-width(800px) 800w",
+								"100vw",
+							},
+						},
 					},
 				},
 			},
@@ -151,9 +188,20 @@ func Test_Manipulator(t *testing.T) {
 						},
 					},
 				},
+				Config: &config.Config{
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID: "body",
+							SourceSizes: []string{
+								"min-width(800px) 800w",
+								"100vw",
+							},
+						},
+					},
+				},
 			},
 			doc:  MustGetNode(t, `<iframe src="player.vimeo.com/video/1234567?random=searchparam" iframeborder="0" other="test"></iframe>`),
-			want: `<html><head></head><body><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><div class="n-hopin-lite-vi" videoid="1234567" style="position:absolute;width:100%;height:100%;"><a href="example.vimeo.com/1234567" class="n-hopin-lite-vi__link" target="_blank"><img style="width: 100%; height: 100%; object-fit: contain;" srcset="https://cdn.vimeo.com/1234567/1 1w,https://cdn.vimeo.com/1234567/2 2w,https://cdn.vimeo.com/1234567/3 3w" src="https://cdn.vimeo.com/1234567/3" alt="Vimeo video &#34;Example name&#34; described as &#34;Example description&#34;"/></a></div></div></div></body></html>`,
+			want: `<html><head></head><body><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><div class="n-hopin-lite-vi" videoid="1234567" style="position:absolute;width:100%;height:100%;"><a href="example.vimeo.com/1234567" class="n-hopin-lite-vi__link" target="_blank"><img style="width: 100%; height: 100%; object-fit: contain;" sizes="min-width(800px) 800w,100vw" srcset="https://cdn.vimeo.com/1234567/1 1w,https://cdn.vimeo.com/1234567/2 2w,https://cdn.vimeo.com/1234567/3 3w" src="https://cdn.vimeo.com/1234567/3" alt="Vimeo video &#34;Example name&#34; described as &#34;Example description&#34;"/></a></div></div></div></body></html>`,
 		},
 		{
 			description: "clean attributes and URL for vimeo src with http protocol",
@@ -186,9 +234,20 @@ func Test_Manipulator(t *testing.T) {
 						},
 					},
 				},
+				Config: &config.Config{
+					ImgToPicture: []*config.ImgToPicConfig{
+						{
+							ID: "body",
+							SourceSizes: []string{
+								"min-width(800px) 800w",
+								"100vw",
+							},
+						},
+					},
+				},
 			},
 			doc:  MustGetNode(t, `<iframe src="http://player.vimeo.com/video/1234567?random=searchparam" iframeborder="0" other="test"></iframe>`),
-			want: `<html><head></head><body><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><div class="n-hopin-lite-vi" videoid="1234567" style="position:absolute;width:100%;height:100%;"><a href="example.vimeo.com/1234567" class="n-hopin-lite-vi__link" target="_blank"><img style="width: 100%; height: 100%; object-fit: contain;" srcset="https://cdn.vimeo.com/1234567/1 1w,https://cdn.vimeo.com/1234567/2 2w,https://cdn.vimeo.com/1234567/3 3w" src="https://cdn.vimeo.com/1234567/3" alt="Vimeo video &#34;Example name&#34; described as &#34;Example description&#34;"/></a></div></div></div></body></html>`,
+			want: `<html><head></head><body><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><div class="n-hopin-lite-vi" videoid="1234567" style="position:absolute;width:100%;height:100%;"><a href="example.vimeo.com/1234567" class="n-hopin-lite-vi__link" target="_blank"><img style="width: 100%; height: 100%; object-fit: contain;" sizes="min-width(800px) 800w,100vw" srcset="https://cdn.vimeo.com/1234567/1 1w,https://cdn.vimeo.com/1234567/2 2w,https://cdn.vimeo.com/1234567/3 3w" src="https://cdn.vimeo.com/1234567/3" alt="Vimeo video &#34;Example name&#34; described as &#34;Example description&#34;"/></a></div></div></div></body></html>`,
 		},
 	}
 
