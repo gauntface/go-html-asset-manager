@@ -203,12 +203,14 @@ func TestManipulator(t *testing.T) {
 					"div": {
 						assets.PreloadCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
+								IDReturn:   "preload.css",
 								TypeReturn: assets.PreloadCSS,
 								URLReturn:  "/div-preload.css",
 							},
 						},
 						assets.PreloadJS: []assetmanager.Asset{
 							&assetstubs.Asset{
+								IDReturn:   "preload.js",
 								TypeReturn: assets.PreloadJS,
 								URLReturn:  "/div-preload.js",
 							},

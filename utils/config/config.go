@@ -85,9 +85,15 @@ func Get(filePath string) (*Config, error) {
 	conf.HTMLDir = abs(dir, conf.HTMLDir)
 
 	if conf.Assets != nil {
-		conf.Assets.StaticDir = abs(dir, conf.Assets.StaticDir)
-		conf.Assets.JSONDir = abs(dir, conf.Assets.JSONDir)
-		conf.Assets.GeneratedDir = abs(dir, conf.Assets.GeneratedDir)
+		if conf.Assets.StaticDir != "" {
+			conf.Assets.StaticDir = abs(dir, conf.Assets.StaticDir)
+		}
+		if conf.Assets.JSONDir != "" {
+			conf.Assets.JSONDir = abs(dir, conf.Assets.JSONDir)
+		}
+		if conf.Assets.GeneratedDir != "" {
+			conf.Assets.GeneratedDir = abs(dir, conf.Assets.GeneratedDir)
+		}
 	}
 	if conf.GenAssets != nil {
 		conf.GenAssets.StaticDir = abs(dir, conf.GenAssets.StaticDir)
