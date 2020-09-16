@@ -74,6 +74,8 @@ github.com/schollz/progressbar/v3 v3.3.3 h1:woop83iT9IwNMhawXBgHTlAAOwUj4Nnr1RvX
 github.com/schollz/progressbar/v3 v3.3.3/go.mod h1:N/820QRS3ua9DhrVnLShsNgAEKNYFd89Cf5syXfqeyQ=
 github.com/schollz/progressbar/v3 v3.5.0 h1:rVya3NTks1kFmuFKaLYWt/3TYDiE+Cxb1iXuxeEjf5c=
 github.com/schollz/progressbar/v3 v3.5.0/go.mod h1:Rp5lZwpgtYmlvmGo1FyDwXMqagyRBQYSDwzlP9QDu84=
+github.com/schollz/progressbar/v3 v3.5.1 h1:qRe3Gccl3pHOzFyw1qd3YA/XKhbfVUtRhYEza4Z7FPo=
+github.com/schollz/progressbar/v3 v3.5.1/go.mod h1:Rp5lZwpgtYmlvmGo1FyDwXMqagyRBQYSDwzlP9QDu84=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
