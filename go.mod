@@ -16,7 +16,7 @@ require (
 	github.com/nickalie/go-webpbin v0.0.0-20170427122138-7e79cf5bb01e
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect
-	github.com/otiai10/copy v1.5.1
+	github.com/otiai10/copy v1.6.0
 	github.com/pierrec/lz4 v2.5.1+incompatible // indirect
 	github.com/schollz/progressbar/v3 v3.8.0
 	github.com/stretchr/testify v1.6.1 // indirect
