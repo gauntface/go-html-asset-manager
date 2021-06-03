@@ -20,4 +20,8 @@ go get -u github.com/gauntface/go-html-asset-manager/cmds/genimgs/
 
 ## Usage
 
-I typically use it via [this node wrapper](https://github.com/gauntface/html-asset-manager#html-asset-manager).
+I typically use it via [this node wrapper](https://github.com/gauntface/html-asset-manager#html-asset-manager) but you can run it like so:
+
+```
+htmlassets
+```
