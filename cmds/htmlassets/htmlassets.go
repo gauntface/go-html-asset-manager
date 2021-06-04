@@ -37,6 +37,7 @@ import (
 	"github.com/gauntface/go-html-asset-manager/manipulations/lazyload"
 	"github.com/gauntface/go-html-asset-manager/manipulations/opengraphimg"
 	"github.com/gauntface/go-html-asset-manager/manipulations/ratiowrapper"
+	"github.com/gauntface/go-html-asset-manager/manipulations/stripassets"
 	"github.com/gauntface/go-html-asset-manager/manipulations/vimeoclean"
 	"github.com/gauntface/go-html-asset-manager/manipulations/youtubeclean"
 	"github.com/gauntface/go-html-asset-manager/preprocessors"
@@ -142,6 +143,7 @@ func newClient() (*client, error) {
 			ratiowrapper.Manipulator,
 			lazyload.Manipulator,
 			asyncsrc.Manipulator,
+			stripassets.Manipulator,
 			injectassets.Manipulator,
 		},
 	}, nil
