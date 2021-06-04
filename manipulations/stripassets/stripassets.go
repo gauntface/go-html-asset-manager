@@ -17,12 +17,8 @@
 package stripassets
 
 import (
-	"fmt"
-	"sort"
-
 	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/utils/stringui"
 	"golang.org/x/net/html"
 )
 
@@ -31,43 +27,21 @@ var (
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
-	keys := htmlparsing.GetKeys(doc)
-
-	prettyPrintKeys(runtime.Debug, keys.Slice())
+	tags := []string{"style", "script"}
+	for _, t := range tags {
+		tagNodes := htmlparsingFindNodesByTag(t, doc)
+		for _, t := range tagNodes {
+			t.Parent.RemoveChild(t)
+		}
+	}
 
 	linkNodes := htmlparsingFindNodesByTag("link", doc)
 	for _, l := range linkNodes {
-		l.Parent.RemoveChild(l)
-	}
-
-	scriptNodes := htmlparsingFindNodesByTag("script", doc)
-	for _, s := range scriptNodes {
-		s.Parent.RemoveChild(s)
+		a := htmlparsing.Attributes(l)
+		if v, ok := a["rel"]; ok && v.Val == "stylesheet" {
+			l.Parent.RemoveChild(l)
+		}
 	}
 
 	return nil
-}
-
-func prettyPrintKeys(debug bool, keys []string) {
-	if !debug {
-		return
-	}
-
-	headings := []string{
-		"Key",
-	}
-
-	rows := [][]string{}
-	for _, key := range keys {
-		rows = append(rows, []string{
-			key,
-		})
-	}
-
-	sort.Slice(rows, func(i, j int) bool {
-		return rows[i][0] < rows[j][0]
-	})
-
-	fmt.Printf("HTML file keys\n")
-	fmt.Println(stringui.Table(headings, rows))
 }
