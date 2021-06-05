@@ -472,15 +472,14 @@ func Test_integration_noassets(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	err = copy.Copy(path.Join("..", "..", "testdata", "noassets"), tmpDir)
+	testdataDir := path.Join("..", "..", "testdata", "noassets")
+	err = copy.Copy(testdataDir, tmpDir)
 	if err != nil {
 		t.Fatalf("Fatal to copy files to temporary directory: %v", err)
 	}
 
 	tmpConf := filepath.Join(tmpDir, "asset-manager.json")
 	configPath = &tmpConf
-
-	start := readTestFile(t, path.Join(tmpDir, "index.html"))
 
 	c, err := newClient()
 	if err != nil {
@@ -492,11 +491,13 @@ func Test_integration_noassets(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	end := readTestFile(t, path.Join(tmpDir, "index.html"))
+	got := readTestFile(t, path.Join(tmpDir, "index.html"))
+	want := readTestFile(t, path.Join(testdataDir, "index-want.html"))
 
-	if diff := cmp.Diff(start, end); diff != "" {
+	if diff := cmp.Diff(got, want); diff == "" {
 		t.Fatalf("Unexpected result; diff %v", diff)
 	}
+
 }
 
 func readTestFile(t *testing.T, file string) string {
