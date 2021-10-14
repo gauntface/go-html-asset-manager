@@ -31,7 +31,7 @@ require (
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/image v0.0.0-20210504121937-7319ad40d33e // indirect
-	golang.org/x/net v0.0.0-20211013171255-e13a2654a71e
+	golang.org/x/net v0.0.0-20211014172544-2b766c08f1c0
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
