@@ -17,7 +17,7 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nickalie/go-binwrapper v0.0.0-20190114141239-525121d43c84 // indirect
-	github.com/nickalie/go-webpbin v0.0.0-20170427122138-7e79cf5bb01e
+	github.com/nickalie/go-webpbin 5fb7f112adb5
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/otiai10/copy v1.6.0
