@@ -222,6 +222,7 @@ func (m *Manager) String() string {
 
 type LocalAsset struct {
 	assetType    assets.Type
+	assetMedia   string
 	id           string
 	originalPath string
 	path         string
@@ -231,12 +232,13 @@ type LocalAsset struct {
 }
 
 func NewLocalAsset(relDir, path string) (*LocalAsset, error) {
-	t, err := assetid.IdentifyType(path)
+	t, m, err := assetid.IdentifyType(path)
 	if err != nil {
 		return nil, err
 	}
 	return &LocalAsset{
 		assetType:    t,
+		assetMedia:   m,
 		id:           assetid.Generate(path),
 		originalPath: path,
 		path:         path,
@@ -248,6 +250,10 @@ func NewLocalAsset(relDir, path string) (*LocalAsset, error) {
 
 func (l *LocalAsset) Type() assets.Type {
 	return l.assetType
+}
+
+func (l *LocalAsset) Media() string {
+	return l.assetMedia
 }
 
 func (l *LocalAsset) ID() string {
@@ -312,6 +318,10 @@ func (r *RemoteAsset) Type() assets.Type {
 	return r.assetType
 }
 
+func (r *RemoteAsset) Media() string {
+	return ""
+}
+
 func (r *RemoteAsset) ID() string {
 	return r.id
 }
@@ -360,6 +370,7 @@ func findLocalAssets(dir string, exts ...string) ([]*LocalAsset, error) {
 type Asset interface {
 	ID() string
 	Type() assets.Type
+	Media() string
 	URL() (string, error)
 	Contents() (string, error)
 	IsLocal() bool

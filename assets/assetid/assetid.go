@@ -40,12 +40,19 @@ var (
 		preloadPrefix,
 	}
 
+	mediaValues = []string{
+		"print",
+		"screen",
+		"aural",
+		"braille",
+	}
+
 	ErrUnknownType = errors.New("unknown asset type")
 )
 
 func Generate(path string) string {
 	// Initialise ID to just the filename
-	id, ext := filename(path)
+	id, _, ext := filename(path)
 
 	switch ext {
 	case ".css", ".js":
@@ -60,9 +67,10 @@ func Generate(path string) string {
 	return id
 }
 
-func IdentifyType(path string) (assets.Type, error) {
-	fn, ext := filename(path)
-	return assetType(fn, ext)
+func IdentifyType(path string) (assets.Type, string, error) {
+	fn, media, ext := filename(path)
+	t, err := assetType(fn, ext)
+	return t, media, err
 }
 
 func assetType(fn, ext string) (assets.Type, error) {
@@ -102,7 +110,25 @@ func typeFromSyncSet(fn string, inline, sync, async, preload assets.Type) assets
 	return t
 }
 
-func filename(path string) (string, string) {
-	ext := filepath.Ext(path)
-	return strings.TrimSuffix(filepath.Base(path), ext), ext
+func filename(path string) (filename string, media string, ext string) {
+	ext = filepath.Ext(path)
+	media = ""
+	filename = strings.TrimSuffix(filepath.Base(path), ext)
+	pieces := strings.Split(filename, ".")
+	if len(pieces) == 1 || ext != ".css" || !isMedia(pieces[len(pieces)-1]) {
+		return filename, media, ext
+	}
+
+	media = pieces[len(pieces)-1]
+	pieces = pieces[:len(pieces)-1]
+	return strings.Join(pieces, "."), media, ext
+}
+
+func isMedia(s string) bool {
+	for _, m := range mediaValues {
+		if strings.Contains(strings.ToLower(s), m) {
+			return true
+		}
+	}
+	return false
 }

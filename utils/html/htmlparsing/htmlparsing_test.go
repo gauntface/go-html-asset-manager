@@ -122,19 +122,29 @@ func Test_InlineCSSTag(t *testing.T) {
 func Test_SyncCSSTag(t *testing.T) {
 	tests := []struct {
 		description string
-		url         string
+		cm          CSSMediaPair
 		want        string
 	}{
 		{
-			description: "return link tag",
-			url:         "/example.css",
-			want:        `<link href="/example.css" rel="stylesheet"/>`,
+			description: "return link tag without media",
+			cm: CSSMediaPair{
+				URL: "/example.css",
+			},
+			want: `<link href="/example.css" rel="stylesheet"/>`,
+		},
+		{
+			description: "return link tag with media",
+			cm: CSSMediaPair{
+				URL:   "/example.css",
+				Media: "print",
+			},
+			want: `<link href="/example.css" rel="stylesheet" media="print"/>`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got := SyncCSSTag(tt.url)
+			got := SyncCSSTag(tt.cm)
 			if diff := cmp.Diff(MustRenderNode(t, got), tt.want); diff != "" {
 				t.Fatalf("Unexpected result; diff %v", diff)
 			}
@@ -145,22 +155,27 @@ func Test_SyncCSSTag(t *testing.T) {
 func Test_AsyncCSSTag(t *testing.T) {
 	tests := []struct {
 		description string
-		urls        []string
+		cms         []CSSMediaPair
 		want        string
 	}{
 		{
 			description: "return link tag",
-			urls: []string{
-				"/example-1.css",
-				"/example-2.css",
+			cms: []CSSMediaPair{
+				{
+					URL: "/example-1.css",
+				},
+				{
+					URL:   "/example-2.css",
+					Media: "print",
+				},
 			},
-			want: `<script>var haCSS = ['/example-1.css','/example-2.css'];</script>`,
+			want: `<script>var haCSS = [{url:'/example-1.css'},{url:'/example-2.css',media:'print'}];</script>`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got := AsyncCSSTag(tt.urls)
+			got := AsyncCSSTag(tt.cms)
 			if diff := cmp.Diff(MustRenderNode(t, got), tt.want); diff != "" {
 				t.Fatalf("Unexpected result; diff %v", diff)
 			}

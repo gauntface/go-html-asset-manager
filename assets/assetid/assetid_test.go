@@ -86,33 +86,83 @@ func TestFilename(t *testing.T) {
 		description  string
 		path         string
 		wantFilename string
+		wantMedia    string
 		wantExt      string
 	}{
 		{
 			description:  "return filename and ext for full path",
 			path:         "/example/nested/example.css",
 			wantFilename: "example",
+			wantMedia:    "",
 			wantExt:      ".css",
 		},
 		{
 			description:  "return filename and ext for file only",
 			path:         "example.css",
 			wantFilename: "example",
+			wantMedia:    "",
 			wantExt:      ".css",
 		},
 		{
 			description:  "return filename and with empty ext",
 			path:         "example",
 			wantFilename: "example",
+			wantMedia:    "",
 			wantExt:      "",
+		},
+		{
+			description:  "return filename, media and ext for simple file",
+			path:         "example.print.css",
+			wantFilename: "example",
+			wantMedia:    "print",
+			wantExt:      ".css",
+		},
+		{
+			description:  "return filename, media and ext for sync file",
+			path:         "example-sync.print.css",
+			wantFilename: "example-sync",
+			wantMedia:    "print",
+			wantExt:      ".css",
+		},
+		{
+			description:  "return filename, media and ext for complex file",
+			path:         "example.screen and (max-width: 600px).css",
+			wantFilename: "example",
+			wantMedia:    "screen and (max-width: 600px)",
+			wantExt:      ".css",
+		},
+		{
+			description:  "return filename, media and ext for file with dots in name",
+			path:         "example.test.dots.print.css",
+			wantFilename: "example.test.dots",
+			wantMedia:    "print",
+			wantExt:      ".css",
+		},
+		{
+			description:  "return filename and ext for file with dots in name but no media",
+			path:         "example.test.print.dots.css",
+			wantFilename: "example.test.print.dots",
+			wantMedia:    "",
+			wantExt:      ".css",
+		},
+		{
+			description:  "return filename and ext for simple js file",
+			path:         "example.print.js",
+			wantFilename: "example.print",
+			wantMedia:    "",
+			wantExt:      ".js",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got, gotExt := filename(tt.path)
+			got, gotMedia, gotExt := filename(tt.path)
 			if got != tt.wantFilename {
 				t.Errorf("Unexpected filename; got %v, want %v", got, tt.wantFilename)
+			}
+
+			if gotMedia != tt.wantMedia {
+				t.Errorf("Unexpected media; got %v, want %v", gotMedia, tt.wantMedia)
 			}
 
 			if gotExt != tt.wantExt {
@@ -246,36 +296,44 @@ func TestIdentifyType(t *testing.T) {
 	tests := []struct {
 		description string
 		path        string
-		want        assets.Type
+		wantType    assets.Type
+		wantMedia   string
 		wantError   error
 	}{
 		{
 			description: "return error for unknown",
 			path:        "example.unknown",
-			want:        assets.Unknown,
+			wantType:    assets.Unknown,
+			wantMedia:   "",
 			wantError:   ErrUnknownType,
 		},
 		{
-			description: "return type for valid path",
+			description: "return type for simple valid path",
 			path:        "example.css",
-			want:        assets.InlineCSS,
+			wantMedia:   "",
+			wantType:    assets.InlineCSS,
+		},
+		{
+			description: "return type for sync path with media",
+			path:        "example-sync.print.css",
+			wantMedia:   "print",
+			wantType:    assets.SyncCSS,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got, err := IdentifyType(tt.path)
-			if tt.wantError != nil {
-				if !errors.Is(err, tt.wantError) {
-					t.Fatalf("Different error returned; got %v, want %v", err, tt.wantError)
-				}
-			}
-			if err != nil {
-				return
+			gotType, gotMedia, err := IdentifyType(tt.path)
+			if !errors.Is(err, tt.wantError) {
+				t.Fatalf("Different error returned; got %v, want %v", err, tt.wantError)
 			}
 
-			if !cmp.Equal(got, tt.want) {
-				t.Errorf("Unexpected result; Diff %v", cmp.Diff(got, tt.want))
+			if !cmp.Equal(gotType, tt.wantType) {
+				t.Errorf("Unexpected type; Diff %v", cmp.Diff(gotType, tt.wantType))
+			}
+
+			if !cmp.Equal(gotMedia, tt.wantMedia) {
+				t.Errorf("Unexpected media; Diff %v", cmp.Diff(gotMedia, tt.wantMedia))
 			}
 		})
 	}

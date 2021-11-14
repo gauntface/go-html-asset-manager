@@ -138,7 +138,10 @@ func addSyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
 	if err != nil {
 		return err
 	}
-	headNode.AppendChild(htmlparsing.SyncCSSTag(u))
+	headNode.AppendChild(htmlparsing.SyncCSSTag(htmlparsing.CSSMediaPair{
+		URL:   u,
+		Media: asset.Media(),
+	}))
 	return nil
 }
 
@@ -147,15 +150,18 @@ func addAsyncCSS(bodyNode *html.Node, assets []assetmanager.Asset) error {
 		return nil
 	}
 
-	urls := []string{}
+	cms := []htmlparsing.CSSMediaPair{}
 	for _, a := range assets {
 		u, err := a.URL()
 		if err != nil {
 			return err
 		}
-		urls = append(urls, u)
+		cms = append(cms, htmlparsing.CSSMediaPair{
+			URL:   u,
+			Media: a.Media(),
+		})
 	}
-	bodyNode.AppendChild(htmlparsing.AsyncCSSTag(urls))
+	bodyNode.AppendChild(htmlparsing.AsyncCSSTag(cms))
 	return nil
 }
 
