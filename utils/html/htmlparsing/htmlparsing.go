@@ -63,21 +63,31 @@ func InlineCSSTag(contents string) *html.Node {
 	}
 }
 
-func SyncCSSTag(url string) *html.Node {
+func SyncCSSTag(cm CSSMediaPair) *html.Node {
+	attr := []html.Attribute{
+		{Key: "href", Val: cm.URL},
+		{Key: "rel", Val: "stylesheet"},
+	}
+	if cm.Media != "" {
+		attr = append(attr, html.Attribute{Key: "media", Val: cm.Media})
+	}
 	return &html.Node{
 		Type: html.ElementNode,
 		Data: "link",
-		Attr: []html.Attribute{
-			{Key: "href", Val: url},
-			{Key: "rel", Val: "stylesheet"},
-		},
+		Attr: attr,
 	}
 }
 
-func AsyncCSSTag(urls []string) *html.Node {
+func AsyncCSSTag(cms []CSSMediaPair) *html.Node {
 	asyncCSS := []string{}
-	for _, url := range urls {
-		asyncCSS = append(asyncCSS, fmt.Sprintf("'%v'", url))
+	for _, cm := range cms {
+		parts := []string{
+			fmt.Sprintf("url:'%v'", cm.URL),
+		}
+		if cm.Media != "" {
+			parts = append(parts, fmt.Sprintf("media:'%v'", cm.Media))
+		}
+		asyncCSS = append(asyncCSS, fmt.Sprintf("{%v}", strings.Join(parts, ",")))
 	}
 
 	js := fmt.Sprintf(
@@ -204,4 +214,9 @@ func Attributes(e *html.Node) map[string]html.Attribute {
 		attributes[a.Key] = a
 	}
 	return attributes
+}
+
+type CSSMediaPair struct {
+	URL   string
+	Media string
 }

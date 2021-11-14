@@ -52,7 +52,8 @@ func (m *Manager) String() string {
 type Asset struct {
 	IDReturn string
 
-	TypeReturn assets.Type
+	TypeReturn  assets.Type
+	MediaReturn string
 
 	URLReturn string
 	URLError  error
@@ -75,6 +76,10 @@ func (a *Asset) ID() string {
 
 func (a *Asset) Type() assets.Type {
 	return a.TypeReturn
+}
+
+func (a *Asset) Media() string {
+	return a.MediaReturn
 }
 
 func (a *Asset) URL() (string, error) {

@@ -90,7 +90,7 @@ func TestManipulator(t *testing.T) {
 			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
 			assets: &assetstubs.Manager{
 				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
-					"example-1": map[assets.Type][]assetmanager.Asset{
+					"example-1": {
 						assets.AsyncCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
 								URLError: errInjected,
@@ -181,9 +181,14 @@ func TestManipulator(t *testing.T) {
 								TypeReturn: assets.AsyncCSS,
 								URLReturn:  "/example-1-async.css",
 							},
+							&assetstubs.Asset{
+								TypeReturn:  assets.AsyncCSS,
+								MediaReturn: "print",
+								URLReturn:   "/example-1-async.print.css",
+							},
 						},
 					},
-					"example-2": map[assets.Type][]assetmanager.Asset{
+					"example-2": {
 						assets.AsyncCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
 								URLReturn: "/example-2-async.css",
@@ -192,7 +197,7 @@ func TestManipulator(t *testing.T) {
 					},
 				},
 			},
-			wantHTML: `<html><head><style>example-1 inline contents</style></head><body><div class="example-1 example-2"></div><script>var haCSS = ['/example-1-async.css','/example-2-async.css'];</script></body></html>`,
+			wantHTML: `<html><head><style>example-1 inline contents</style></head><body><div class="example-1 example-2"></div><script>var haCSS = [{url:'/example-1-async.css'},{url:'/example-1-async.print.css',media:'print'},{url:'/example-2-async.css'}];</script></body></html>`,
 		},
 		{
 			description: "add preload assets",
@@ -524,13 +529,23 @@ func TestAddAsyncCSS(t *testing.T) {
 			wantError: errInjected,
 		},
 		{
-			description: "add asset to body",
+			description: "add asset to body without media",
 			assets: []assetmanager.Asset{
 				&assetstubs.Asset{
-					URLReturn: "http://example.com/url.js",
+					URLReturn: "http://example.com/url.css",
 				},
 			},
-			want: `<html><head></head><body><script>var haCSS = ['http://example.com/url.js'];</script></body></html>`,
+			want: `<html><head></head><body><script>var haCSS = [{url:'http://example.com/url.css'}];</script></body></html>`,
+		},
+		{
+			description: "add asset to body with media",
+			assets: []assetmanager.Asset{
+				&assetstubs.Asset{
+					URLReturn:   "http://example.com/url.css",
+					MediaReturn: "print",
+				},
+			},
+			want: `<html><head></head><body><script>var haCSS = [{url:'http://example.com/url.css',media:'print'}];</script></body></html>`,
 		},
 	}
 

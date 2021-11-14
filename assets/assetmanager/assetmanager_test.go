@@ -110,7 +110,7 @@ func TestNewManager(t *testing.T) {
 			wantError: errInjected,
 		},
 		{
-			description: "return manager with assets",
+			description: "return manager with assets no media",
 			staticDir:   "/assets/",
 			jsonDir:     "/json/",
 			filesFind: func(dir string, exts ...string) ([]string, error) {
@@ -217,6 +217,124 @@ func TestNewManager(t *testing.T) {
 						id:           "example-inline",
 						originalPath: "/json/example-inline.json",
 						path:         "/json/example-inline.json",
+						relativeDir:  "/json/",
+						readFile:     ioutil.ReadFile,
+					},
+				},
+			},
+		},
+		{
+			description: "return manager with assets and media",
+			staticDir:   "/assets/",
+			jsonDir:     "/json/",
+			filesFind: func(dir string, exts ...string) ([]string, error) {
+				switch dir {
+				case "/assets/":
+					return []string{
+						"/assets/example.print.css",
+						"/assets/example-inline.screen.css",
+						"/assets/example-sync.braille.css",
+						"/assets/example-async.screen (min-width: 200px).css",
+						"/assets/example.print.js",
+						"/assets/example-inline.screen.js",
+						"/assets/example-sync.braille.js",
+						"/assets/example-async.screen (min-width: 200px).js",
+					}, nil
+				case "/json/":
+					return []string{
+						"/json/example.print.json",
+						"/json/example-inline.screen (min-width: 200px).json",
+					}, nil
+				}
+				return nil, fmt.Errorf("unknown dir passed to files.Find(): %q", dir)
+			},
+			want: &Manager{
+				remoteAssets: []*RemoteAsset{},
+				localAssets: []*LocalAsset{
+					// CSS
+					{
+						assetType:    assets.InlineCSS,
+						assetMedia:   "print",
+						id:           "example",
+						originalPath: "/assets/example.print.css",
+						path:         "/assets/example.print.css",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.InlineCSS,
+						assetMedia:   "screen",
+						id:           "example",
+						originalPath: "/assets/example-inline.screen.css",
+						path:         "/assets/example-inline.screen.css",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.SyncCSS,
+						assetMedia:   "braille",
+						id:           "example",
+						originalPath: "/assets/example-sync.braille.css",
+						path:         "/assets/example-sync.braille.css",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.AsyncCSS,
+						assetMedia:   "screen (min-width: 200px)",
+						id:           "example",
+						originalPath: "/assets/example-async.screen (min-width: 200px).css",
+						path:         "/assets/example-async.screen (min-width: 200px).css",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+
+					// JS
+					{
+						assetType:    assets.InlineJS,
+						id:           "example.print",
+						originalPath: "/assets/example.print.js",
+						path:         "/assets/example.print.js",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.InlineJS,
+						id:           "example-inline.screen",
+						originalPath: "/assets/example-inline.screen.js",
+						path:         "/assets/example-inline.screen.js",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.InlineJS,
+						id:           "example-sync.braille",
+						originalPath: "/assets/example-sync.braille.js",
+						path:         "/assets/example-sync.braille.js",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.InlineJS,
+						id:           "example-async.screen (min-width: 200px)",
+						originalPath: "/assets/example-async.screen (min-width: 200px).js",
+						path:         "/assets/example-async.screen (min-width: 200px).js",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.JSON,
+						id:           "example.print",
+						originalPath: "/json/example.print.json",
+						path:         "/json/example.print.json",
+						relativeDir:  "/json/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.JSON,
+						id:           "example-inline.screen (min-width: 200px)",
+						originalPath: "/json/example-inline.screen (min-width: 200px).json",
+						path:         "/json/example-inline.screen (min-width: 200px).json",
 						relativeDir:  "/json/",
 						readFile:     ioutil.ReadFile,
 					},
