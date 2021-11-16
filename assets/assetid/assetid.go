@@ -89,6 +89,8 @@ func assetType(fn, ext string) (assets.Type, error) {
 		return assets.JPEG, nil
 	case ".webp":
 		return assets.WEBP, nil
+	case ".avif":
+		return assets.AVIF, nil
 	}
 	return assets.Unknown, fmt.Errorf("%w: for file %q with extension %q", ErrUnknownType, fn, ext)
 }

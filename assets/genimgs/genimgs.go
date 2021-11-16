@@ -89,7 +89,8 @@ func getImageSizes(conf *config.Config, srcPath, hash string) ([]GenImg, error) 
 		switch ext {
 		case ".webp":
 			typ = "image/webp"
-			break
+		case ".avif":
+			typ = "image/avif"
 		}
 
 		imgs = append(imgs, GenImg{

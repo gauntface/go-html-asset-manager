@@ -84,7 +84,7 @@ func TestNewManager(t *testing.T) {
 				if dir != wantDir {
 					t.Fatalf("Unexpected dir for files.Find; got %v, want %v", dir, wantDir)
 				}
-				wantExts := []string{".css", ".js", ".png", ".jpg", ".jpeg", ".webp"}
+				wantExts := []string{".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".avif"}
 				if diff := cmp.Diff(exts, wantExts); diff != "" {
 					t.Fatalf("Unexpected exts for files.Find; diff %v", diff)
 				}

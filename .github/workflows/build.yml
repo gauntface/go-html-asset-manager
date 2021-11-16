@@ -6,5 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+    - name: Install avif deps
+      run: sudo apt-get install libaom-dev
     - name: Run Test
       run: make test
