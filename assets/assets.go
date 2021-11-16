@@ -33,4 +33,5 @@ const (
 	PNG             = "png"
 	JPEG            = "jpeg"
 	WEBP            = "webp"
+	AVIF            = "avif"
 )

@@ -30,6 +30,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Kagami/go-avif"
 	"github.com/chai2010/webp"
 	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/assets"
@@ -117,8 +118,10 @@ func (c *client) run(ctx context.Context) error {
 	pngs := c.staticManager.WithType(assets.PNG)
 	jpegs := c.staticManager.WithType(assets.JPEG)
 	webps := c.staticManager.WithType(assets.WEBP)
+	avifs := c.staticManager.WithType(assets.AVIF)
 	all := append(pngs, jpegs...)
 	all = append(all, webps...)
+	all = append(all, avifs...)
 
 	fmt.Printf("📷 Found %v images\n", len(all))
 
@@ -223,8 +226,10 @@ func (c *client) assessAssets(allImages []generateImage) ([]generateImage, []str
 	generatedPNGs := c.generatedManager.WithType(assets.PNG)
 	generatedJPEGs := c.generatedManager.WithType(assets.JPEG)
 	generatedWEBPs := c.generatedManager.WithType(assets.WEBP)
+	generatedAVIFs := c.generatedManager.WithType(assets.AVIF)
 	allGenerated := append(generatedPNGs, generatedJPEGs...)
 	allGenerated = append(allGenerated, generatedWEBPs...)
+	allGenerated = append(allGenerated, generatedAVIFs...)
 
 	generatedSet := sets.NewStringSet()
 	for _, g := range allGenerated {
@@ -331,6 +336,11 @@ func (c *client) generateImageSet(imgPath string) ([]generateImage, error) {
 				width:        s,
 				outputPath:   path.Join(outputDir, fmt.Sprintf("%v%v", s, ".webp")),
 			},
+			generateImage{
+				originalPath: imgPath,
+				width:        s,
+				outputPath:   path.Join(outputDir, fmt.Sprintf("%v%v", s, ".avif")),
+			},
 		)
 	}
 
@@ -387,6 +397,8 @@ func createImage(img generateImage) error {
 		return createImagingImage(img)
 	case ".webp":
 		return createWebpImage(img)
+	case ".avif":
+		return createAvifImage(img)
 	default:
 		return fmt.Errorf("unsupported file: %q with extension%q", img.outputPath, ext)
 	}
@@ -420,6 +432,30 @@ func createWebpImage(img generateImage) error {
 	}
 
 	err = webp.Encode(f, dst, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createAvifImage(img generateImage) error {
+	// go-avif doesn't support alpha channel
+	if path.Ext(img.originalPath) == ".png" {
+		return nil
+	}
+	srcImg, err := imaging.Open(img.originalPath)
+	if err != nil {
+		return err
+	}
+
+	dst := imaging.Resize(srcImg, img.width, 0, imaging.Lanczos)
+
+	f, err := os.Create(img.outputPath)
+	if err != nil {
+		return err
+	}
+
+	err = avif.Encode(f, dst, nil)
 	if err != nil {
 		return err
 	}

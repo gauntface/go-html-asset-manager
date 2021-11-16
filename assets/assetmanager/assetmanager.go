@@ -51,7 +51,7 @@ func NewManager(htmlDir, staticDir, jsonDir string) (*Manager, error) {
 		return nil, err
 	}
 
-	staticAssets, err := findLocalAssets(staticDir, ".css", ".js", ".png", ".jpg", ".jpeg", ".webp")
+	staticAssets, err := findLocalAssets(staticDir, ".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".avif")
 	if err != nil {
 		return nil, err
 	}
@@ -145,6 +145,11 @@ func (m *Manager) String() string {
 		{
 			Title:     "WEBP",
 			Type:      assets.WEBP,
+			CountOnly: true,
+		},
+		{
+			Title:     "AVIF",
+			Type:      assets.AVIF,
 			CountOnly: true,
 		},
 		{

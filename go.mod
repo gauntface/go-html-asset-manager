@@ -3,6 +3,7 @@ module github.com/gauntface/go-html-asset-manager
 go 1.13
 
 require (
+	github.com/Kagami/go-avif v0.1.0
 	github.com/chai2010/webp v1.1.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/disintegration/imaging v1.6.2
@@ -31,7 +32,7 @@ require (
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa // indirect
+	golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/sys v0.0.0-20211113001501-0c823b97ae02 // indirect

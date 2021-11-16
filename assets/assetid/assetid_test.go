@@ -271,6 +271,12 @@ func TestAssetType(t *testing.T) {
 			ext:         ".webp",
 			want:        assets.WEBP,
 		},
+		{
+			description: "return avif for avif",
+			filename:    "example",
+			ext:         ".avif",
+			want:        assets.AVIF,
+		},
 	}
 
 	for _, tt := range tests {
