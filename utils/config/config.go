@@ -50,6 +50,10 @@ type GeneratedImagesConfig struct {
 	StaticDir string `json:"static-dir"`
 	// The path to a directory containing generated files
 	OutputDir string `json:"output-dir"`
+	// The bucket name to generate files to
+	OutputBucket string `json:"output-bucket"`
+	// The path for generated images in the s3 bucket
+	OutputBucketDir string `json:"output-bucket-dir"`
 	// The maximum width in CSS pixels images should be
 	MaxWidth int64 `json:"max-width"`
 	// The maximum density to cater for

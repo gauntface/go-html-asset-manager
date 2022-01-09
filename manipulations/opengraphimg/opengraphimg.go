@@ -49,14 +49,14 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			continue
 		}
 
-		imgs, err := genimgs.LookupSizes(runtime.Config, c.Val)
+		imgs, err := genimgs.LookupSizes(runtime.S3, runtime.Config, c.Val)
 		if err != nil {
 			return err
 		}
 
 		imgsByTypes := genimgs.GroupByType(imgs)
 		imgsByType := imgsByTypes[""]
-		if len(imgs) == 0 {
+		if len(imgsByType) == 0 {
 			return nil
 		}
 

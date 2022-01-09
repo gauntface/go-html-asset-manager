@@ -18,6 +18,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -27,6 +28,8 @@ import (
 	"strings"
 	"sync"
 
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
@@ -88,10 +91,13 @@ type client struct {
 	vimeo         *vimeoapi.Client
 	preprocessors []preprocessors.Preprocessor
 	manipulators  []manipulations.Manipulator
+	s3            *s3.Client
 }
 
 func newClient() (*client, error) {
 	flag.Parse()
+
+	ctx := context.Background()
 
 	absConfigPath, err := homedirExpand(*configPath)
 	if err != nil {
@@ -122,6 +128,13 @@ func newClient() (*client, error) {
 		vimeo = vimeoapi.New(*vimeoToken)
 	}
 
+	cfg, err := awsconfig.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to load AWS SDK config, %v", err)
+	}
+
+	s3Client := s3.NewFromConfig(cfg)
+
 	return &client{
 		htmlRender:      html.Render,
 		htmlParse:       html.Parse,
@@ -130,6 +143,7 @@ func newClient() (*client, error) {
 		config:  c,
 		manager: manager,
 		vimeo:   vimeo,
+		s3:      s3Client,
 		preprocessors: []preprocessors.Preprocessor{
 			jsonassets.Preprocessor,
 			revisionassets.Preprocessor,
@@ -239,6 +253,7 @@ func (c *client) manipulateHTMLFile(asset assetmanagerLocalAsset, manager assetm
 		Debug:    debug,
 		Assets:   manager,
 		Vimeo:    c.vimeo,
+		S3:       c.s3,
 		HasVimeo: c.vimeo != nil,
 		Config:   c.config,
 	}

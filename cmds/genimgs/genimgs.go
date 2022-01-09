@@ -31,6 +31,11 @@ import (
 	"sync"
 
 	"github.com/Kagami/go-avif"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/chai2010/webp"
 	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/assets"
@@ -62,12 +67,16 @@ func main() {
 }
 
 type client struct {
-	staticdir string
-	outputdir string
-	maxWidth  int64
+	staticdir   string
+	outputdir   string
+	s3Bucket    string
+	s3BucketDir string
+	maxWidth    int64
 
 	staticManager    *assetmanager.Manager
 	generatedManager *assetmanager.Manager
+	s3               *s3.Client
+	s3Manager        *s3manager.Uploader
 }
 
 func newClient(ctx context.Context) (*client, error) {
@@ -85,7 +94,7 @@ func newClient(ctx context.Context) (*client, error) {
 	}
 
 	fmt.Printf("📁 Looking for Static assets in: %q\n", c.GenAssets.StaticDir)
-	fmt.Printf("📁 Will output imgs to: %q\n", c.GenAssets.OutputDir)
+	fmt.Printf("📁 Will output imgs to: [🪣 %v]/%v\n", c.GenAssets.OutputBucket, c.GenAssets.OutputBucketDir)
 
 	err = os.MkdirAll(c.GenAssets.OutputDir, 0777)
 	if err != nil {
@@ -105,12 +114,24 @@ func newClient(ctx context.Context) (*client, error) {
 	maxWidth := c.GenAssets.MaxWidth * c.GenAssets.MaxDensity
 	fmt.Printf("📏 Max width will be %v (CSS px) x %v (Density) = %v\n", c.GenAssets.MaxWidth, c.GenAssets.MaxDensity, maxWidth)
 
+	cfg, err := awsconfig.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to load AWS SDK config, %v", err)
+	}
+
+	s3Client := s3.NewFromConfig(cfg)
+	s3Manager := s3manager.NewUploader(s3Client)
+
 	return &client{
 		staticdir:        c.GenAssets.StaticDir,
 		outputdir:        c.GenAssets.OutputDir,
+		s3Bucket:         c.GenAssets.OutputBucket,
+		s3BucketDir:      c.GenAssets.OutputBucketDir,
 		maxWidth:         maxWidth,
 		staticManager:    staticManager,
 		generatedManager: generatedManager,
+		s3:               s3Client,
+		s3Manager:        s3Manager,
 	}, nil
 }
 
@@ -132,7 +153,16 @@ func (c *client) run(ctx context.Context) error {
 
 	fmt.Printf("📸 This should result in %v images\n", len(fullImgSet))
 
-	toCreate, toDelete := c.assessAssets(fullImgSet)
+	s3Imgs, err := c.getS3GenImages(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("🪣 S3 has %v images\n", len(s3Imgs))
+
+	toCreate, toDelete := c.assessAssets(ctx, fullImgSet, s3Imgs)
+	if err != nil {
+		return err
+	}
 
 	fmt.Printf("🖌️ Need to create %v images\n", len(toCreate))
 	fmt.Printf("🗑️ Need to delete %v images\n", len(toDelete))
@@ -142,14 +172,39 @@ func (c *client) run(ctx context.Context) error {
 		return err
 	}
 
-	err = c.deleteImages(toDelete)
+	/* err = c.deleteImages(toDelete)
 	if err != nil {
 		return err
-	}
+	}*/
 
 	fmt.Printf("✅ Done.\n")
 
 	return nil
+}
+
+func (c *client) getS3GenImages(ctx context.Context) ([]awstypes.Object, error) {
+	params := &s3.ListObjectsV2Input{
+		Bucket: &c.s3Bucket,
+		Prefix: &c.s3BucketDir,
+	}
+
+	// Create the Paginator for the ListObjectsV2 operation.
+	p := s3.NewListObjectsV2Paginator(c.s3, params)
+
+	// Iterate through the S3 object pages, printing each object returned.
+	objs := []awstypes.Object{}
+	for p.HasMorePages() {
+		// Next Page takes a new context for each page retrieval. This is where
+		// you could add timeouts or deadlines.
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Log the objects found
+		objs = append(objs, page.Contents...)
+	}
+	return objs, nil
 }
 
 func (c *client) deleteImages(imgs []string) error {
@@ -196,7 +251,7 @@ func (c *client) createImages(imgs []generateImage) error {
 	results := make(chan error, len(imgs))
 
 	for w := 1; w <= runtime.NumCPU(); w++ {
-		go imgCreatorWorker(w, jobs, results)
+		go c.imgCreatorWorker(w, jobs, results)
 	}
 
 	for _, i := range imgs {
@@ -210,7 +265,7 @@ func (c *client) createImages(imgs []generateImage) error {
 		err := <-results
 		bar.Add(1)
 		if err != nil {
-			fmt.Printf("failed to create image: %v\n", err)
+			fmt.Printf("\nfailed to create image: %v\n", err)
 			errCount++
 		}
 	}
@@ -222,38 +277,32 @@ func (c *client) createImages(imgs []generateImage) error {
 	return nil
 }
 
-func (c *client) assessAssets(allImages []generateImage) ([]generateImage, []string) {
-	generatedPNGs := c.generatedManager.WithType(assets.PNG)
-	generatedJPEGs := c.generatedManager.WithType(assets.JPEG)
-	generatedWEBPs := c.generatedManager.WithType(assets.WEBP)
-	generatedAVIFs := c.generatedManager.WithType(assets.AVIF)
-	allGenerated := append(generatedPNGs, generatedJPEGs...)
-	allGenerated = append(allGenerated, generatedWEBPs...)
-	allGenerated = append(allGenerated, generatedAVIFs...)
-
-	generatedSet := sets.NewStringSet()
-	for _, g := range allGenerated {
-		img := g.(*assetmanager.LocalAsset)
-		generatedSet.Add(img.Path())
-	}
-
+func (c *client) assessAssets(ctx context.Context, allImages []generateImage, s3Images []types.Object) ([]generateImage, []string) {
 	requiredMap := map[string]generateImage{}
 	for _, i := range allImages {
-		requiredMap[i.outputPath] = i
+		k := strings.TrimPrefix(i.outputPath, c.staticdir)
+		k = strings.TrimPrefix(k, "/")
+		requiredMap[k] = i
 	}
 
 	imgsToGenerate := []generateImage{}
-	for path, r := range requiredMap {
-		if generatedSet.Contains(path) {
-			continue
+	for k, r := range requiredMap {
+		found := false
+		for _, i := range s3Images {
+			if k == *i.Key {
+				found = true
+				break
+			}
 		}
-		imgsToGenerate = append(imgsToGenerate, r)
+		if !found {
+			imgsToGenerate = append(imgsToGenerate, r)
+		}
 	}
 
 	filesToRm := []string{}
-	for _, g := range generatedSet.Slice() {
-		if _, ok := requiredMap[g]; !ok {
-			filesToRm = append(filesToRm, g)
+	for _, g := range s3Images {
+		if _, ok := requiredMap[*g.Key]; !ok {
+			filesToRm = append(filesToRm, *g.Key)
 		}
 	}
 
@@ -298,9 +347,9 @@ func (c *client) generateImageList(imgs []assetmanager.Asset) ([]generateImage, 
 	wg.Wait()
 
 	if len(errs) > 0 {
-		fmt.Printf("☠️ %v errors occurred while generating the image list:", len(errs))
+		fmt.Printf("☠️ %v errors occurred while generating the image list:\n", len(errs))
 		for i, e := range errs {
-			fmt.Printf("    - %v) %v", i, e)
+			fmt.Printf("    - %v) %v\n", i, e)
 		}
 		return nil, fmt.Errorf("%v errors occurred while generating image list. See logs for details.", len(errs))
 	}
@@ -336,12 +385,16 @@ func (c *client) generateImageSet(imgPath string) ([]generateImage, error) {
 				width:        s,
 				outputPath:   path.Join(outputDir, fmt.Sprintf("%v%v", s, ".webp")),
 			},
-			generateImage{
+		)
+
+		// avif library doesn't support alpha channel
+		if !strings.HasSuffix(imgPath, ".png") {
+			genImgs = append(genImgs, generateImage{
 				originalPath: imgPath,
 				width:        s,
 				outputPath:   path.Join(outputDir, fmt.Sprintf("%v%v", s, ".avif")),
-			},
-		)
+			})
+		}
 	}
 
 	return genImgs, nil
@@ -378,11 +431,20 @@ func generateSizes(img image.Image, maxWidth int64) []int {
 	return widths
 }
 
-func imgCreatorWorker(id int, jobs <-chan generateImage, results chan<- error) {
+func (c *client) imgCreatorWorker(id int, jobs <-chan generateImage, results chan<- error) {
+	ctx := context.Background()
 	for j := range jobs {
-		err := createImage(j)
+		err := c.createAndUploadImage(ctx, j)
 		results <- err
 	}
+}
+
+func (c *client) createAndUploadImage(ctx context.Context, img generateImage) error {
+	err := createImage(img)
+	if err != nil {
+		return err
+	}
+	return c.uploadImage(ctx, img)
 }
 
 func createImage(img generateImage) error {
@@ -402,6 +464,24 @@ func createImage(img generateImage) error {
 	default:
 		return fmt.Errorf("unsupported file: %q with extension%q", img.outputPath, ext)
 	}
+}
+
+func (c *client) uploadImage(ctx context.Context, img generateImage) error {
+	f, err := os.Open(img.outputPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	key := strings.TrimPrefix(img.outputPath, c.staticdir)
+	key = strings.TrimPrefix(key, "/")
+
+	_, err = c.s3Manager.Upload(ctx, &s3.PutObjectInput{
+		Bucket: &c.s3Bucket,
+		Key:    &key,
+		Body:   f,
+	})
+	return err
 }
 
 func createImagingImage(img generateImage) error {
