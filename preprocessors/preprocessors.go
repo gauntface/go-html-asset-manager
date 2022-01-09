@@ -17,8 +17,8 @@
 package preprocessors
 
 import (
-	"github.com/gauntface/go-html-asset-manager/assets"
-	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v2/assets"
+	"github.com/gauntface/go-html-asset-manager/v2/assets/assetmanager"
 )
 
 type Preprocessor func(runtime Runtime) error

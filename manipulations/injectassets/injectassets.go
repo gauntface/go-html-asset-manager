@@ -22,12 +22,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/assets"
-	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/manipulations"
-	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/utils/sets"
-	"github.com/gauntface/go-html-asset-manager/utils/stringui"
+	"github.com/gauntface/go-html-asset-manager/v2/assets"
+	"github.com/gauntface/go-html-asset-manager/v2/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/sets"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/stringui"
 	"golang.org/x/net/html"
 )
 

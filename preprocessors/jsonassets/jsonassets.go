@@ -21,9 +21,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gauntface/go-html-asset-manager/assets"
-	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/preprocessors"
+	"github.com/gauntface/go-html-asset-manager/v2/assets"
+	"github.com/gauntface/go-html-asset-manager/v2/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v2/preprocessors"
 )
 
 var (

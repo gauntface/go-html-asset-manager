@@ -14,8 +14,8 @@ a set of operations on the source to optimize for web performance, this includes
 ## Installation
 
 ```
-go get -u github.com/gauntface/go-html-asset-manager/cmds/htmlassets/
-go get -u github.com/gauntface/go-html-asset-manager/cmds/genimgs/
+go get -u github.com/gauntface/go-html-asset-manager/v2/cmds/htmlassets/
+go get -u github.com/gauntface/go-html-asset-manager/v2/cmds/genimgs/
 ```
 
 ## Usage

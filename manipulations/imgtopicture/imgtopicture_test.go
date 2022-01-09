@@ -26,10 +26,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/gauntface/go-html-asset-manager/assets/genimgs"
-	"github.com/gauntface/go-html-asset-manager/manipulations"
-	"github.com/gauntface/go-html-asset-manager/utils/config"
-	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v2/assets/genimgs"
+	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )
