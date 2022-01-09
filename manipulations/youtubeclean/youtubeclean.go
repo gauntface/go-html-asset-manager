@@ -23,9 +23,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/manipulations"
-	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/utils/html/ratiocontainer"
+	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/html/ratiocontainer"
 	"golang.org/x/net/html"
 )
 

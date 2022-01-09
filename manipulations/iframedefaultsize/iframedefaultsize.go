@@ -21,8 +21,8 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/gauntface/go-html-asset-manager/manipulations"
-	"github.com/gauntface/go-html-asset-manager/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
 	"golang.org/x/net/html"
 )
 

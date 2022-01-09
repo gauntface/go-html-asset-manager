@@ -14,8 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/disintegration/imaging"
-	"github.com/gauntface/go-html-asset-manager/utils/config"
-	"github.com/gauntface/go-html-asset-manager/utils/files"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/files"
 )
 
 var (
