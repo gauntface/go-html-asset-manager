@@ -1,4 +1,4 @@
-module github.com/gauntface/go-html-asset-manager
+module github.com/gauntface/go-html-asset-manager/v2
 
 go 1.17
 
