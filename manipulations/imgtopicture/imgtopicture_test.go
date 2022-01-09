@@ -25,6 +25,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gauntface/go-html-asset-manager/assets/genimgs"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"github.com/gauntface/go-html-asset-manager/utils/config"
@@ -359,8 +360,9 @@ func Test_manipulateImg(t *testing.T) {
 		conf               *config.Config
 		imgtopic           *config.ImgToPicConfig
 		doc                *html.Node
+		s3                 *s3.Client
 		genimgsOpen        func(conf *config.Config, imgPath string) (image.Image, error)
-		genimgsLookupSizes func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
+		genimgsLookupSizes func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
 		want               string
 		wantError          error
 	}{
@@ -392,7 +394,7 @@ func Test_manipulateImg(t *testing.T) {
 			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
 				return &image.RGBA{}, nil
 			},
-			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				wantImg := "/example.png"
 				if wantImg != imgPath {
 					t.Fatalf("Unexpected img path passed to genimgs.LookupSizes; got %v, want %v", imgPath, wantImg)
@@ -408,7 +410,7 @@ func Test_manipulateImg(t *testing.T) {
 			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
 				return &image.RGBA{}, nil
 			},
-			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return nil, nil
 			},
 			want: `<html><head></head><body><img src="/example.png"/></body></html>`,
@@ -422,7 +424,7 @@ func Test_manipulateImg(t *testing.T) {
 			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
 				return &image.RGBA{}, nil
 			},
-			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{
 					{
 						Type: "",
@@ -442,7 +444,7 @@ func Test_manipulateImg(t *testing.T) {
 			genimgsOpen = tt.genimgsOpen
 			genimgsLookupSizes = tt.genimgsLookupSizes
 
-			err := manipulateImg(tt.debug, tt.conf, tt.imgtopic, htmlparsing.FindNodeByTag("img", tt.doc))
+			err := manipulateImg(tt.s3, tt.debug, tt.conf, tt.imgtopic, htmlparsing.FindNodeByTag("img", tt.doc))
 			if !errors.Is(err, tt.wantError) {
 				t.Fatalf("Unexpected error; got %v, want %v", err, tt.wantError)
 			}
@@ -461,8 +463,9 @@ func Test_manipulateWithConfig(t *testing.T) {
 		conf               *config.Config
 		imgtopic           *config.ImgToPicConfig
 		doc                *html.Node
+		s3                 *s3.Client
 		genimgsOpen        func(conf *config.Config, imgPath string) (image.Image, error)
-		genimgsLookupSizes func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
+		genimgsLookupSizes func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
 		want               string
 		wantError          error
 	}{
@@ -476,7 +479,7 @@ func Test_manipulateWithConfig(t *testing.T) {
 			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
 				return &image.RGBA{}, nil
 			},
-			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{
 					{
 						Type: "",
@@ -497,7 +500,7 @@ func Test_manipulateWithConfig(t *testing.T) {
 			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
 				return &image.RGBA{}, nil
 			},
-			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{
 					{
 						Type: "",
@@ -518,7 +521,7 @@ func Test_manipulateWithConfig(t *testing.T) {
 			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
 				return &image.RGBA{}, nil
 			},
-			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return nil, errInjected
 			},
 			wantError: errInjected,
@@ -533,7 +536,7 @@ func Test_manipulateWithConfig(t *testing.T) {
 			genimgsOpen = tt.genimgsOpen
 			genimgsLookupSizes = tt.genimgsLookupSizes
 
-			err := manipulateWithConfig(tt.debug, tt.conf, tt.imgtopic, tt.doc)
+			err := manipulateWithConfig(tt.s3, tt.debug, tt.conf, tt.imgtopic, tt.doc)
 			if !errors.Is(err, tt.wantError) {
 				t.Fatalf("Unexpected error; got %v, want %v", err, tt.wantError)
 			}
@@ -551,7 +554,7 @@ func Test_Manipulator(t *testing.T) {
 		runtime            manipulations.Runtime
 		doc                *html.Node
 		genimgsOpen        func(conf *config.Config, imgPath string) (image.Image, error)
-		genimgsLookupSizes func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
+		genimgsLookupSizes func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
 		want               string
 		wantError          error
 	}{
@@ -581,7 +584,7 @@ func Test_Manipulator(t *testing.T) {
 			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
 				return &image.RGBA{}, nil
 			},
-			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return nil, errInjected
 			},
 			wantError: errInjected,
@@ -607,7 +610,7 @@ func Test_Manipulator(t *testing.T) {
 			genimgsOpen: func(conf *config.Config, imgPath string) (image.Image, error) {
 				return &image.RGBA{}, nil
 			},
-			genimgsLookupSizes: func(conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{
 					{
 						Type: "",
