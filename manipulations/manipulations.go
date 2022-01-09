@@ -19,6 +19,7 @@
 package manipulations
 
 import (
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gauntface/go-html-asset-manager/assets"
 	"github.com/gauntface/go-html-asset-manager/assets/assetmanager"
 	"github.com/gauntface/go-html-asset-manager/utils/config"
@@ -35,6 +36,7 @@ type Runtime struct {
 
 	HasVimeo bool
 	Vimeo    vimeoapiClient
+	S3       *s3.Client
 }
 
 type AssetManager interface {

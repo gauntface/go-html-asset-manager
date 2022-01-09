@@ -1,16 +1,18 @@
 package genimgs
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"image"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/utils/config"
 	"github.com/gauntface/go-html-asset-manager/utils/files"
@@ -33,7 +35,7 @@ func Open(conf *config.Config, imgPath string) (image.Image, error) {
 	return imagingOpen(getPath(conf, imgPath))
 }
 
-func LookupSizes(conf *config.Config, imgPath string) ([]GenImg, error) {
+func LookupSizes(s3Client *s3.Client, conf *config.Config, imgPath string) ([]GenImg, error) {
 	srcPath := getPath(conf, imgPath)
 
 	hash, err := filesHash(srcPath)
@@ -42,40 +44,35 @@ func LookupSizes(conf *config.Config, imgPath string) ([]GenImg, error) {
 	}
 
 	// Get available sizes of the image
-	sizes, err := getImageSizes(conf, srcPath, hash)
+	sizes, err := getImageSizes(s3Client, conf, srcPath, hash)
 	if err != nil {
 		return nil, err
 	}
 	return sizes, nil
 }
 
-func getImageSizes(conf *config.Config, srcPath, hash string) ([]GenImg, error) {
+func getImageSizes(s3Client *s3.Client, conf *config.Config, srcPath, hash string) ([]GenImg, error) {
 	filename := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
 	genDirName := fmt.Sprintf("%v.%v", filename, hash)
-	dirPath := filepath.Join(conf.Assets.GeneratedDir, genDirName)
+	dirPath := filepath.Join(conf.GenAssets.OutputBucketDir, genDirName)
 
-	contents, err := ioutilReadDir(dirPath)
+	objs, err := lookupS3Images(s3Client, conf, dirPath)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return nil, nil
-		}
-		return nil, err
+		fmt.Printf("⚠️ Unable to lookup S3 images in %v\n", dirPath)
 	}
 
+	maxSize := conf.GenAssets.MaxWidth * conf.GenAssets.MaxDensity
 	generatedDirURL, err := filepath.Rel(conf.Assets.StaticDir, dirPath)
 	if err != nil {
 		return nil, fmt.Errorf("%w from %q to %q: %v", errRelPath, conf.Assets.GeneratedDir, dirPath, err)
 	}
 
-	maxSize := conf.GenAssets.MaxWidth * conf.GenAssets.MaxDensity
 	imgs := []GenImg{}
-	for _, c := range contents {
-		if c.IsDir() {
-			continue
-		}
+	for _, c := range objs {
+		_, file := filepath.Split(*c.Key)
+		ext := filepath.Ext(file)
+		filename := strings.TrimSuffix(file, ext)
 
-		ext := filepath.Ext(c.Name())
-		filename := strings.TrimSuffix(c.Name(), ext)
 		size, err := strconv.ParseInt(filename, 10, 64)
 		if err != nil {
 			continue
@@ -94,13 +91,39 @@ func getImageSizes(conf *config.Config, srcPath, hash string) ([]GenImg, error) 
 		}
 
 		imgs = append(imgs, GenImg{
-			URL:  filepath.Join("/", generatedDirURL, c.Name()),
+			URL:  filepath.Join("/", generatedDirURL, file),
 			Type: typ,
 			Size: size,
 		})
 	}
 
 	return imgs, nil
+}
+
+func lookupS3Images(s3Client *s3.Client, conf *config.Config, dir string) ([]awstypes.Object, error) {
+	ctx := context.Background()
+	params := &s3.ListObjectsV2Input{
+		Bucket: &conf.GenAssets.OutputBucket,
+		Prefix: &dir,
+	}
+
+	// Create the Paginator for the ListObjectsV2 operation.
+	p := s3.NewListObjectsV2Paginator(s3Client, params)
+
+	// Iterate through the S3 object pages, printing each object returned.
+	objs := []awstypes.Object{}
+	for p.HasMorePages() {
+		// Next Page takes a new context for each page retrieval. This is where
+		// you could add timeouts or deadlines.
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Log the objects found
+		objs = append(objs, page.Contents...)
+	}
+	return objs, nil
 }
 
 func GroupByType(imgs []GenImg) map[string][]GenImg {

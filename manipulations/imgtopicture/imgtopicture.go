@@ -22,6 +22,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gauntface/go-html-asset-manager/assets/genimgs"
 	"github.com/gauntface/go-html-asset-manager/manipulations"
 	"github.com/gauntface/go-html-asset-manager/utils/config"
@@ -42,7 +43,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 	}
 
 	for _, i := range runtime.Config.ImgToPicture {
-		err := manipulateWithConfig(runtime.Debug, runtime.Config, i, doc)
+		err := manipulateWithConfig(runtime.S3, runtime.Debug, runtime.Config, i, doc)
 		if err != nil {
 			return err
 		}
@@ -66,7 +67,7 @@ func shouldRun(conf *config.Config) bool {
 	return true
 }
 
-func manipulateWithConfig(debug bool, conf *config.Config, imgtopic *config.ImgToPicConfig, doc *html.Node) error {
+func manipulateWithConfig(s3Client *s3.Client, debug bool, conf *config.Config, imgtopic *config.ImgToPicConfig, doc *html.Node) error {
 	rawElements := htmlparsing.FindNodesByTag(imgtopic.ID, doc)
 	rawElements = append(rawElements, htmlparsing.FindNodesByClassname(imgtopic.ID, doc)...)
 
@@ -84,7 +85,7 @@ func manipulateWithConfig(debug bool, conf *config.Config, imgtopic *config.ImgT
 	}
 
 	for _, ie := range imgs {
-		err := manipulateImg(debug, conf, imgtopic, ie)
+		err := manipulateImg(s3Client, debug, conf, imgtopic, ie)
 		if err != nil {
 			return err
 		}
@@ -92,7 +93,7 @@ func manipulateWithConfig(debug bool, conf *config.Config, imgtopic *config.ImgT
 	return nil
 }
 
-func manipulateImg(debug bool, conf *config.Config, imgtopic *config.ImgToPicConfig, ie *html.Node) error {
+func manipulateImg(s3Client *s3.Client, debug bool, conf *config.Config, imgtopic *config.ImgToPicConfig, ie *html.Node) error {
 	attributes := htmlparsing.Attributes(ie)
 
 	srcAttr, ok := attributes["src"]
@@ -119,7 +120,7 @@ func manipulateImg(debug bool, conf *config.Config, imgtopic *config.ImgToPicCon
 	// Get width and height from the image
 	origWidth, origHeight := i.Bounds().Size().X, i.Bounds().Size().Y
 
-	sizes, err := genimgsLookupSizes(conf, srcAttr.Val)
+	sizes, err := genimgsLookupSizes(s3Client, conf, srcAttr.Val)
 	if err != nil {
 		return err
 	}
