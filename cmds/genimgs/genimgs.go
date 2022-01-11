@@ -478,6 +478,7 @@ func (c *client) uploadImage(ctx context.Context, img generateImage) error {
 
 	_, err = c.s3Manager.Upload(ctx, &s3.PutObjectInput{
 		Bucket: &c.s3Bucket,
+		ACL:    awstypes.ObjectCannedACLPublicRead,
 		Key:    &key,
 		Body:   f,
 	})

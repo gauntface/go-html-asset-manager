@@ -26,11 +26,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-const (
-	defaultWidth  int64 = 4
-	defaultHeight int64 = 3
-)
-
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 	if runtime.Config == nil || len(runtime.Config.RatioWrapper) == 0 {
 		return nil
@@ -53,10 +48,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		// Remove the soon to be redundant attributes
 		delete(attributes, "width")
 		delete(attributes, "height")
-		ele.Attr = []html.Attribute{}
-		for _, a := range attributes {
-			ele.Attr = append(ele.Attr, a)
-		}
+		ele.Attr = htmlparsing.AttributesList(attributes)
 
 		// Remove element from it's parent so it can be wrapped
 		p := ele.Parent

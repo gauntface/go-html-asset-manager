@@ -26,14 +26,11 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 	allElements := getElementsToLazyLoad(doc)
 	for _, ele := range allElements {
 		// Create a map of the element attributes
-		attributes := map[string]html.Attribute{}
-		for _, a := range ele.Attr {
-			attributes[a.Key] = a
-		}
+		attributes := htmlparsing.Attributes(ele)
 
 		// Bail on elements that already have a loading attribute
 		if _, ok := attributes["loading"]; ok {
-			return nil
+			continue
 		}
 
 		ele.Attr = append(ele.Attr, html.Attribute{

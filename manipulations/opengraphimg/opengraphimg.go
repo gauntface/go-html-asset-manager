@@ -64,10 +64,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 
 		c.Val = fmt.Sprintf("%v%v", runtime.Config.BaseURL, largestImg.URL)
 		attributes["content"] = c
-		ele.Attr = []html.Attribute{}
-		for _, a := range attributes {
-			ele.Attr = append(ele.Attr, a)
-		}
+		ele.Attr = htmlparsing.AttributesList(attributes)
 	}
 	return nil
 }
