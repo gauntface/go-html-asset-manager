@@ -48,9 +48,9 @@ import (
 )
 
 var (
-	configPath = flag.String("config", "asset-manager.json", "The path of the Config file.")
-
-	homedirExpand = homedir.Expand
+	configPath      = flag.String("config", "asset-manager.json", "The path of the Config file.")
+	cacheControlAge = flag.Int64("cache_control", 31104000, "The max age for caching images")
+	homedirExpand   = homedir.Expand
 )
 
 func main() {
@@ -476,11 +476,14 @@ func (c *client) uploadImage(ctx context.Context, img generateImage) error {
 	key := strings.TrimPrefix(img.outputPath, c.staticdir)
 	key = strings.TrimPrefix(key, "/")
 
+	cc := fmt.Sprintf("max-age=%v", cacheControlAge)
+
 	_, err = c.s3Manager.Upload(ctx, &s3.PutObjectInput{
-		Bucket: &c.s3Bucket,
-		ACL:    awstypes.ObjectCannedACLPublicRead,
-		Key:    &key,
-		Body:   f,
+		Bucket:       &c.s3Bucket,
+		ACL:          awstypes.ObjectCannedACLPublicRead,
+		CacheControl: &cc,
+		Key:          &key,
+		Body:         f,
 	})
 	return err
 }
