@@ -18,6 +18,7 @@ package htmlparsing
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/gauntface/go-html-asset-manager/v2/utils/sets"
@@ -213,6 +214,17 @@ func Attributes(e *html.Node) map[string]html.Attribute {
 	for _, a := range e.Attr {
 		attributes[a.Key] = a
 	}
+	return attributes
+}
+
+func AttributesList(attrs map[string]html.Attribute) []html.Attribute {
+	attributes := []html.Attribute{}
+	for _, a := range attrs {
+		attributes = append(attributes, a)
+	}
+	sort.Slice(attributes, func(i, j int) bool {
+		return attributes[i].Key < attributes[j].Key
+	})
 	return attributes
 }
 

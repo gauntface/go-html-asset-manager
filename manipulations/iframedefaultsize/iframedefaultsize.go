@@ -18,7 +18,6 @@ package iframedefaultsize
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 
 	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
@@ -52,13 +51,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			Key: "height",
 			Val: fmt.Sprintf("%v", height),
 		}
-		ele.Attr = []html.Attribute{}
-		for _, a := range attributes {
-			ele.Attr = append(ele.Attr, a)
-		}
-		sort.Slice(ele.Attr, func(i, j int) bool {
-			return ele.Attr[i].Key < ele.Attr[j].Key
-		})
+		ele.Attr = htmlparsing.AttributesList(attributes)
 	}
 	return nil
 }

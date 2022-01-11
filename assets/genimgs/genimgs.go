@@ -58,7 +58,7 @@ func getImageSizes(s3Client *s3.Client, conf *config.Config, srcPath, hash strin
 
 	objs, err := lookupS3Images(s3Client, conf, dirPath)
 	if err != nil {
-		fmt.Printf("⚠️ Unable to lookup S3 images in %v\n", dirPath)
+		return nil, fmt.Errorf("unable to lookup S3 images in %v", dirPath)
 	}
 
 	maxSize := conf.GenAssets.MaxWidth * conf.GenAssets.MaxDensity

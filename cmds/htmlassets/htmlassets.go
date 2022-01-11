@@ -35,6 +35,7 @@ import (
 	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
 	"github.com/gauntface/go-html-asset-manager/v2/manipulations/asyncsrc"
 	"github.com/gauntface/go-html-asset-manager/v2/manipulations/iframedefaultsize"
+	"github.com/gauntface/go-html-asset-manager/v2/manipulations/imgsize"
 	"github.com/gauntface/go-html-asset-manager/v2/manipulations/imgtopicture"
 	"github.com/gauntface/go-html-asset-manager/v2/manipulations/injectassets"
 	"github.com/gauntface/go-html-asset-manager/v2/manipulations/lazyload"
@@ -59,7 +60,6 @@ var (
 	debug      = flag.String("debug", "", "Provide a HTML file name to log debug info as required")
 
 	errRunFailed  = errors.New("failed to run successfully")
-	errRelPath    = errors.New("unable to calculate relative path")
 	errManipulate = errors.New("failed to manipulate HTML")
 
 	configGet              = config.Get
@@ -80,11 +80,9 @@ func main() {
 }
 
 type client struct {
-	homedirExpand          func(path string) (string, error)
-	htmlParse              func(r io.Reader) (*html.Node, error)
-	htmlRender             func(w io.Writer, n *html.Node) error
-	ioutilWriteFile        func(filename string, data []byte, perm os.FileMode) error
-	assetmanagerNewManager func(htmlDir, staticDir, jsonDir string) (*assetmanager.Manager, error)
+	htmlParse       func(r io.Reader) (*html.Node, error)
+	htmlRender      func(w io.Writer, n *html.Node) error
+	ioutilWriteFile func(filename string, data []byte, perm os.FileMode) error
 
 	config        *config.Config
 	manager       assetmanagerManager
@@ -153,6 +151,7 @@ func newClient() (*client, error) {
 			youtubeclean.Manipulator,
 			vimeoclean.Manipulator,
 			iframedefaultsize.Manipulator,
+			imgsize.Manipulator,
 			imgtopicture.Manipulator,
 			ratiowrapper.Manipulator,
 			lazyload.Manipulator,
@@ -259,7 +258,7 @@ func (c *client) manipulateHTMLFile(asset assetmanagerLocalAsset, manager assetm
 	}
 	for i, m := range manips {
 		if err := m(r, doc); err != nil {
-			return fmt.Errorf(`Manipulation %v failed: %w`, i, err)
+			return fmt.Errorf(`manipulation %v failed: %w`, i, err)
 		}
 	}
 
@@ -279,7 +278,7 @@ func (c *client) writeChanges(htmlFile string, doc *html.Node) error {
 		return fmt.Errorf("failed to render html node to string: %w", err)
 	}
 
-	err = c.ioutilWriteFile(htmlFile, []byte(buf.String()), 0644)
+	err = c.ioutilWriteFile(htmlFile, buf.Bytes(), 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write changes to %q: %w", htmlFile, err)
 	}
