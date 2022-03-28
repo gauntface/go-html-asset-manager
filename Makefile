@@ -6,7 +6,7 @@ build: clean format
 	env GOOS=linux go build -ldflags="-s -w" -o ./bin/genimgs ./cmds/genimgs/genimgs.go
 
 # NOTE: Add the `-test.v` flag for verbose logging.
-test: gomodget build format
+test: gomodget build
 	mkdir -p coverage/
 	go test ./... -covermode=atomic -coverprofile ./coverage/cover.out
 	go tool cover -html=./coverage/cover.out -o ./coverage/cover.html
