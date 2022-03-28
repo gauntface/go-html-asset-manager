@@ -17,7 +17,6 @@
 package imgtopicture
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -31,8 +30,6 @@ import (
 )
 
 var (
-	errRelPath = errors.New("unable to get relative path")
-
 	genimgsOpen        = genimgs.Open
 	genimgsLookupSizes = genimgs.LookupSizes
 )

@@ -20,10 +20,16 @@ go get -u github.com/gauntface/go-html-asset-manager/v2/cmds/genimgs/
 
 ## Usage
 
-I typically use it via [this node wrapper](https://github.com/gauntface/html-asset-manager#html-asset-manager) but you can run it like so:
+From your web project you can run it like so:
 
 ```shell
 htmlassets
+```
+
+For configs living else where:
+
+```shell
+htmlassets --config="${HOME}/project/asset-manager.json"
 ```
 
 Then add an assetmanager.json file.

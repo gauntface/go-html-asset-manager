@@ -73,19 +73,24 @@ type ImgToPicConfig struct {
 }
 
 // Get reads and parses a Config file
-func Get(filePath string) (*Config, error) {
-	b, err := ioutil.ReadFile(filePath)
+func Get(inputPath string) (*Config, error) {
+	absPath, err := filepath.Abs(inputPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file %q: %v", filePath, err)
+		return nil, fmt.Errorf("failed to get absolute path for config file: %w", err)
+	}
+
+	b, err := ioutil.ReadFile(absPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config file %q: %v", inputPath, err)
 	}
 
 	var conf Config
 	err = json.Unmarshal(b, &conf)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse config file %q: %v", filePath, err)
+		return nil, fmt.Errorf("failed to parse config file %q: %v", inputPath, err)
 	}
 
-	dir := filepath.Dir(filePath)
+	dir := filepath.Dir(absPath)
 	conf.HTMLDir = abs(dir, conf.HTMLDir)
 
 	if conf.Assets != nil {

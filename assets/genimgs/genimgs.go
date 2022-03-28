@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"io/ioutil"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -22,9 +21,8 @@ var (
 	errFileHash = errors.New("failed to get file hash")
 	errRelPath  = errors.New("unable to get relative path")
 
-	imagingOpen   = imaging.Open
-	filesHash     = files.Hash
-	ioutilReadDir = ioutil.ReadDir
+	imagingOpen = imaging.Open
+	filesHash   = files.Hash
 )
 
 func getPath(conf *config.Config, imgPath string) string {
@@ -54,17 +52,19 @@ func LookupSizes(s3Client *s3.Client, conf *config.Config, imgPath string) ([]Ge
 func getImageSizes(s3Client *s3.Client, conf *config.Config, srcPath, hash string) ([]GenImg, error) {
 	filename := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
 	genDirName := fmt.Sprintf("%v.%v", filename, hash)
-	dirPath := filepath.Join(conf.GenAssets.OutputBucketDir, genDirName)
+	localDirPath := filepath.Join(conf.GenAssets.OutputDir, genDirName)
+	bucketDirPath := filepath.Join(conf.GenAssets.OutputBucketDir, genDirName)
 
-	objs, err := lookupS3Images(s3Client, conf, dirPath)
+	objs, err := lookupS3Images(s3Client, conf, bucketDirPath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to lookup S3 images in %v", dirPath)
+		return nil, fmt.Errorf("unable to lookup S3 images in %v", bucketDirPath)
 	}
 
 	maxSize := conf.GenAssets.MaxWidth * conf.GenAssets.MaxDensity
-	generatedDirURL, err := filepath.Rel(conf.Assets.StaticDir, dirPath)
+	generatedDirURL, err := filepath.Rel(conf.GenAssets.StaticDir, localDirPath)
 	if err != nil {
-		return nil, fmt.Errorf("%w from %q to %q: %v", errRelPath, conf.Assets.GeneratedDir, dirPath, err)
+		fmt.Printf("GENIMGS\nStaticDir: %v\nDirPath: %v\nRel: %v\n\n", conf.GenAssets.StaticDir, localDirPath, generatedDirURL)
+		return nil, fmt.Errorf("%w from %q to %q: %v", errRelPath, conf.GenAssets.StaticDir, localDirPath, err)
 	}
 
 	imgs := []GenImg{}

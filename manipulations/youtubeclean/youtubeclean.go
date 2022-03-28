@@ -38,6 +38,10 @@ var (
 	embedRegex = regexp.MustCompile(`/embed/(.*).*`)
 
 	errURLParse = errors.New("unable to parse URL")
+
+	supportedParams = map[string]bool{
+		"list": true,
+	}
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
@@ -73,15 +77,14 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			return nil
 		}
 
-		ytElement := ytElement(matches[1])
-
+		ytElement := ytElement(matches[1], queryParams(u.Query()))
 		htmlparsing.SwapNodes(ele, ytElement)
 	}
 	return nil
 }
 
 // H/T to @paulirish for the idea via https://github.com/paulirish/lite-youtube-embed
-func ytElement(videoID string) *html.Node {
+func ytElement(videoID string, params url.Values) *html.Node {
 	posterImg := &html.Node{
 		Type: html.ElementNode,
 		Data: "img",
@@ -97,13 +100,24 @@ func ytElement(videoID string) *html.Node {
 		},
 	}
 
+	vURL := fmt.Sprintf("https://www.youtube.com/watch?v=%v", videoID)
+	paramAttribs := []html.Attribute{}
+	if len(params) > 0 {
+		ps := paramsString(params)
+		vURL = fmt.Sprintf("%v&%v", vURL, ps)
+		paramAttribs = append(paramAttribs, html.Attribute{
+			Key: "videoparams",
+			Val: ps,
+		})
+	}
+
 	anchor := &html.Node{
 		Type: html.ElementNode,
 		Data: "a",
 		Attr: []html.Attribute{
 			{
 				Key: "href",
-				Val: fmt.Sprintf("https://www.youtube.com/watch?v=%v", videoID),
+				Val: vURL,
 			},
 			{
 				Key: "class",
@@ -120,18 +134,43 @@ func ytElement(videoID string) *html.Node {
 	container := &html.Node{
 		Type: html.ElementNode,
 		Data: "div",
-		Attr: []html.Attribute{
-			{
-				Key: "class",
-				Val: "n-hopin-lite-yt",
+		Attr: append(
+			[]html.Attribute{
+				{
+					Key: "class",
+					Val: "n-hopin-lite-yt",
+				},
+				{
+					Key: "videoid",
+					Val: videoID,
+				},
 			},
-			{
-				Key: "videoid",
-				Val: videoID,
-			},
-		},
+			paramAttribs...,
+		),
 	}
 	container.AppendChild(anchor)
 
 	return ratiocontainer.Wrap(container, defaultWidth, defaultHeight)
+}
+
+func queryParams(params url.Values) url.Values {
+	n := url.Values{}
+	for k, v := range params {
+		if _, ok := supportedParams[k]; !ok {
+			continue
+		}
+		// Use the last value
+		n[k] = v
+	}
+	return n
+}
+
+func paramsString(params url.Values) string {
+	pairs := []string{}
+	for k, vs := range params {
+		for _, v := range vs {
+			pairs = append(pairs, fmt.Sprintf("%v=%v", k, v))
+		}
+	}
+	return strings.Join(pairs, "&")
 }

@@ -241,6 +241,7 @@ func NewLocalAsset(relDir, path string) (*LocalAsset, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &LocalAsset{
 		assetType:    t,
 		assetMedia:   m,

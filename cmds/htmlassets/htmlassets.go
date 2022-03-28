@@ -25,6 +25,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"reflect"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -256,9 +258,9 @@ func (c *client) manipulateHTMLFile(asset assetmanagerLocalAsset, manager assetm
 		HasVimeo: c.vimeo != nil,
 		Config:   c.config,
 	}
-	for i, m := range manips {
+	for _, m := range manips {
 		if err := m(r, doc); err != nil {
-			return fmt.Errorf(`manipulation %v failed: %w`, i, err)
+			return fmt.Errorf(`manipulation %v failed: %w`, runtime.FuncForPC(reflect.ValueOf(m).Pointer()).Name(), err)
 		}
 	}
 
