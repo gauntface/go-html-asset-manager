@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.26.6
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
-	github.com/google/go-cmp v0.5.7
+	github.com/google/go-cmp v0.5.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.7.0
 	github.com/schollz/progressbar/v3 v3.8.6
