@@ -62,7 +62,8 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			wrappedElement = ratiocontainer.WrapWithMax(ele, width, height)
 		case "img":
 			if p != nil && p.Data == "picture" {
-				// If the img is inside a picture element, do nothing.
+				// If the img is inside a picture element, do nothing as we'll wrap
+				// the picture element.
 				wrappedElement = ele
 			} else {
 				wrappedElement = ratiocontainer.WrapWithMax(ele, width, height)
