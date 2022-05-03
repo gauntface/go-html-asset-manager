@@ -81,7 +81,7 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "wrap picture with max size applied",
 			selectors:   []string{"div"},
-			doc:         MustGetNode(t, `<div><picture width="2" height="1"><img/></picture></div>`),
+			doc:         MustGetNode(t, `<div><picture width="2" height="1"><img width="3" height="4"/></picture></div>`),
 			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container" style="max-width: 2px;"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:50%;"><picture><img style="position:absolute;width:100%;height:100%;"/></picture></div></div></div></body></html>`,
 		},
 		{

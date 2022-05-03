@@ -58,8 +58,15 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		// Wrap the element and place before it's sibling
 		var wrappedElement *html.Node
 		switch ele.Data {
-		case "picture", "img":
+		case "picture":
 			wrappedElement = ratiocontainer.WrapWithMax(ele, width, height)
+		case "img":
+			if p != nil && p.Data == "picture" {
+				// If the img is inside a picture element, do nothing.
+				wrappedElement = ele
+			} else {
+				wrappedElement = ratiocontainer.WrapWithMax(ele, width, height)
+			}
 		default:
 			wrappedElement = ratiocontainer.Wrap(ele, width, height)
 		}
