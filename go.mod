@@ -5,8 +5,8 @@ go 1.17
 require (
 	github.com/Kagami/go-avif v0.1.0
 	github.com/aws/aws-sdk-go-v2/config v1.15.4
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.7
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.26.7
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.8
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.26.8
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/google/go-cmp v0.5.8
