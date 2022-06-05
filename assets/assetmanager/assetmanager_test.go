@@ -231,10 +231,12 @@ func TestNewManager(t *testing.T) {
 				switch dir {
 				case "/assets/":
 					return []string{
+						"/assets/example.css",
 						"/assets/example.print.css",
 						"/assets/example-inline.screen.css",
 						"/assets/example-sync.braille.css",
 						"/assets/example-async.screen (min-width: 200px).css",
+						"/assets/example.js",
 						"/assets/example.print.js",
 						"/assets/example-inline.screen.js",
 						"/assets/example-sync.braille.js",
@@ -254,6 +256,15 @@ func TestNewManager(t *testing.T) {
 					// CSS
 					{
 						assetType:    assets.InlineCSS,
+						assetMedia:   "",
+						id:           "example",
+						originalPath: "/assets/example.css",
+						path:         "/assets/example.css",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
+					{
+						assetType:    assets.SyncCSS,
 						assetMedia:   "print",
 						id:           "example",
 						originalPath: "/assets/example.print.css",
@@ -290,6 +301,14 @@ func TestNewManager(t *testing.T) {
 					},
 
 					// JS
+					{
+						assetType:    assets.InlineJS,
+						id:           "example",
+						originalPath: "/assets/example.js",
+						path:         "/assets/example.js",
+						relativeDir:  "/assets/",
+						readFile:     ioutil.ReadFile,
+					},
 					{
 						assetType:    assets.InlineJS,
 						id:           "example.print",

@@ -69,16 +69,16 @@ func Generate(path string) string {
 
 func IdentifyType(path string) (assets.Type, string, error) {
 	fn, media, ext := filename(path)
-	t, err := assetType(fn, ext)
+	t, err := assetType(fn, media, ext)
 	return t, media, err
 }
 
-func assetType(fn, ext string) (assets.Type, error) {
+func assetType(fn, media, ext string) (assets.Type, error) {
 	switch ext {
 	case ".css":
-		return typeFromSyncSet(fn, assets.InlineCSS, assets.SyncCSS, assets.AsyncCSS, assets.PreloadCSS), nil
+		return typeFromSyncSet(fn, media, assets.InlineCSS, assets.SyncCSS, assets.AsyncCSS, assets.PreloadCSS), nil
 	case ".js":
-		return typeFromSyncSet(fn, assets.InlineJS, assets.SyncJS, assets.AsyncJS, assets.PreloadJS), nil
+		return typeFromSyncSet(fn, media, assets.InlineJS, assets.SyncJS, assets.AsyncJS, assets.PreloadJS), nil
 	case ".json":
 		return assets.JSON, nil
 	case ".html":
@@ -95,8 +95,11 @@ func assetType(fn, ext string) (assets.Type, error) {
 	return assets.Unknown, fmt.Errorf("%w: for file %q with extension %q", ErrUnknownType, fn, ext)
 }
 
-func typeFromSyncSet(fn string, inline, sync, async, preload assets.Type) assets.Type {
+func typeFromSyncSet(fn, media string, inline, sync, async, preload assets.Type) assets.Type {
 	t := inline
+	if media != "" {
+		t = sync
+	}
 	prefixes := map[string]assets.Type{
 		inlinePrefix:  inline,
 		syncPrefix:    sync,

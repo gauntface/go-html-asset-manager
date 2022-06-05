@@ -28,6 +28,7 @@ func TestTypeFromSyncSet(t *testing.T) {
 	tests := []struct {
 		description string
 		filename    string
+		media       string
 		inline      assets.Type
 		sync        assets.Type
 		async       assets.Type
@@ -73,7 +74,7 @@ func TestTypeFromSyncSet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got := typeFromSyncSet(tt.filename, tt.inline, tt.sync, tt.async, tt.preload)
+			got := typeFromSyncSet(tt.filename, tt.media, tt.inline, tt.sync, tt.async, tt.preload)
 			if got != tt.want {
 				t.Errorf("Unexpected result; got %v, want %v", got, tt.want)
 			}
@@ -176,6 +177,7 @@ func TestAssetType(t *testing.T) {
 	tests := []struct {
 		description string
 		filename    string
+		media       string
 		ext         string
 		want        assets.Type
 		wantError   error
@@ -194,8 +196,22 @@ func TestAssetType(t *testing.T) {
 			want:        assets.InlineCSS,
 		},
 		{
+			description: "return sync css without prefix and media",
+			filename:    "example",
+			media:       "print",
+			ext:         ".css",
+			want:        assets.SyncCSS,
+		},
+		{
 			description: "return inline css with prefix",
 			filename:    "example-inline",
+			ext:         ".css",
+			want:        assets.InlineCSS,
+		},
+		{
+			description: "return inline css with prefix and media",
+			filename:    "example-inline",
+			media:       "print",
 			ext:         ".css",
 			want:        assets.InlineCSS,
 		},
@@ -281,7 +297,7 @@ func TestAssetType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got, err := assetType(tt.filename, tt.ext)
+			got, err := assetType(tt.filename, tt.media, tt.ext)
 			if tt.wantError != nil {
 				if !errors.Is(err, tt.wantError) {
 					t.Fatalf("Different error returned; got %v, want %v", err, tt.wantError)
