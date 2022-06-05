@@ -152,37 +152,6 @@ func Test_SyncCSSTag(t *testing.T) {
 	}
 }
 
-func Test_AsyncCSSTag(t *testing.T) {
-	tests := []struct {
-		description string
-		cms         []CSSMediaPair
-		want        string
-	}{
-		{
-			description: "return link tag",
-			cms: []CSSMediaPair{
-				{
-					URL: "/example-1.css",
-				},
-				{
-					URL:   "/example-2.css",
-					Media: "print",
-				},
-			},
-			want: `<script>var haCSS = [{url:'/example-1.css'},{url:'/example-2.css',media:'print'}];</script>`,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			got := AsyncCSSTag(tt.cms)
-			if diff := cmp.Diff(MustRenderNode(t, got), tt.want); diff != "" {
-				t.Fatalf("Unexpected result; diff %v", diff)
-			}
-		})
-	}
-}
-
 func Test_InlineJSTag(t *testing.T) {
 	tests := []struct {
 		description string

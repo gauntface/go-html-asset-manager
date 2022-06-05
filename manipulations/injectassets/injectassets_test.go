@@ -85,23 +85,6 @@ func TestManipulator(t *testing.T) {
 		wantHTML    string
 	}{
 		{
-			description: "return error if adding async css asset fails",
-			findNode:    htmlparsing.FindNodeByTag,
-			doc:         MustGetNode(t, `<div class="example-1 example-2"></div>`),
-			assets: &assetstubs.Manager{
-				WithIDReturn: map[string]map[assets.Type][]assetmanager.Asset{
-					"example-1": {
-						assets.AsyncCSS: []assetmanager.Asset{
-							&assetstubs.Asset{
-								URLError: errInjected,
-							},
-						},
-					},
-				},
-			},
-			wantError: errInjected,
-		},
-		{
 			description: "return error if getting head node fails",
 			assets:      &assetstubs.Manager{},
 			findNode: func(tag string, node *html.Node) *html.Node {
@@ -197,7 +180,7 @@ func TestManipulator(t *testing.T) {
 					},
 				},
 			},
-			wantHTML: `<html><head><style>example-1 inline contents</style></head><body><div class="example-1 example-2"></div><script>var haCSS = [{url:'/example-1-async.css'},{url:'/example-1-async.print.css',media:'print'},{url:'/example-2-async.css'}];</script></body></html>`,
+			wantHTML: `<html><head><style>example-1 inline contents</style><link rel="preload" as="style" href="/example-1-async.css"/><link rel="preload" as="style" href="/example-1-async.print.css"/></head><body><div class="example-1 example-2"></div></body></html>`,
 		},
 		{
 			description: "add preload assets",
@@ -496,65 +479,6 @@ func TestAddAsyncJS(t *testing.T) {
 			body := htmlparsing.FindNodeByTag("body", doc)
 
 			err := addAsyncJS(head, body, tt.asset)
-			if !errors.Is(err, tt.wantError) {
-				t.Errorf("Unexpected error; got %v, want %v", err, tt.wantError)
-			}
-
-			if err != nil {
-				return
-			}
-
-			got := MustRenderNode(t, doc)
-			if !cmp.Equal(got, tt.want) {
-				t.Errorf("Unexpected result; Diff %v", cmp.Diff(got, tt.want))
-			}
-		})
-	}
-}
-
-func TestAddAsyncCSS(t *testing.T) {
-	tests := []struct {
-		description string
-		assets      []assetmanager.Asset
-		want        string
-		wantError   error
-	}{
-		{
-			description: "return error if getting contents fails",
-			assets: []assetmanager.Asset{
-				&assetstubs.Asset{
-					URLError: errInjected,
-				},
-			},
-			wantError: errInjected,
-		},
-		{
-			description: "add asset to body without media",
-			assets: []assetmanager.Asset{
-				&assetstubs.Asset{
-					URLReturn: "http://example.com/url.css",
-				},
-			},
-			want: `<html><head></head><body><script>var haCSS = [{url:'http://example.com/url.css'}];</script></body></html>`,
-		},
-		{
-			description: "add asset to body with media",
-			assets: []assetmanager.Asset{
-				&assetstubs.Asset{
-					URLReturn:   "http://example.com/url.css",
-					MediaReturn: "print",
-				},
-			},
-			want: `<html><head></head><body><script>var haCSS = [{url:'http://example.com/url.css',media:'print'}];</script></body></html>`,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			doc := MustGetNode(t, "")
-			body := htmlparsing.FindNodeByTag("body", doc)
-
-			err := addAsyncCSS(body, tt.assets)
 			if !errors.Is(err, tt.wantError) {
 				t.Errorf("Unexpected error; got %v, want %v", err, tt.wantError)
 			}

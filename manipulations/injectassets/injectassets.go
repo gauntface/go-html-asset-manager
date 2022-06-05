@@ -57,14 +57,9 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		return err
 	}
 
-	asyncCSS := getAssetsForType(keys, runtime.Assets, assets.AsyncCSS)
-	err = addAsyncCSS(bodyNode, asyncCSS)
-	if err != nil {
-		return err
-	}
-
 	injectMap := map[assets.Type]func(headNode, bodyNode *html.Node, asset assetmanager.Asset) error{
 		assets.SyncCSS:    addSyncCSS,
+		assets.AsyncCSS:   addPreloadCSS,
 		assets.PreloadCSS: addPreloadCSS,
 
 		assets.InlineJS:  addInlineJS,
@@ -142,26 +137,6 @@ func addSyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
 		URL:   u,
 		Media: asset.Media(),
 	}))
-	return nil
-}
-
-func addAsyncCSS(bodyNode *html.Node, assets []assetmanager.Asset) error {
-	if len(assets) == 0 {
-		return nil
-	}
-
-	cms := []htmlparsing.CSSMediaPair{}
-	for _, a := range assets {
-		u, err := a.URL()
-		if err != nil {
-			return err
-		}
-		cms = append(cms, htmlparsing.CSSMediaPair{
-			URL:   u,
-			Media: a.Media(),
-		})
-	}
-	bodyNode.AppendChild(htmlparsing.AsyncCSSTag(cms))
 	return nil
 }
 

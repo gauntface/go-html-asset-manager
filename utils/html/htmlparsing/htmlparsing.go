@@ -17,7 +17,6 @@
 package htmlparsing
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -76,33 +75,6 @@ func SyncCSSTag(cm CSSMediaPair) *html.Node {
 		Type: html.ElementNode,
 		Data: "link",
 		Attr: attr,
-	}
-}
-
-func AsyncCSSTag(cms []CSSMediaPair) *html.Node {
-	asyncCSS := []string{}
-	for _, cm := range cms {
-		parts := []string{
-			fmt.Sprintf("url:'%v'", cm.URL),
-		}
-		if cm.Media != "" {
-			parts = append(parts, fmt.Sprintf("media:'%v'", cm.Media))
-		}
-		asyncCSS = append(asyncCSS, fmt.Sprintf("{%v}", strings.Join(parts, ",")))
-	}
-
-	js := fmt.Sprintf(
-		`var haCSS = [%v];`,
-		strings.Join(asyncCSS, ","),
-	)
-
-	return &html.Node{
-		Type: html.ElementNode,
-		Data: "script",
-		FirstChild: &html.Node{
-			Type: html.TextNode,
-			Data: js,
-		},
 	}
 }
 

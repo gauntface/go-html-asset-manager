@@ -1,0 +1,9 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/matt/Projects/Code/go-html-asset-manager'
+rm -rf ./bin ./vendor Gopkg.lock
+go fmt ./...
+export GO111MODULE=on
+env GOOS=linux go build -ldflags="-s -w" -o ./bin/htmlassets ./cmds/htmlassets/htmlassets.go
+env GOOS=linux go build -ldflags="-s -w" -o ./bin/genimgs ./cmds/genimgs/genimgs.go
+make: Leaving directory '/home/matt/Projects/Code/go-html-asset-manager'
+ 
