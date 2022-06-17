@@ -156,7 +156,13 @@ func TestManipulator(t *testing.T) {
 						assets.InlineCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
 								TypeReturn:     assets.InlineCSS,
-								ContentsReturn: "example-1 inline contents",
+								ContentsReturn: "example-1 inline contents 2",
+								URLReturn:      "/example-1-inline.2.css",
+							},
+							&assetstubs.Asset{
+								TypeReturn:     assets.InlineCSS,
+								ContentsReturn: "example-1 inline contents 1",
+								URLReturn:      "/example-1-inline.1.css",
 							},
 						},
 						assets.AsyncCSS: []assetmanager.Asset{
@@ -174,13 +180,18 @@ func TestManipulator(t *testing.T) {
 					"example-2": {
 						assets.AsyncCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
-								URLReturn: "/example-2-async.css",
+								URLReturn: "/example-2-async.1.css",
+							},
+							&assetstubs.Asset{
+								URLReturn: "/example-2-async.2.css",
 							},
 						},
 					},
 				},
 			},
-			wantHTML: `<html><head><style>example-1 inline contents</style><link rel="preload" as="style" href="/example-1-async.css"/><link rel="preload" as="style" href="/example-1-async.print.css"/></head><body><div class="example-1 example-2"></div></body></html>`,
+			wantHTML: `<html><head><style>example-1 inline contents 1
+
+example-1 inline contents 2</style><link rel="preload" as="style" href="/example-1-async.css"/><link rel="preload" as="style" href="/example-1-async.print.css"/></head><body><div class="example-1 example-2"></div></body></html>`,
 		},
 		{
 			description: "add preload assets",
@@ -319,13 +330,6 @@ func TestSyncCSS(t *testing.T) {
 		wantError   error
 	}{
 		{
-			description: "return error if getting contents fails",
-			asset: &assetstubs.Asset{
-				URLError: errInjected,
-			},
-			wantError: errInjected,
-		},
-		{
 			description: "add asset to head",
 			asset: &assetstubs.Asset{
 				URLReturn: "http://example.com/url.css",
@@ -411,13 +415,6 @@ func TestAddSyncJS(t *testing.T) {
 		wantError   error
 	}{
 		{
-			description: "return error if getting contents fails",
-			asset: &assetstubs.Asset{
-				URLError: errInjected,
-			},
-			wantError: errInjected,
-		},
-		{
 			description: "add asset to head",
 			asset: &assetstubs.Asset{
 				URLReturn: "http://example.com/url.js",
@@ -456,13 +453,6 @@ func TestAddAsyncJS(t *testing.T) {
 		want        string
 		wantError   error
 	}{
-		{
-			description: "return error if getting contents fails",
-			asset: &assetstubs.Asset{
-				URLError: errInjected,
-			},
-			wantError: errInjected,
-		},
 		{
 			description: "add asset to head",
 			asset: &assetstubs.Asset{
@@ -503,13 +493,6 @@ func TestAddPreloadCSS(t *testing.T) {
 		wantError   error
 	}{
 		{
-			description: "return error if getting url fails",
-			asset: &assetstubs.Asset{
-				URLError: errInjected,
-			},
-			wantError: errInjected,
-		},
-		{
 			description: "add asset to head",
 			asset: &assetstubs.Asset{
 				URLReturn: "http://example.com/url.css",
@@ -548,13 +531,6 @@ func TestAddPreloadJS(t *testing.T) {
 		want        string
 		wantError   error
 	}{
-		{
-			description: "return error if getting url fails",
-			asset: &assetstubs.Asset{
-				URLError: errInjected,
-			},
-			wantError: errInjected,
-		},
 		{
 			description: "add asset to head",
 			asset: &assetstubs.Asset{

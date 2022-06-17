@@ -57,7 +57,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		return err
 	}
 
-	injectMap := map[assets.Type]func(headNode, bodyNode *html.Node, asset assetmanager.Asset) error{
+	injectMap := map[assets.Type]addAssetFunc{
 		assets.SyncCSS:    addSyncCSS,
 		assets.AsyncCSS:   addPreloadCSS,
 		assets.PreloadCSS: addPreloadCSS,
@@ -92,7 +92,7 @@ func toArray(assetsByType map[assets.Type][]assetmanager.Asset) []assetmanager.A
 	}
 
 	sort.Slice(ar, func(i, j int) bool {
-		return ar[i].ID() < ar[j].ID()
+		return ar[i].URL() < ar[j].URL()
 	})
 
 	return ar
@@ -108,6 +108,11 @@ func getAssetsForType(keys sets.StringSet, manager manipulations.AssetManager, a
 			}
 		}
 	}
+
+	sort.Slice(assets, func(i, j int) bool {
+		return assets[i].URL() < assets[j].URL()
+	})
+
 	return assets
 }
 
@@ -129,23 +134,15 @@ func addInlineCSS(headNode *html.Node, assets []assetmanager.Asset) error {
 }
 
 func addSyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
-	u, err := asset.URL()
-	if err != nil {
-		return err
-	}
 	headNode.AppendChild(htmlparsing.SyncCSSTag(htmlparsing.CSSMediaPair{
-		URL:   u,
+		URL:   asset.URL(),
 		Media: asset.Media(),
 	}))
 	return nil
 }
 
 func addPreloadCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
-	u, err := asset.URL()
-	if err != nil {
-		return err
-	}
-	headNode.AppendChild(htmlparsing.PreloadTag("style", u))
+	headNode.AppendChild(htmlparsing.PreloadTag("style", asset.URL()))
 	return nil
 }
 
@@ -159,29 +156,17 @@ func addInlineJS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error 
 }
 
 func addSyncJS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
-	u, err := asset.URL()
-	if err != nil {
-		return err
-	}
-	bodyNode.AppendChild(htmlparsing.SyncJSTag(u))
+	bodyNode.AppendChild(htmlparsing.SyncJSTag(asset.URL()))
 	return nil
 }
 
 func addAsyncJS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
-	u, err := asset.URL()
-	if err != nil {
-		return err
-	}
-	bodyNode.AppendChild(htmlparsing.AsyncJSTag(u))
+	bodyNode.AppendChild(htmlparsing.AsyncJSTag(asset.URL()))
 	return nil
 }
 
 func addPreloadJS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
-	u, err := asset.URL()
-	if err != nil {
-		return err
-	}
-	headNode.AppendChild(htmlparsing.PreloadTag("script", u))
+	headNode.AppendChild(htmlparsing.PreloadTag("script", asset.URL()))
 	return nil
 }
 
@@ -208,3 +193,5 @@ func prettyPrintKeys(debug bool, keys []string) {
 	fmt.Printf("HTML file keys\n")
 	fmt.Println(stringui.Table(headings, rows))
 }
+
+type addAssetFunc func(headNode, bodyNode *html.Node, asset assetmanager.Asset) error

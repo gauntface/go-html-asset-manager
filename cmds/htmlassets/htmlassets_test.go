@@ -430,7 +430,7 @@ func Test_run(t *testing.T) {
 			manager: &assetstubs.Manager{
 				WithTypeReturn: map[assets.Type][]assetmanager.Asset{
 					assets.HTML: {
-						assetstubs.MustNewLocalAsset(t, "/tmp/", "should-not-exist.html"),
+						assetstubs.MustNewLocalAsset(t, "testdata/noassets/", "index.html"),
 					},
 				},
 			},

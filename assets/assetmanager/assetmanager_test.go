@@ -144,6 +144,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example.css",
 						path:         "/assets/example.css",
 						relativeDir:  "/assets/",
+						url:          "/example.css",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -152,6 +153,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-inline.css",
 						path:         "/assets/example-inline.css",
 						relativeDir:  "/assets/",
+						url:          "/example-inline.css",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -160,6 +162,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-sync.css",
 						path:         "/assets/example-sync.css",
 						relativeDir:  "/assets/",
+						url:          "/example-sync.css",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -168,6 +171,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-async.css",
 						path:         "/assets/example-async.css",
 						relativeDir:  "/assets/",
+						url:          "/example-async.css",
 						readFile:     ioutil.ReadFile,
 					},
 
@@ -178,6 +182,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example.js",
 						path:         "/assets/example.js",
 						relativeDir:  "/assets/",
+						url:          "/example.js",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -186,6 +191,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-inline.js",
 						path:         "/assets/example-inline.js",
 						relativeDir:  "/assets/",
+						url:          "/example-inline.js",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -194,6 +200,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-sync.js",
 						path:         "/assets/example-sync.js",
 						relativeDir:  "/assets/",
+						url:          "/example-sync.js",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -202,6 +209,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-async.js",
 						path:         "/assets/example-async.js",
 						relativeDir:  "/assets/",
+						url:          "/example-async.js",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -210,6 +218,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/json/example.json",
 						path:         "/json/example.json",
 						relativeDir:  "/json/",
+						url:          "/example.json",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -218,6 +227,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/json/example-inline.json",
 						path:         "/json/example-inline.json",
 						relativeDir:  "/json/",
+						url:          "/example-inline.json",
 						readFile:     ioutil.ReadFile,
 					},
 				},
@@ -261,6 +271,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example.css",
 						path:         "/assets/example.css",
 						relativeDir:  "/assets/",
+						url:          "/example.css",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -270,6 +281,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example.print.css",
 						path:         "/assets/example.print.css",
 						relativeDir:  "/assets/",
+						url:          "/example.print.css",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -279,6 +291,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-inline.screen.css",
 						path:         "/assets/example-inline.screen.css",
 						relativeDir:  "/assets/",
+						url:          "/example-inline.screen.css",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -288,6 +301,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-sync.braille.css",
 						path:         "/assets/example-sync.braille.css",
 						relativeDir:  "/assets/",
+						url:          "/example-sync.braille.css",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -297,6 +311,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-async.screen (min-width: 200px).css",
 						path:         "/assets/example-async.screen (min-width: 200px).css",
 						relativeDir:  "/assets/",
+						url:          "/example-async.screen (min-width: 200px).css",
 						readFile:     ioutil.ReadFile,
 					},
 
@@ -307,6 +322,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example.js",
 						path:         "/assets/example.js",
 						relativeDir:  "/assets/",
+						url:          "/example.js",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -315,6 +331,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example.print.js",
 						path:         "/assets/example.print.js",
 						relativeDir:  "/assets/",
+						url:          "/example.print.js",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -323,6 +340,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-inline.screen.js",
 						path:         "/assets/example-inline.screen.js",
 						relativeDir:  "/assets/",
+						url:          "/example-inline.screen.js",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -331,6 +349,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-sync.braille.js",
 						path:         "/assets/example-sync.braille.js",
 						relativeDir:  "/assets/",
+						url:          "/example-sync.braille.js",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -339,14 +358,18 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/assets/example-async.screen (min-width: 200px).js",
 						path:         "/assets/example-async.screen (min-width: 200px).js",
 						relativeDir:  "/assets/",
+						url:          "/example-async.screen (min-width: 200px).js",
 						readFile:     ioutil.ReadFile,
 					},
+
+					// JSON
 					{
 						assetType:    assets.JSON,
 						id:           "example.print",
 						originalPath: "/json/example.print.json",
 						path:         "/json/example.print.json",
 						relativeDir:  "/json/",
+						url:          "/example.print.json",
 						readFile:     ioutil.ReadFile,
 					},
 					{
@@ -355,6 +378,7 @@ func TestNewManager(t *testing.T) {
 						originalPath: "/json/example-inline.screen (min-width: 200px).json",
 						path:         "/json/example-inline.screen (min-width: 200px).json",
 						relativeDir:  "/json/",
+						url:          "/example-inline.screen (min-width: 200px).json",
 						readFile:     ioutil.ReadFile,
 					},
 				},
@@ -437,6 +461,7 @@ func Test_findLocalAssets(t *testing.T) {
 					path:         "/example/example.css",
 					relativeDir:  "/example/",
 					readFile:     ioutil.ReadFile,
+					url:          "/example.css",
 				},
 				{
 					assetType:    assets.InlineCSS,
@@ -444,6 +469,7 @@ func Test_findLocalAssets(t *testing.T) {
 					originalPath: "/example/example-inline.css",
 					path:         "/example/example-inline.css",
 					relativeDir:  "/example/",
+					url:          "/example-inline.css",
 					readFile:     ioutil.ReadFile,
 				},
 				{
@@ -452,6 +478,7 @@ func Test_findLocalAssets(t *testing.T) {
 					originalPath: "/example/example-sync.css",
 					path:         "/example/example-sync.css",
 					relativeDir:  "/example/",
+					url:          "/example-sync.css",
 					readFile:     ioutil.ReadFile,
 				},
 				{
@@ -460,6 +487,7 @@ func Test_findLocalAssets(t *testing.T) {
 					originalPath: "/example/example-async.css",
 					path:         "/example/example-async.css",
 					relativeDir:  "/example/",
+					url:          "/example-async.css",
 					readFile:     ioutil.ReadFile,
 				},
 			},
@@ -517,6 +545,7 @@ func TestNewLocalAsset(t *testing.T) {
 				originalPath: "/example/example.css",
 				path:         "/example/example.css",
 				relativeDir:  "/example/",
+				url:          "/example.css",
 
 				readFile: ioutil.ReadFile,
 			},
@@ -972,21 +1001,11 @@ func TestLocalAsset_URL(t *testing.T) {
 		description string
 		asset       *LocalAsset
 		want        string
-		wantError   error
 	}{
 		{
-			description: "return error if read fails",
+			description: "return file url",
 			asset: &LocalAsset{
-				relativeDir: "..",
-				path:        "/example/original.html",
-			},
-			wantError: errRelPath,
-		},
-		{
-			description: "return file contents",
-			asset: &LocalAsset{
-				relativeDir: "/example/",
-				path:        "/example/original.html",
+				url: "/original.html",
 			},
 			want: "/original.html",
 		},
@@ -994,10 +1013,7 @@ func TestLocalAsset_URL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got, err := tt.asset.URL()
-			if !errors.Is(err, tt.wantError) {
-				t.Fatalf("Unexpected error; got %v, want %v", err, tt.wantError)
-			}
+			got := tt.asset.URL()
 
 			if diff := cmp.Diff(got, tt.want); diff != "" {
 				t.Errorf("Unexpected result; Diff %v", diff)
@@ -1222,10 +1238,9 @@ func TestRemoteAsset_URL(t *testing.T) {
 		description string
 		asset       *RemoteAsset
 		want        string
-		wantError   error
 	}{
 		{
-			description: "return error if read fails",
+			description: "return url",
 			asset: &RemoteAsset{
 				url: "http://example.com/url.html",
 			},
@@ -1235,10 +1250,7 @@ func TestRemoteAsset_URL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got, err := tt.asset.URL()
-			if !errors.Is(err, tt.wantError) {
-				t.Fatalf("Unexpected error; got %v, want %v", err, tt.wantError)
-			}
+			got := tt.asset.URL()
 
 			if diff := cmp.Diff(got, tt.want); diff != "" {
 				t.Errorf("Unexpected result; Diff %v", diff)
