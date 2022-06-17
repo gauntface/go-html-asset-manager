@@ -150,6 +150,12 @@ func Test_orderedSourceSets(t *testing.T) {
 						URL:  "/image.png",
 					},
 				},
+				"image/avif": {
+					{
+						Type: "image/avif",
+						URL:  "/image.avif",
+					},
+				},
 				"image/webp": {
 					{
 						Type: "image/webp",
@@ -158,6 +164,12 @@ func Test_orderedSourceSets(t *testing.T) {
 				},
 			},
 			want: [][]genimgs.GenImg{
+				{
+					{
+						Type: "image/avif",
+						URL:  "/image.avif",
+					},
+				},
 				{
 					{
 						Type: "image/webp",

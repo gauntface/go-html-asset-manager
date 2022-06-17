@@ -234,8 +234,9 @@ func createSourceElement(imgtopic *config.ImgToPicConfig, imgs []genimgs.GenImg)
 }
 
 func orderedSourceSets(sourceSetByType map[string][]genimgs.GenImg) [][]genimgs.GenImg {
-	// Order of src-set is important and we prefer webp over other formats
+	// Order of src-set is important and we prefer avif, and then webp over other formats
 	desiredOrder := []string{
+		"image/avif",
 		"image/webp",
 	}
 
