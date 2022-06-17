@@ -40,8 +40,6 @@ type AssetsConfig struct {
 	StaticDir string `json:"static-dir"`
 	// path to a directory containing JSON files for asset injection
 	JSONDir string `json:"json-dir"`
-	// path to a directory containing generate files
-	GeneratedDir string `json:"generated-dir"`
 }
 
 // GeneratedImagesConfig defines config options for gen-imgs cmd
@@ -99,9 +97,6 @@ func Get(inputPath string) (*Config, error) {
 		}
 		if conf.Assets.JSONDir != "" {
 			conf.Assets.JSONDir = abs(dir, conf.Assets.JSONDir)
-		}
-		if conf.Assets.GeneratedDir != "" {
-			conf.Assets.GeneratedDir = abs(dir, conf.Assets.GeneratedDir)
 		}
 	}
 	if conf.GenAssets != nil {

@@ -53,7 +53,7 @@ func shouldRun(conf *config.Config) bool {
 		return false
 	}
 
-	if conf.Assets == nil || conf.Assets.StaticDir == "" || conf.Assets.GeneratedDir == "" {
+	if conf.Assets == nil || conf.Assets.StaticDir == "" {
 		return false
 	}
 

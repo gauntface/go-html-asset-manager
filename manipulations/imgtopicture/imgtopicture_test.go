@@ -81,8 +81,7 @@ func Test_shouldRun(t *testing.T) {
 			description: "return false for config without generated dir",
 			conf: &config.Config{
 				Assets: &config.AssetsConfig{
-					StaticDir:    "/",
-					GeneratedDir: "",
+					StaticDir: "/",
 				},
 			},
 			want: false,
@@ -91,8 +90,7 @@ func Test_shouldRun(t *testing.T) {
 			description: "return false for config without ImgToPicture",
 			conf: &config.Config{
 				Assets: &config.AssetsConfig{
-					StaticDir:    "/",
-					GeneratedDir: "/generated",
+					StaticDir: "/",
 				},
 				ImgToPicture: nil,
 			},
@@ -102,8 +100,7 @@ func Test_shouldRun(t *testing.T) {
 			description: "return true for config required params",
 			conf: &config.Config{
 				Assets: &config.AssetsConfig{
-					StaticDir:    "/",
-					GeneratedDir: "/generated",
+					StaticDir: "/",
 				},
 				ImgToPicture: []*config.ImgToPicConfig{
 					{
@@ -569,8 +566,7 @@ func Test_Manipulator(t *testing.T) {
 			runtime: manipulations.Runtime{
 				Config: &config.Config{
 					Assets: &config.AssetsConfig{
-						StaticDir:    "/",
-						GeneratedDir: "/generated/",
+						StaticDir: "/",
 					},
 					ImgToPicture: []*config.ImgToPicConfig{
 						{
@@ -595,8 +591,7 @@ func Test_Manipulator(t *testing.T) {
 			runtime: manipulations.Runtime{
 				Config: &config.Config{
 					Assets: &config.AssetsConfig{
-						StaticDir:    "/",
-						GeneratedDir: "/generated/",
+						StaticDir: "/",
 					},
 					ImgToPicture: []*config.ImgToPicConfig{
 						{
