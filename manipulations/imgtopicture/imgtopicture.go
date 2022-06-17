@@ -238,6 +238,8 @@ func orderedSourceSets(sourceSetByType map[string][]genimgs.GenImg) [][]genimgs.
 	desiredOrder := []string{
 		"image/avif",
 		"image/webp",
+		// Undefined is used for jpg and png
+		"",
 	}
 
 	sourceSets := [][]genimgs.GenImg{}
@@ -247,20 +249,28 @@ func orderedSourceSets(sourceSetByType map[string][]genimgs.GenImg) [][]genimgs.
 			continue
 		}
 		sourceSets = append(sourceSets, v)
-		delete(sourceSetByType, dt)
 	}
 
-	other := [][]genimgs.GenImg{}
-	for _, i := range sourceSetByType {
-		other = append(other, i)
+	otherTypes := []string{}
+	for t := range sourceSetByType {
+		knownType := false
+		for _, o := range desiredOrder {
+			if o == t {
+				knownType = true
+				break
+			}
+		}
+		if !knownType {
+			otherTypes = append(otherTypes, t)
+		}
 	}
 
-	// Sort the other values to ensure tests are reliable
-	sort.Slice(other, func(i, j int) bool {
-		return other[i][0].Type < other[j][0].Type
-	})
-
-	sourceSets = append(sourceSets, other...)
+	if len(otherTypes) > 0 {
+		fmt.Printf("⚠️ %v unexpected image format(s) in picture source set:\n", len(otherTypes))
+		for _, t := range otherTypes {
+			fmt.Printf("    - %v\n", t)
+		}
+	}
 
 	return sourceSets
 }

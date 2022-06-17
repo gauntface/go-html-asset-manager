@@ -138,15 +138,13 @@ func Test_orderedSourceSets(t *testing.T) {
 		{
 			description: "return sorted sets",
 			sourceSetByType: map[string][]genimgs.GenImg{
-				"image/jpg": {
+				"": {
 					{
-						Type: "image/jpg",
+						Type: "",
 						URL:  "/image.jpg",
 					},
-				},
-				"image/png": {
 					{
-						Type: "image/png",
+						Type: "",
 						URL:  "/image.png",
 					},
 				},
@@ -160,6 +158,12 @@ func Test_orderedSourceSets(t *testing.T) {
 					{
 						Type: "image/webp",
 						URL:  "/image.webp",
+					},
+				},
+				"image/newformat": {
+					{
+						Type: "image/newformat",
+						URL:  "/image.newformat",
 					},
 				},
 			},
@@ -178,13 +182,11 @@ func Test_orderedSourceSets(t *testing.T) {
 				},
 				{
 					{
-						Type: "image/jpg",
+						Type: "",
 						URL:  "/image.jpg",
 					},
-				},
-				{
 					{
-						Type: "image/png",
+						Type: "",
 						URL:  "/image.png",
 					},
 				},
@@ -297,19 +299,19 @@ func Test_pictureElement(t *testing.T) {
 			},
 			sizes: []genimgs.GenImg{
 				{
-					Type: "image/png",
+					Type: "",
 					Size: 1,
 					URL:  "/example-1.png",
 				},
 				{
-					Type: "image/png",
+					Type: "",
 					Size: 2,
 					URL:  "/example-2.png",
 				},
 			},
 			origWidth:  3,
 			origHeight: 3,
-			want:       `<picture><source type="image/png" sizes="min-width(800px) 800px,100vw" srcset="/example-1.png 1w,/example-2.png 2w"/><img src="/example.png"/></picture>`,
+			want:       `<picture width="2" height="2"><source sizes="min-width(800px) 800px,100vw" srcset="/example-1.png 1w,/example-2.png 2w"/><img src="/example-2.png"/></picture>`,
 		},
 		{
 			description: "return picture element for img with gen images without a type",
