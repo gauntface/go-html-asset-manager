@@ -1,1 +1,0 @@
-{"buildTargets":["build","clean","format","gomodgen","gomodget","test"],"launchTargets":[],"customConfigurationProvider":{"workspaceBrowse":{"browsePath":[],"compilerArgs":[]},"fileIndex":[]}}
