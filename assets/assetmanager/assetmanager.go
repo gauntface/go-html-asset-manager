@@ -243,11 +243,6 @@ func NewLocalAsset(relDir, assetPath string) (*LocalAsset, error) {
 		return nil, err
 	}
 
-	relPath, err := filepath.Rel(relDir, assetPath)
-	if err != nil {
-		return nil, fmt.Errorf("%w for directory %q and file %q; %v", errRelPath, relDir, assetPath, err)
-	}
-
 	return &LocalAsset{
 		assetType:    t,
 		assetMedia:   m,
@@ -255,7 +250,6 @@ func NewLocalAsset(relDir, assetPath string) (*LocalAsset, error) {
 		originalPath: assetPath,
 		path:         assetPath,
 		relativeDir:  relDir,
-		url:          path.Join("/", relPath),
 
 		readFile: ioutil.ReadFile,
 	}, nil
@@ -290,8 +284,14 @@ func (l *LocalAsset) Contents() (string, error) {
 	return string(b), err
 }
 
-func (l *LocalAsset) URL() string {
-	return l.url
+func (l *LocalAsset) URL() (string, error) {
+	relPath, err := filepath.Rel(l.relativeDir, l.path)
+	if err != nil {
+		return "", fmt.Errorf("%w for directory %q and file %q; %v", errRelPath, l.relativeDir, l.path, err)
+	}
+
+	return path.Join("/", relPath), nil
+
 }
 
 func (l *LocalAsset) IsLocal() bool {
@@ -335,8 +335,8 @@ func (r *RemoteAsset) ID() string {
 	return r.id
 }
 
-func (r *RemoteAsset) URL() string {
-	return r.url
+func (r *RemoteAsset) URL() (string, error) {
+	return r.url, nil
 }
 
 func (r *RemoteAsset) Contents() (string, error) {
@@ -380,7 +380,7 @@ type Asset interface {
 	ID() string
 	Type() assets.Type
 	Media() string
-	URL() string
+	URL() (string, error)
 	Contents() (string, error)
 	IsLocal() bool
 	String() string

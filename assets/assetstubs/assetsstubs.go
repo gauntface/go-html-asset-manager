@@ -56,6 +56,7 @@ type Asset struct {
 	MediaReturn string
 
 	URLReturn string
+	URLError  error
 
 	ContentsReturn string
 	ContentsError  error
@@ -81,8 +82,8 @@ func (a *Asset) Media() string {
 	return a.MediaReturn
 }
 
-func (a *Asset) URL() string {
-	return a.URLReturn
+func (a *Asset) URL() (string, error) {
+	return a.URLReturn, a.URLError
 }
 
 func (a *Asset) Contents() (string, error) {
