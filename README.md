@@ -7,21 +7,26 @@ The asset manager does the following:
 
 Looks through all of your site's files for HTML, CSS, JS, and image files
 The CSS and JS files are categorized into asset groups (group assignment is done via name convention discussed below):
-Inline
-Synchronous
-Asynchronous
-Preload
+
+- Inline
+- Synchronous
+- Asynchronous
+- Preload
+
 For each HTML file, the asset manager runs a set of "manipulators" listed below:
-Removes any existing CSS and JS on the page
-Async Src
-Default Size for iframes
-Add sizes to images
-Generates picture element markup
-Injects the required CSS and JS based on the HTML and classes used in the page
-Add `lazyload` to images
-Updates image for Open Graph to a suitable size
-Wraps images and iframes with divs to apply appropriate ratios to the elements
-Swaps out YouTube and Vimeo iframes with a static image
+
+- Removes any existing CSS and JS on the page
+- Async Src
+- Default Size for iframes
+- Add width and height attributes to images
+- Generates multiple image sizes
+- Generates picture element markup
+- Injects the required CSS and JS based on the HTML and classes used in the page
+- Add `lazyload` to images
+- Updates image for Open Graph to a suitable size
+- Wraps images and iframes with divs to apply appropriate ratios to the elements
+- Swaps out YouTube and Vimeo iframes with a static image
+- Revision assets for safe long term caching
 
 ## Why do all of this?
 Using go-html-asset-manager will improve the overall performance of a site without requiring a specific build process or site generator.
