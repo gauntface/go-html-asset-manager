@@ -75,17 +75,19 @@ To use this tool, create an `asset-manager.json` file at the root of your projec
   }
 ```
 
-With this file, the next step is to name your CSS and JS files in the following structure:
+This configuration file describes you project so go-html-asset-manager knows where to find the CSS and JS files.
+
+The next step is to name your CSS and JS files in the following structure:
 
 ```
 <HTML Element | CSS Classname>[-<inline | sync | async | preload>][.<media>].<css | js>
 ```
 For example, your styles for `<h1>` elements might be:
 
-`h1.css`: Primary CSS that you want to be inlined (**If no loading strategy is defined, inline is the default**)
-`h1-async.css`: For optional styles.
-`h1-sync.print.css`: Styles that are needed for print can be synchronously loaded by the browser when required.
-`h1-async.js`: To load a script that adds anchor tags to the page.
+- `h1.css`: Primary CSS that you want to be inlined (**If no loading strategy is defined, inline is the default**)
+- `h1-async.css`: For optional styles.
+- `h1-sync.print.css`: Styles that are needed for print can be synchronously loaded by the browser when required.
+- `h1-async.js`: To load a script that adds anchor tags to the page.
 
 If it's still unclear what is happening ![this image may help](explainer.png).
 
