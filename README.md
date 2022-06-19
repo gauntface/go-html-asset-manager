@@ -183,7 +183,8 @@ The maximum screen density you'd like to account for when generating images.
 
 There are some features/changes I'd like to make.
 
-Split the config out for `genimgs` so there is a clear separation.
-Ability to add styles if one or more elements/classnames are in the page. I.e. if you wanted to add styles for h1-h6, this approach requires 6 files, vs just one file with styles defined as `h1,h2,h3,h4,h5,h6 {...}`.
+- Embed JS for async loading + YouTube etc
+- Split the config out for `genimgs` so there is a clear separation.
+- Ability to add styles if one or more elements/classnames are in the page. I.e. if you wanted to add styles for h1-h6, this approach requires 6 files, vs just one file with styles defined as `h1,h2,h3,h4,h5,h6 {...}`.
 
 Thank you to [Ashley McNamara for the gopher image](https://github.com/ashleymcnamara/gophers).
