@@ -1,4 +1,4 @@
-module github.com/gauntface/go-html-asset-manager/v2
+module github.com/gauntface/go-html-asset-manager/v3
 
 go 1.17
 
@@ -15,6 +15,8 @@ require (
 	github.com/schollz/progressbar/v3 v3.8.6
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129
 )
+
+require github.com/tdewolff/parse/v2 v2.6.1 // indirect
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.16.7 // indirect
@@ -37,6 +39,7 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/tdewolff/minify/v2 v2.12.0 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/image v0.0.0-20220617043117-41969df76e82 // indirect
 	golang.org/x/sys v0.0.0-20220712014510-0a85c31ab51e // indirect
