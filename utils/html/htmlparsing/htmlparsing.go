@@ -20,12 +20,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v2/utils/sets"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/sets"
 	"golang.org/x/net/html"
-)
-
-const (
-	AsyncCSSClassname = "n-hopin-u-async-css"
 )
 
 func GetKeys(node *html.Node) sets.StringSet {

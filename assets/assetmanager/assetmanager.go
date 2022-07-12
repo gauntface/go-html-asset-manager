@@ -25,10 +25,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v2/assets"
-	"github.com/gauntface/go-html-asset-manager/v2/assets/assetid"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/files"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/stringui"
+	"github.com/gauntface/go-html-asset-manager/v3/assets"
+	"github.com/gauntface/go-html-asset-manager/v3/assets/assetid"
+	"github.com/gauntface/go-html-asset-manager/v3/embedassets"
+	_ "github.com/gauntface/go-html-asset-manager/v3/embedassets"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/files"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/stringui"
 )
 
 var (
@@ -37,7 +39,8 @@ var (
 	errReadFailed  = errors.New("unable to read file")
 	errNoContents  = errors.New("unable to get contents for asset")
 
-	filesFind = files.Find
+	filesFind             = files.Find
+	embedassetsCopyAssets = embedassets.CopyAssets
 )
 
 type Manager struct {
@@ -46,6 +49,13 @@ type Manager struct {
 }
 
 func NewManager(htmlDir, staticDir, jsonDir string) (*Manager, error) {
+	if staticDir != "" {
+		err := embedassetsCopyAssets(staticDir)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	htmlAssets, err := findLocalAssets(htmlDir, ".html")
 	if err != nil {
 		return nil, err

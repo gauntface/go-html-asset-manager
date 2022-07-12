@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v2/assets/genimgs"
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/config"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v3/assets/genimgs"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
 	"golang.org/x/net/html"
 )
 

@@ -26,10 +26,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/gauntface/go-html-asset-manager/v2/assets/genimgs"
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/config"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v3/assets/genimgs"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )
@@ -311,7 +311,7 @@ func Test_pictureElement(t *testing.T) {
 			},
 			origWidth:  3,
 			origHeight: 3,
-			want:       `<picture width="2" height="2"><source sizes="min-width(800px) 800px,100vw" srcset="/example-1.png 1w,/example-2.png 2w"/><img src="/example-2.png"/></picture>`,
+			want:       `<picture><source sizes="min-width(800px) 800px,100vw" srcset="/example-1.png 1w,/example-2.png 2w"/><img src="/example-2.png"/></picture>`,
 		},
 		{
 			description: "return picture element for img with gen images without a type",
@@ -350,7 +350,7 @@ func Test_pictureElement(t *testing.T) {
 			},
 			origWidth:  3,
 			origHeight: 3,
-			want:       `<picture class="picture-class" width="2" height="2"><source sizes="min-width(800px) 800px,100vw" srcset="/example-1.png 1w,/example-2.png 2w"/><img src="/example-2.png" class="example"/></picture>`,
+			want:       `<picture class="picture-class"><source sizes="min-width(800px) 800px,100vw" srcset="/example-1.png 1w,/example-2.png 2w"/><img src="/example-2.png" class="example"/></picture>`,
 		},
 	}
 
@@ -444,7 +444,7 @@ func Test_manipulateImg(t *testing.T) {
 					},
 				}, nil
 			},
-			want: `<html><head></head><body><picture width="100" height="-9223372036854775808"><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
+			want: `<html><head></head><body><picture><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
 		},
 	}
 
@@ -499,7 +499,7 @@ func Test_manipulateWithConfig(t *testing.T) {
 					},
 				}, nil
 			},
-			want: `<html><head></head><body><picture width="100" height="-9223372036854775808"><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
+			want: `<html><head></head><body><picture><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
 		},
 		{
 			description: "replace img with picture for class container",
@@ -520,7 +520,7 @@ func Test_manipulateWithConfig(t *testing.T) {
 					},
 				}, nil
 			},
-			want: `<html><head></head><body><div class="container"><picture width="100" height="-9223372036854775808"><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></div></body></html>`,
+			want: `<html><head></head><body><div class="container"><picture><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></div></body></html>`,
 		},
 		{
 			description: "return error if manipulating the elements fails",
@@ -628,7 +628,7 @@ func Test_Manipulator(t *testing.T) {
 					},
 				}, nil
 			},
-			want: `<html><head></head><body><picture width="100" height="-9223372036854775808"><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
+			want: `<html><head></head><body><picture><source sizes="100vw" srcset="/example-100.png 100w"/><img src="/example-100.png"/></picture></body></html>`,
 		},
 	}
 

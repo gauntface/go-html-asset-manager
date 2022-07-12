@@ -1,6 +1,10 @@
 .PHONY: build clean gomodgen format
 
-build: clean format
+typescript:
+	npx esbuild static/js/n-ham-c-lite-yt.ts --minify --bundle --outfile=embedassets/assets/js/n-ham-c-lite-yt.js --format=cjs
+	npx esbuild static/js/n-ham-c-lite-vi.ts --minify --bundle --outfile=embedassets/assets/js/n-ham-c-lite-vi.js --format=cjs
+
+build: clean format typescript
 	export GO111MODULE=on
 	env GOOS=linux go build -ldflags="-s -w" -o ./bin/htmlassets ./cmds/htmlassets/htmlassets.go
 	env GOOS=linux go build -ldflags="-s -w" -o ./bin/genimgs ./cmds/genimgs/genimgs.go
@@ -12,7 +16,7 @@ test: gomodget build
 	go tool cover -html=./coverage/cover.out -o ./coverage/cover.html
 
 clean:
-	rm -rf ./bin ./vendor Gopkg.lock
+	rm -rf ./bin ./vendor Gopkg.lock ./embedassets/assets
 
 gomodget:
 	go get -v all

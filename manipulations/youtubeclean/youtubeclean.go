@@ -23,9 +23,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/ratiocontainer"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/css"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/ratiostyles"
 	"golang.org/x/net/html"
 )
 
@@ -121,7 +122,7 @@ func ytElement(videoID string, params url.Values) *html.Node {
 			},
 			{
 				Key: "class",
-				Val: "n-hopin-lite-yt__link",
+				Val: css.Format(css.ComponentType, "lite-yt", css.WithElement("link")),
 			},
 			{
 				Key: "target",
@@ -138,7 +139,7 @@ func ytElement(videoID string, params url.Values) *html.Node {
 			[]html.Attribute{
 				{
 					Key: "class",
-					Val: "n-hopin-lite-yt",
+					Val: css.Format(css.ComponentType, "lite-yt"),
 				},
 				{
 					Key: "videoid",
@@ -150,7 +151,9 @@ func ytElement(videoID string, params url.Values) *html.Node {
 	}
 	container.AppendChild(anchor)
 
-	return ratiocontainer.Wrap(container, defaultWidth, defaultHeight)
+	ratiostyles.AddAspectRatio(container, defaultWidth, defaultHeight)
+
+	return container
 }
 
 func queryParams(params url.Values) url.Values {

@@ -26,11 +26,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/config"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/ratiocontainer"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/vimeoapi"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/css"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/ratiostyles"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/vimeoapi"
 	"golang.org/x/net/html"
 )
 
@@ -146,7 +147,7 @@ func vimeoElement(videoID string, video *vimeoapi.Video, sizes []string) *html.N
 			},
 			{
 				Key: "class",
-				Val: "n-hopin-lite-vi__link",
+				Val: css.Format(css.ComponentType, "lite-vi", css.WithElement("link")),
 			},
 			{
 				Key: "target",
@@ -162,7 +163,7 @@ func vimeoElement(videoID string, video *vimeoapi.Video, sizes []string) *html.N
 		Attr: []html.Attribute{
 			{
 				Key: "class",
-				Val: "n-hopin-lite-vi",
+				Val: css.Format(css.ComponentType, "lite-vi"),
 			},
 			{
 				Key: "videoid",
@@ -172,7 +173,9 @@ func vimeoElement(videoID string, video *vimeoapi.Video, sizes []string) *html.N
 	}
 	container.AppendChild(anchor)
 
-	return ratiocontainer.Wrap(container, int64(video.Width), int64(video.Height))
+	ratiostyles.AddAspectRatio(container, int64(video.Width), int64(video.Height))
+
+	return container
 }
 
 func posterElement(video *vimeoapi.Video, sizes []string) *html.Node {

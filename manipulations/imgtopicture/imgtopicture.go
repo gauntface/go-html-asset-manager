@@ -22,10 +22,10 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/gauntface/go-html-asset-manager/v2/assets/genimgs"
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/config"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v3/assets/genimgs"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
 	"golang.org/x/net/html"
 )
 
@@ -163,7 +163,6 @@ func pictureElement(imgtopic *config.ImgToPicConfig, imgElement *html.Node, size
 
 	// Replace the img src="..." attribute to point to the largest generated asset
 	if len(sourceSetByType[""]) > 0 {
-		ratio := float64(origHeight) / float64(origWidth)
 		for i, a := range imgElement.Attr {
 			if a.Key != "src" {
 				continue
@@ -171,17 +170,6 @@ func pictureElement(imgtopic *config.ImgToPicConfig, imgElement *html.Node, size
 			// Change the src of the img to the largest, generated, default URL
 			largest := sourceSetByType[""][len(sourceSetByType[""])-1]
 			imgElement.Attr[i].Val = largest.URL
-
-			picture.Attr = append(picture.Attr, []html.Attribute{
-				{
-					Key: "width",
-					Val: fmt.Sprintf("%v", largest.Size),
-				},
-				{
-					Key: "height",
-					Val: fmt.Sprintf("%v", int64(ratio*float64(largest.Size))),
-				},
-			}...)
 		}
 	}
 

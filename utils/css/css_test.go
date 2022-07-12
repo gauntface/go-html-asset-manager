@@ -25,63 +25,62 @@ import (
 func Test_Format(t *testing.T) {
 	tests := []struct {
 		description string
-		namespace   string
 		typ         CSSType
 		body        string
-		element     string
-		modifier    string
+		opts        []FormatOption
 		want        string
 	}{
 		{
 			description: "return component with body only",
-			namespace:   "",
 			typ:         ComponentType,
 			body:        "example",
-			element:     "",
-			modifier:    "",
-			want:        `c-example`,
+			want:        `n-ham-c-example`,
 		},
 		{
 			description: "return layout with body and namespace",
-			namespace:   "example-namespace",
 			typ:         LayoutType,
 			body:        "example-body",
-			element:     "",
-			modifier:    "",
-			want:        `n-example-namespace-l-example-body`,
+			opts: []FormatOption{
+				WithNamspace("example-namespace"),
+			},
+			want: `n-example-namespace-l-example-body`,
 		},
 		{
 			description: "return utility with body and element",
-			namespace:   "",
 			typ:         UtilityType,
 			body:        "example-body",
-			element:     "example-element",
-			modifier:    "",
-			want:        `u-example-body__example-element`,
+			opts: []FormatOption{
+				WithNamspace(""),
+				WithElement("example-element"),
+			},
+			want: `u-example-body__example-element`,
 		},
 		{
 			description: "return utility with body and modifier",
-			namespace:   "",
 			typ:         UtilityType,
 			body:        "example-body",
-			element:     "",
-			modifier:    "example-modifier",
-			want:        `u-example-body--example-modifier`,
+			opts: []FormatOption{
+				WithNamspace(""),
+				WithModifier("example-modifier"),
+			},
+			want: `u-example-body--example-modifier`,
 		},
 		{
 			description: "return component with everything",
-			namespace:   "example-namespace",
 			typ:         ComponentType,
 			body:        "example-body",
-			element:     "example-element",
-			modifier:    "example-modifier",
-			want:        `n-example-namespace-c-example-body__example-element--example-modifier`,
+			opts: []FormatOption{
+				WithNamspace("example-namespace"),
+				WithElement("example-element"),
+				WithModifier("example-modifier"),
+			},
+			want: `n-example-namespace-c-example-body__example-element--example-modifier`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got := Format(tt.namespace, tt.typ, tt.body, tt.element, tt.modifier)
+			got := Format(tt.typ, tt.body, tt.opts...)
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Fatalf("Unexpected HTML files; diff %v", diff)
 			}

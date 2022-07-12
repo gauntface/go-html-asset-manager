@@ -14,34 +14,33 @@
  * limitations under the License.
  **/
 
-package stripassets
+package ratiostyles
 
 import (
-	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
+	"fmt"
+
 	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
 	"golang.org/x/net/html"
 )
 
-var (
-	htmlparsingFindNodesByTag = htmlparsing.FindNodesByTag
-)
-
-func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
-	tags := []string{"style", "script"}
-	for _, t := range tags {
-		tagNodes := htmlparsingFindNodesByTag(t, doc)
-		for _, t := range tagNodes {
-			t.Parent.RemoveChild(t)
-		}
+func AddAspectRatio(ele *html.Node, width, height int64) {
+	eleToSize := ele
+	if ele.Type == html.ElementNode && ele.Data == "picture" {
+		eleToSize = htmlparsing.FindNodeByTag("img", ele)
 	}
 
-	linkNodes := htmlparsingFindNodesByTag("link", doc)
-	for _, l := range linkNodes {
-		a := htmlparsing.Attributes(l)
-		if v, ok := a["rel"]; ok && v.Val == "stylesheet" {
-			l.Parent.RemoveChild(l)
+	var ok bool
+	styleToAdd := fmt.Sprintf("aspect-ratio: auto %v / %v", width, height)
+	for i, a := range eleToSize.Attr {
+		if a.Key == "style" {
+			eleToSize.Attr[i].Val = fmt.Sprintf("%v;%v", a.Val, styleToAdd)
+			ok = true
 		}
 	}
-
-	return nil
+	if !ok {
+		eleToSize.Attr = append(eleToSize.Attr, html.Attribute{
+			Key: "style",
+			Val: styleToAdd,
+		})
+	}
 }

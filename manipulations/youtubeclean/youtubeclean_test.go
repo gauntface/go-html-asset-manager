@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )
@@ -69,17 +69,17 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "clean attributes and URL for youtube src without protocol",
 			doc:         MustGetNode(t, `<iframe src="www.youtube.com/embed/1234-abcd?random=searchparam" iframeborder="0" other="test"></iframe>`),
-			want:        `<html><head></head><body><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><div class="n-hopin-lite-yt" videoid="1234-abcd" style="position:absolute;width:100%;height:100%;"><a href="https://www.youtube.com/watch?v=1234-abcd" class="n-hopin-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></div></div></body></html>`,
+			want:        `<html><head></head><body><div class="n-ham-c-lite-yt" videoid="1234-abcd" style="aspect-ratio: auto 4 / 3"><a href="https://www.youtube.com/watch?v=1234-abcd" class="n-ham-c-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></body></html>`,
 		},
 		{
 			description: "clean attributes and URL for youtube src with http protocol",
 			doc:         MustGetNode(t, `<iframe src="http://www.youtube.com/embed/1234-abcd?random=searchparam" iframeborder="0" other="test"></iframe>`),
-			want:        `<html><head></head><body><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><div class="n-hopin-lite-yt" videoid="1234-abcd" style="position:absolute;width:100%;height:100%;"><a href="https://www.youtube.com/watch?v=1234-abcd" class="n-hopin-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></div></div></body></html>`,
+			want:        `<html><head></head><body><div class="n-ham-c-lite-yt" videoid="1234-abcd" style="aspect-ratio: auto 4 / 3"><a href="https://www.youtube.com/watch?v=1234-abcd" class="n-ham-c-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></body></html>`,
 		},
 		{
 			description: "clean attributes and URL for youtube playlist",
 			doc:         MustGetNode(t, `<iframe src="http://www.youtube.com/embed/1234-abcd?list=xyz-5678&random=searchparam" iframeborder="0" other="test"></iframe>`),
-			want:        `<html><head></head><body><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><div class="n-hopin-lite-yt" videoid="1234-abcd" videoparams="list=xyz-5678" style="position:absolute;width:100%;height:100%;"><a href="https://www.youtube.com/watch?v=1234-abcd&amp;list=xyz-5678" class="n-hopin-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></div></div></body></html>`,
+			want:        `<html><head></head><body><div class="n-ham-c-lite-yt" videoid="1234-abcd" videoparams="list=xyz-5678" style="aspect-ratio: auto 4 / 3"><a href="https://www.youtube.com/watch?v=1234-abcd&amp;list=xyz-5678" class="n-ham-c-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></body></html>`,
 		},
 	}
 
