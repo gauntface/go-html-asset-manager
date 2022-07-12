@@ -58,13 +58,13 @@ func Test_Manipulator(t *testing.T) {
 			description: "wrap iframe with width and height",
 			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe width="4" height="3" src="/example.html"></iframe></div>`),
-			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><iframe src="/example.html" style="position:absolute;width:100%;height:100%;"></iframe></div></div></div></body></html>`,
+			want:        `<html><head></head><body><div><iframe src="/example.html" style="aspect-ratio: auto 4 / 3"></iframe></div></body></html>`,
 		},
 		{
 			description: "wrap all iframes with width and height",
 			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><iframe width="4" height="3" src="/example.html"></iframe></div><div><iframe width="16" height="9" src="/example.html"></iframe></div>`),
-			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:75%;"><iframe src="/example.html" style="position:absolute;width:100%;height:100%;"></iframe></div></div></div><div><div class="n-hopin-u-ratio-container"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:56.25%;"><iframe src="/example.html" style="position:absolute;width:100%;height:100%;"></iframe></div></div></div></body></html>`,
+			want:        `<html><head></head><body><div><iframe src="/example.html" style="aspect-ratio: auto 4 / 3"></iframe></div><div><iframe src="/example.html" style="aspect-ratio: auto 16 / 9"></iframe></div></body></html>`,
 		},
 		{
 			description: "do not wrap if width cannot be parsed",
@@ -81,14 +81,14 @@ func Test_Manipulator(t *testing.T) {
 		{
 			description: "wrap picture with max size applied",
 			selectors:   []string{"div"},
-			doc:         MustGetNode(t, `<div><picture width="2" height="1"><img width="3" height="4"/></picture></div>`),
-			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container" style="max-width: 2px;"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:50%;"><picture><img style="position:absolute;width:100%;height:100%;"/></picture></div></div></div></body></html>`,
+			doc:         MustGetNode(t, `<div><picture><img width="3" height="4"/></picture></div>`),
+			want:        `<html><head></head><body><div><picture><img style="aspect-ratio: auto 3 / 4"/></picture></div></body></html>`,
 		},
 		{
 			description: "wrap img with max size applied",
 			selectors:   []string{"div"},
 			doc:         MustGetNode(t, `<div><img width="2" height="1"/></div>`),
-			want:        `<html><head></head><body><div><div class="n-hopin-u-ratio-container" style="max-width: 2px;"><div class="n-hopin-u-ratio-container__wrapper" style="position:relative;padding-bottom:50%;"><img style="position:absolute;width:100%;height:100%;"/></div></div></div></body></html>`,
+			want:        `<html><head></head><body><div><img style="aspect-ratio: auto 2 / 1"/></div></body></html>`,
 		},
 	}
 

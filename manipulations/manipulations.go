@@ -19,6 +19,8 @@
 package manipulations
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gauntface/go-html-asset-manager/v2/assets"
 	"github.com/gauntface/go-html-asset-manager/v2/assets/assetmanager"
@@ -45,4 +47,8 @@ type AssetManager interface {
 
 type vimeoapiClient interface {
 	Video(videoID string) (*vimeoapi.Video, error)
+}
+
+func CSSNamespace(name string) string {
+	return fmt.Sprintf("n-ham-%v", name)
 }

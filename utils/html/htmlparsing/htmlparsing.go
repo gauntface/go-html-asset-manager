@@ -24,10 +24,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-const (
-	AsyncCSSClassname = "n-hopin-u-async-css"
-)
-
 func GetKeys(node *html.Node) sets.StringSet {
 	keys := sets.NewStringSet("always")
 	if node.Type == html.ElementNode {

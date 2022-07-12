@@ -22,7 +22,7 @@ import (
 
 	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
 	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/ratiocontainer"
+	"github.com/gauntface/go-html-asset-manager/v2/utils/html/ratiostyles"
 	"golang.org/x/net/html"
 )
 
@@ -39,7 +39,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			attributes[a.Key] = a
 		}
 
-		// Check that the iframe has a width and height attribute
+		// Check that the element has a width and height attribute
 		width, height, err := widthAndHeight(attributes)
 		if err != nil {
 			continue
@@ -50,29 +50,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		delete(attributes, "height")
 		ele.Attr = htmlparsing.AttributesList(attributes)
 
-		// Remove element from it's parent so it can be wrapped
-		p := ele.Parent
-		s := ele.NextSibling
-		p.RemoveChild(ele)
-
-		// Wrap the element and place before it's sibling
-		var wrappedElement *html.Node
-		switch ele.Data {
-		case "picture":
-			wrappedElement = ratiocontainer.WrapWithMax(ele, width, height)
-		case "img":
-			if p != nil && p.Data == "picture" {
-				// If the img is inside a picture element, do nothing as we'll wrap
-				// the picture element.
-				wrappedElement = ele
-			} else {
-				wrappedElement = ratiocontainer.WrapWithMax(ele, width, height)
-			}
-		default:
-			wrappedElement = ratiocontainer.Wrap(ele, width, height)
-		}
-
-		p.InsertBefore(wrappedElement, s)
+		ratiostyles.AddAspectRatio(ele, width, height)
 	}
 	return nil
 }
@@ -109,7 +87,6 @@ func getElementsToWrap(queries []string, doc *html.Node) []*html.Node {
 
 	tags := []string{
 		"iframe",
-		"picture",
 		"img",
 	}
 	all := []*html.Node{}
