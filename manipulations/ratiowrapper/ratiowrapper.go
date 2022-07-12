@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/html/ratiostyles"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/html/ratiostyles"
 	"golang.org/x/net/html"
 )
 

@@ -20,7 +20,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v2/utils/sets"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/sets"
 	"golang.org/x/net/html"
 )
 

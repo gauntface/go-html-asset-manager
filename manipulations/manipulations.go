@@ -22,10 +22,10 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/gauntface/go-html-asset-manager/v2/assets"
-	"github.com/gauntface/go-html-asset-manager/v2/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/config"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/vimeoapi"
+	"github.com/gauntface/go-html-asset-manager/v3/assets"
+	"github.com/gauntface/go-html-asset-manager/v3/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/vimeoapi"
 	"golang.org/x/net/html"
 )
 

@@ -22,9 +22,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/config"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/vimeoapi"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/vimeoapi"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )

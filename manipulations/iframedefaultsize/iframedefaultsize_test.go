@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v2/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )

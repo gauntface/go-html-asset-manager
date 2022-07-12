@@ -25,12 +25,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v2/assets"
-	"github.com/gauntface/go-html-asset-manager/v2/assets/assetid"
-	"github.com/gauntface/go-html-asset-manager/v2/embedassets"
-	_ "github.com/gauntface/go-html-asset-manager/v2/embedassets"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/files"
-	"github.com/gauntface/go-html-asset-manager/v2/utils/stringui"
+	"github.com/gauntface/go-html-asset-manager/v3/assets"
+	"github.com/gauntface/go-html-asset-manager/v3/assets/assetid"
+	"github.com/gauntface/go-html-asset-manager/v3/embedassets"
+	_ "github.com/gauntface/go-html-asset-manager/v3/embedassets"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/files"
+	"github.com/gauntface/go-html-asset-manager/v3/utils/stringui"
 )
 
 var (
