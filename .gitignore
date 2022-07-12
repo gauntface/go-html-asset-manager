@@ -2,4 +2,3 @@ bin/
 coverage/
 vendor/
 .vscode/
-embedassets/assets/
