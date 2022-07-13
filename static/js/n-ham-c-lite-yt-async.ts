@@ -1,3 +1,6 @@
+import {logger} from '@gauntface/logger';
+logger.setPrefix('go-html-asset-manager/lite-youtube');
+
 class LiteYTEmbed {
 
   private element: HTMLElement;
@@ -10,19 +13,36 @@ class LiteYTEmbed {
       this.element = e;
       this.anchor = e.querySelector(`${LiteYTEmbed.selector()}__link`) as HTMLElement;
 
-      const vid = e.getAttribute('videoid');
-      if (!vid) {
-        throw new Error(`Failed to get the 'videoid' attribute.`);
+      const params = this.requiredAttributes(e);
+      if (!params) {
+        return
       }
-      const vparam = e.getAttribute('videoparams');
-      if (!vparam) {
-        throw new Error(`Failed to get the 'videoparams' attribute.`);
-      }
-      this.videoID = encodeURIComponent(vid);
-      this.videoParams = vparam;
+
+      this.videoID = encodeURIComponent(params.videoid);
+      this.videoParams = params.videoparams;
       this.preconnected = false;
 
       this.setup();
+  }
+
+  requiredAttributes(e: HTMLElement): reqAttribs|null {
+    const attributes = [
+      'videoid',
+      'videoparams',
+    ];
+    const params: reqAttribs = {
+      videoid: '',
+      videoparams: '',
+    };
+    for (const a of attributes) {
+      const attr = e.getAttribute(a);
+      if (!attr) {
+        logger.error(`Failed to get the '${a}' attribute from element: `, e);
+        return null;
+      }
+      params[a] = attr;
+    }
+    return params;
   }
 
   setup() {
@@ -104,3 +124,8 @@ class LiteYTEmbed {
     prepYTLite();
   }
 })()
+
+interface reqAttribs {
+  videoid: string;
+  videoparams: string;
+}

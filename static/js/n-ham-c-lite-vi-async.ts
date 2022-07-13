@@ -1,3 +1,6 @@
+import {logger} from '@gauntface/logger';
+logger.setPrefix('go-html-asset-manager/lite-vimeo');
+
 class LiteVimeoEmbed {
 
   private element: HTMLElement;
@@ -11,7 +14,8 @@ class LiteVimeoEmbed {
 
       const vid = e.getAttribute('videoid');
       if (!vid) {
-        throw new Error(`Failed to get the 'videoid' attribute.`);
+        logger.warn(`Failed to get the 'videoid' attribute from element: `, e);
+        return;
       }
       this.videoID = encodeURIComponent(vid);
       this.preconnected = false;
