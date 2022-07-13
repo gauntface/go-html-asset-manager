@@ -1,5 +1,7 @@
 import {logger} from '@gauntface/logger';
-logger.setPrefix('go-html-asset-manager/lite-youtube');
+import {OnLoad} from '../utils/_onload.js';
+
+logger.setPrefix('ham/lite-youtube');
 
 class LiteYTEmbed {
 
@@ -111,19 +113,12 @@ class LiteYTEmbed {
   }
 }
 
-(function () {
-  function prepYTLite() {
-    const ytElements = document.querySelectorAll<HTMLElement>(LiteYTEmbed.selector());
-    for (const e of ytElements) {
-      new LiteYTEmbed(e);
-    }
+OnLoad(function() {
+  const ytElements = document.querySelectorAll<HTMLElement>(LiteYTEmbed.selector());
+  for (const e of ytElements) {
+    new LiteYTEmbed(e);
   }
-
-  window.addEventListener('load', prepYTLite)
-  if (document.readyState == 'complete') {
-    prepYTLite();
-  }
-})()
+});
 
 interface reqAttribs {
   videoid: string;

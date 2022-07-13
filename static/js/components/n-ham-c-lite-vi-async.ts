@@ -1,5 +1,7 @@
 import {logger} from '@gauntface/logger';
-logger.setPrefix('go-html-asset-manager/lite-vimeo');
+import {OnLoad} from '../utils/_onload.js';
+
+logger.setPrefix('ham/lite-vimeo');
 
 class LiteVimeoEmbed {
 
@@ -90,16 +92,9 @@ class LiteVimeoEmbed {
   }
 }
 
-(function () {
-  function prepViLite() {
-    const ytElements = document.querySelectorAll<HTMLElement>(LiteVimeoEmbed.selector());
-    for (const e of ytElements) {
-      new LiteVimeoEmbed(e);
-    }
+OnLoad(function() {
+  const ytElements = document.querySelectorAll<HTMLElement>(LiteVimeoEmbed.selector());
+  for (const e of ytElements) {
+    new LiteVimeoEmbed(e);
   }
-
-  window.addEventListener('load', prepViLite)
-  if (document.readyState == 'complete') {
-    prepViLite();
-  }
-})()
+});
