@@ -2,3 +2,4 @@ bin/
 coverage/
 vendor/
 .vscode/
+node_modules/

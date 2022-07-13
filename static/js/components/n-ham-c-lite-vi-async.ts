@@ -1,3 +1,8 @@
+import {logger} from '@gauntface/logger';
+import {OnLoad} from '../utils/_onload.js';
+
+logger.setPrefix('ham/lite-vimeo');
+
 class LiteVimeoEmbed {
 
   private element: HTMLElement;
@@ -11,7 +16,8 @@ class LiteVimeoEmbed {
 
       const vid = e.getAttribute('videoid');
       if (!vid) {
-        throw new Error(`Failed to get the 'videoid' attribute.`);
+        logger.warn(`Failed to get the 'videoid' attribute from element: `, e);
+        return;
       }
       this.videoID = encodeURIComponent(vid);
       this.preconnected = false;
@@ -86,16 +92,9 @@ class LiteVimeoEmbed {
   }
 }
 
-(function () {
-  function prepViLite() {
-    const ytElements = document.querySelectorAll<HTMLElement>(LiteVimeoEmbed.selector());
-    for (const e of ytElements) {
-      new LiteVimeoEmbed(e);
-    }
+OnLoad(function() {
+  const ytElements = document.querySelectorAll<HTMLElement>(LiteVimeoEmbed.selector());
+  for (const e of ytElements) {
+    new LiteVimeoEmbed(e);
   }
-
-  window.addEventListener('load', prepViLite)
-  if (document.readyState == 'complete') {
-    prepViLite();
-  }
-})()
+});

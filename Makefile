@@ -1,8 +1,10 @@
 .PHONY: build clean gomodgen format
 
 typescript:
-	npx esbuild static/js/n-ham-c-lite-yt.ts --minify --bundle --outfile=embedassets/assets/js/n-ham-c-lite-yt.js --format=cjs
-	npx esbuild static/js/n-ham-c-lite-vi.ts --minify --bundle --outfile=embedassets/assets/js/n-ham-c-lite-vi.js --format=cjs
+	npx esbuild static/js/components/n-ham-c-lite-yt-async.ts --minify --bundle --outfile=embedassets/assets/js/components/n-ham-c-lite-yt-async.js --format=cjs
+	npx esbuild static/js/components/n-ham-c-lite-vi-async.ts --minify --bundle --outfile=embedassets/assets/js/components/n-ham-c-lite-vi-async.js --format=cjs
+	npx esbuild static/js/bootstrap/always-async.ts --minify --bundle --outfile=embedassets/assets/js/bootstrap/always-async.js --format=cjs
+	npx esbuild static/js/bootstrap/always-preload.ts --minify --bundle --outfile=embedassets/assets/js/bootstrap/always-preload.js --format=cjs
 
 build: clean format typescript
 	export GO111MODULE=on
