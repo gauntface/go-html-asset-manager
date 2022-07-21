@@ -1,6 +1,6 @@
 module github.com/gauntface/go-html-asset-manager/v3
 
-go 1.17
+go 1.18
 
 require (
 	github.com/Kagami/go-avif v0.1.0
