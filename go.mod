@@ -13,7 +13,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.7.0
 	github.com/schollz/progressbar/v3 v3.8.7
-	golang.org/x/net v0.0.0-20220728030405-41545e8bf201
+	golang.org/x/net v0.0.0-20220728211354-c7608f3a8462
 )
 
 require github.com/tdewolff/parse/v2 v2.6.1 // indirect
