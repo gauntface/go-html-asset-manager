@@ -1,6 +1,6 @@
 module github.com/gauntface/go-html-asset-manager/v3
 
-go 1.18
+go 1.19
 
 require (
 	github.com/Kagami/go-avif v0.1.0
@@ -13,7 +13,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.7.0
 	github.com/schollz/progressbar/v3 v3.9.0
-	golang.org/x/net v0.0.0-20220728211354-c7608f3a8462
+	golang.org/x/net v0.0.0-20220802222814-0bcc04d9c69b
 )
 
 require github.com/tdewolff/parse/v2 v2.6.1 // indirect
