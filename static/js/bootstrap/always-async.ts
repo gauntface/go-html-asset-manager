@@ -9,6 +9,4 @@ function loadPreloadScripts() {
   }
 }
 
-OnLoad(function() {
-  loadPreloadScripts();
-})
+OnLoad(loadPreloadScripts)
