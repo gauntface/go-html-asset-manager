@@ -8,6 +8,10 @@ import (
 
 func Preprocessor(runtime preprocessors.Runtime) error {
 	relDir := runtime.Assets.StaticDir()
+	if relDir == "" {
+		return nil
+	}
+
 	files, err := embedassets.CopyAssets(relDir)
 	if err != nil {
 		return err

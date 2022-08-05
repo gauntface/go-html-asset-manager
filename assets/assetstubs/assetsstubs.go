@@ -31,6 +31,10 @@ type Manager struct {
 	WithTypeReturn map[assets.Type][]assetmanager.Asset
 }
 
+func (m *Manager) StaticDir() string {
+	return ""
+}
+
 func (m *Manager) All() []assetmanager.Asset {
 	return m.AllReturn
 }
@@ -44,6 +48,8 @@ func (m *Manager) WithID(id string) map[assets.Type][]assetmanager.Asset {
 }
 
 func (m *Manager) AddRemote(a *assetmanager.RemoteAsset) {}
+
+func (m *Manager) AddLocal(a *assetmanager.LocalAsset) {}
 
 func (m *Manager) String() string {
 	return ""

@@ -135,6 +135,9 @@ func TestNewManager(t *testing.T) {
 				return nil, fmt.Errorf("unknown dir passed to files.Find(): %q", dir)
 			},
 			want: &Manager{
+				htmlDir:      "",
+				staticDir:    "/assets/",
+				jsonDir:      "/json/",
 				remoteAssets: []*RemoteAsset{},
 				localAssets: []*LocalAsset{
 					// CSS
@@ -251,6 +254,9 @@ func TestNewManager(t *testing.T) {
 				return nil, fmt.Errorf("unknown dir passed to files.Find(): %q", dir)
 			},
 			want: &Manager{
+				htmlDir:      "",
+				staticDir:    "/assets/",
+				jsonDir:      "/json/",
 				remoteAssets: []*RemoteAsset{},
 				localAssets: []*LocalAsset{
 					// CSS
