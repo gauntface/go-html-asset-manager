@@ -17,19 +17,20 @@ var (
 	errWriteFailed   = errors.New("failed to write file")
 )
 
-func CopyAssets(staticDir string) error {
+func CopyAssets(staticDir string) ([]string, error) {
 	outputDir := path.Join(staticDir, "__ham")
 
 	dirs := []string{
 		"assets",
 	}
 	var currentDir string
+	files := []string{}
 	for len(dirs) > 0 {
 		currentDir, dirs = dirs[0], dirs[1:]
 
 		dirContents, err := assetsfs.ReadDir(currentDir)
 		if err != nil {
-			return fmt.Errorf("%w: %v", errReadFailed, err)
+			return nil, fmt.Errorf("%w: %v", errReadFailed, err)
 		}
 
 		for _, d := range dirContents {
@@ -40,19 +41,22 @@ func CopyAssets(staticDir string) error {
 
 			err := os.MkdirAll(path.Join(outputDir, currentDir), 0755)
 			if err != nil {
-				return fmt.Errorf("%w: %v", errMakeDirFailed, err)
+				return nil, fmt.Errorf("%w: %v", errMakeDirFailed, err)
 			}
 
 			data, err := assetsfs.ReadFile(path.Join(currentDir, d.Name()))
 			if err != nil {
-				return fmt.Errorf("%w: %v", errReadFailed, err)
+				return nil, fmt.Errorf("%w: %v", errReadFailed, err)
 			}
 
-			err = os.WriteFile(path.Join(outputDir, currentDir, d.Name()), data, 0755)
+			fp := path.Join(outputDir, currentDir, d.Name())
+			err = os.WriteFile(fp, data, 0755)
 			if err != nil {
-				return fmt.Errorf("%w: %v", errWriteFailed, err)
+				return nil, fmt.Errorf("%w: %v", errWriteFailed, err)
 			}
+
+			files = append(files, fp)
 		}
 	}
-	return nil
+	return files, nil
 }

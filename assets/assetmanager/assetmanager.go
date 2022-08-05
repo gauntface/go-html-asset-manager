@@ -27,35 +27,28 @@ import (
 
 	"github.com/gauntface/go-html-asset-manager/v3/assets"
 	"github.com/gauntface/go-html-asset-manager/v3/assets/assetid"
-	"github.com/gauntface/go-html-asset-manager/v3/embedassets"
-	_ "github.com/gauntface/go-html-asset-manager/v3/embedassets"
 	"github.com/gauntface/go-html-asset-manager/v3/utils/files"
 	"github.com/gauntface/go-html-asset-manager/v3/utils/stringui"
 )
 
 var (
-	errUnknownType = errors.New("unknown asset type")
-	errRelPath     = errors.New("unable to calculate relative path")
-	errReadFailed  = errors.New("unable to read file")
-	errNoContents  = errors.New("unable to get contents for asset")
+	errRelPath    = errors.New("unable to calculate relative path")
+	errReadFailed = errors.New("unable to read file")
+	errNoContents = errors.New("unable to get contents for asset")
 
-	filesFind             = files.Find
-	embedassetsCopyAssets = embedassets.CopyAssets
+	filesFind = files.Find
 )
 
 type Manager struct {
+	htmlDir   string
+	staticDir string
+	jsonDir   string
+
 	localAssets  []*LocalAsset
 	remoteAssets []*RemoteAsset
 }
 
 func NewManager(htmlDir, staticDir, jsonDir string) (*Manager, error) {
-	if staticDir != "" {
-		err := embedassetsCopyAssets(staticDir)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	htmlAssets, err := findLocalAssets(htmlDir, ".html")
 	if err != nil {
 		return nil, err
@@ -76,9 +69,17 @@ func NewManager(htmlDir, staticDir, jsonDir string) (*Manager, error) {
 	la = append(la, staticAssets...)
 	la = append(la, jsonAssets...)
 	return &Manager{
+		htmlDir:   htmlDir,
+		staticDir: staticDir,
+		jsonDir:   jsonDir,
+
 		localAssets:  la,
 		remoteAssets: []*RemoteAsset{},
 	}, nil
+}
+
+func (m *Manager) StaticDir() string {
+	return m.staticDir
 }
 
 func (m *Manager) All() []Asset {
@@ -123,6 +124,10 @@ func (m *Manager) WithID(id string) map[assets.Type][]Asset {
 
 func (m *Manager) AddRemote(a *RemoteAsset) {
 	m.remoteAssets = append(m.remoteAssets, a)
+}
+
+func (m *Manager) AddLocal(a *LocalAsset) {
+	m.localAssets = append(m.localAssets, a)
 }
 
 func (m *Manager) String() string {

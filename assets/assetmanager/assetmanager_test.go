@@ -35,11 +35,9 @@ var reset func()
 
 func TestMain(m *testing.M) {
 	origFilesFind := filesFind
-	origCopyEmbedAssets := embedassetsCopyAssets
 
 	reset = func() {
 		filesFind = origFilesFind
-		embedassetsCopyAssets = origCopyEmbedAssets
 	}
 
 	os.Exit(m.Run())
@@ -47,14 +45,13 @@ func TestMain(m *testing.M) {
 
 func TestNewManager(t *testing.T) {
 	tests := []struct {
-		description     string
-		htmlDir         string
-		staticDir       string
-		jsonDir         string
-		filesFind       func(dir string, exts ...string) ([]string, error)
-		copyEmbedAssets func(staticDir string) error
-		want            *Manager
-		wantError       error
+		description string
+		htmlDir     string
+		staticDir   string
+		jsonDir     string
+		filesFind   func(dir string, exts ...string) ([]string, error)
+		want        *Manager
+		wantError   error
 	}{
 		{
 			description: "do nothing if dirs are not set",
@@ -64,19 +61,8 @@ func TestNewManager(t *testing.T) {
 			},
 		},
 		{
-			description: "return error if copying embed assets fails",
-			staticDir:   "/assets/",
-			copyEmbedAssets: func(staticDir string) error {
-				return errInjected
-			},
-			wantError: errInjected,
-		},
-		{
 			description: "return error if retrieving HTML fails",
 			htmlDir:     "/html/",
-			copyEmbedAssets: func(staticDir string) error {
-				return nil
-			},
 			filesFind: func(dir string, exts ...string) ([]string, error) {
 				wantDir := "/html/"
 				if dir != wantDir {
@@ -93,9 +79,6 @@ func TestNewManager(t *testing.T) {
 		{
 			description: "return error if retrieving assets fails",
 			staticDir:   "/assets/",
-			copyEmbedAssets: func(staticDir string) error {
-				return nil
-			},
 			filesFind: func(dir string, exts ...string) ([]string, error) {
 				wantDir := "/assets/"
 				if dir != wantDir {
@@ -113,9 +96,6 @@ func TestNewManager(t *testing.T) {
 			description: "return error if retrieving json fails",
 			staticDir:   "",
 			jsonDir:     "/json/",
-			copyEmbedAssets: func(staticDir string) error {
-				return nil
-			},
 			filesFind: func(dir string, exts ...string) ([]string, error) {
 				wantDir := "/json/"
 				if dir != wantDir {
@@ -133,9 +113,6 @@ func TestNewManager(t *testing.T) {
 			description: "return manager with assets no media",
 			staticDir:   "/assets/",
 			jsonDir:     "/json/",
-			copyEmbedAssets: func(staticDir string) error {
-				return nil
-			},
 			filesFind: func(dir string, exts ...string) ([]string, error) {
 				switch dir {
 				case "/assets/":
@@ -158,6 +135,9 @@ func TestNewManager(t *testing.T) {
 				return nil, fmt.Errorf("unknown dir passed to files.Find(): %q", dir)
 			},
 			want: &Manager{
+				htmlDir:      "",
+				staticDir:    "/assets/",
+				jsonDir:      "/json/",
 				remoteAssets: []*RemoteAsset{},
 				localAssets: []*LocalAsset{
 					// CSS
@@ -250,9 +230,6 @@ func TestNewManager(t *testing.T) {
 			description: "return manager with assets and media",
 			staticDir:   "/assets/",
 			jsonDir:     "/json/",
-			copyEmbedAssets: func(staticDir string) error {
-				return nil
-			},
 			filesFind: func(dir string, exts ...string) ([]string, error) {
 				switch dir {
 				case "/assets/":
@@ -277,6 +254,9 @@ func TestNewManager(t *testing.T) {
 				return nil, fmt.Errorf("unknown dir passed to files.Find(): %q", dir)
 			},
 			want: &Manager{
+				htmlDir:      "",
+				staticDir:    "/assets/",
+				jsonDir:      "/json/",
 				remoteAssets: []*RemoteAsset{},
 				localAssets: []*LocalAsset{
 					// CSS
@@ -395,7 +375,6 @@ func TestNewManager(t *testing.T) {
 			defer reset()
 
 			filesFind = tt.filesFind
-			embedassetsCopyAssets = tt.copyEmbedAssets
 
 			got, err := NewManager(tt.htmlDir, tt.staticDir, tt.jsonDir)
 			if !errors.Is(err, tt.wantError) {

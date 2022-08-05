@@ -47,6 +47,7 @@ import (
 	"github.com/gauntface/go-html-asset-manager/v3/manipulations/vimeoclean"
 	"github.com/gauntface/go-html-asset-manager/v3/manipulations/youtubeclean"
 	"github.com/gauntface/go-html-asset-manager/v3/preprocessors"
+	"github.com/gauntface/go-html-asset-manager/v3/preprocessors/hamassets"
 	"github.com/gauntface/go-html-asset-manager/v3/preprocessors/jsonassets"
 	"github.com/gauntface/go-html-asset-manager/v3/preprocessors/revisionassets"
 	"github.com/gauntface/go-html-asset-manager/v3/utils/config"
@@ -145,6 +146,7 @@ func newClient() (*client, error) {
 		vimeo:   vimeo,
 		s3:      s3Client,
 		preprocessors: []preprocessors.Preprocessor{
+			hamassets.Preprocessor,
 			jsonassets.Preprocessor,
 			revisionassets.Preprocessor,
 		},
@@ -304,8 +306,10 @@ func logReturn(e error, errs []error) error {
 }
 
 type assetmanagerManager interface {
+	AddLocal(a *assetmanager.LocalAsset)
 	AddRemote(a *assetmanager.RemoteAsset)
 	All() []assetmanager.Asset
+	StaticDir() string
 	String() string
 	WithID(id string) map[assets.Type][]assetmanager.Asset
 	WithType(t assets.Type) []assetmanager.Asset

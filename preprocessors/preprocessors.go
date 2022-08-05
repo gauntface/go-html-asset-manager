@@ -29,6 +29,8 @@ type Runtime struct {
 
 type AssetManager interface {
 	All() []assetmanager.Asset
+	StaticDir() string
 	WithType(t assets.Type) []assetmanager.Asset
 	AddRemote(a *assetmanager.RemoteAsset)
+	AddLocal(a *assetmanager.LocalAsset)
 }
