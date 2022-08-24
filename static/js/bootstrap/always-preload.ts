@@ -4,14 +4,29 @@ function addJSClass() {
   document.body.classList.add('u-js-loaded');
 }
 
-function asyncPreloadCSS() {
-  const styles = document.querySelectorAll('link[rel="preload"][as="style"]') as NodeListOf<HTMLLinkElement>;
-  for (const s of styles) {
-    const l = document.createElement('link');
+function loadStylesheet(s: HTMLLinkElement) {
+  const l = document.createElement('link');
     l.href = s.href;
     l.rel = 'stylesheet';
+    if (s.attributes['ham-media']) {
+      l.media = s.attributes['ham-media'];
+    }
     document.head.appendChild(l);
+}
+
+function loadStylesheets(selector) {
+  const styles = document.querySelectorAll(selector) as NodeListOf<HTMLLinkElement>;
+  for (const s of styles) {
+    loadStylesheet(s);
   }
+}
+
+function loadPreloadCSS() {
+  loadStylesheets('link[rel="preload"][as="style"]');
+}
+
+function loadAsyncCSS() {
+  loadStylesheets('link[rel="stylesheet"][media="ham-async"]');
 }
 
 function asyncDataSrc() {
@@ -24,9 +39,10 @@ function asyncDataSrc() {
 }
 
 function run() {
-  addJSClass();
   asyncDataSrc();
-  asyncPreloadCSS();
+  loadPreloadCSS();
+  loadAsyncCSS();
+  addJSClass();
 }
 
 OnLoad(run);

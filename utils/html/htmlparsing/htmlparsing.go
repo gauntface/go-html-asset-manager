@@ -74,6 +74,22 @@ func SyncCSSTag(cm CSSMediaPair) *html.Node {
 	}
 }
 
+func AsyncCSSTag(cm CSSMediaPair) *html.Node {
+	attr := []html.Attribute{
+		{Key: "href", Val: cm.URL},
+		{Key: "rel", Val: "stylesheet"},
+		{Key: "media", Val: "ham-async"},
+	}
+	if cm.Media != "" {
+		attr = append(attr, html.Attribute{Key: "ham-media", Val: cm.Media})
+	}
+	return &html.Node{
+		Type: html.ElementNode,
+		Data: "link",
+		Attr: attr,
+	}
+}
+
 func InlineJSTag(contents string) *html.Node {
 	return &html.Node{
 		Type: html.ElementNode,
