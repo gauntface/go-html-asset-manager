@@ -191,7 +191,7 @@ func TestManipulator(t *testing.T) {
 			},
 			wantHTML: `<html><head><style>example-1 inline contents 1
 
-example-1 inline contents 2</style><link rel="preload" as="style" href="/example-1-async.css"/><link rel="preload" as="style" href="/example-1-async.print.css"/></head><body><div class="example-1 example-2"></div></body></html>`,
+example-1 inline contents 2</style><link href="/example-1-async.css" rel="stylesheet" media="ham-async"/><link href="/example-1-async.print.css" rel="stylesheet" media="ham-async" ham-media="print"/></head><body><div class="example-1 example-2"></div></body></html>`,
 		},
 		{
 			description: "add preload assets",

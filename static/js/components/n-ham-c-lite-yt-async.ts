@@ -3,6 +3,9 @@ import {OnLoad} from '../utils/_onload.js';
 
 logger.setPrefix('ham/lite-youtube');
 
+const liteYTEmbedClass = 'n-ham-c-lite-yt';
+const liteYTEmbedSelector = `.${liteYTEmbedClass}`;
+
 class LiteYTEmbed {
 
   private element: HTMLElement;
@@ -13,7 +16,7 @@ class LiteYTEmbed {
 
   constructor(e: HTMLElement) {
       this.element = e;
-      this.anchor = e.querySelector(`${LiteYTEmbed.selector()}__link`) as HTMLElement;
+      this.anchor = e.querySelector(`${liteYTEmbedSelector}__link`) as HTMLElement;
 
       const params = this.requiredAttributes(e);
       if (!params) {
@@ -68,7 +71,7 @@ class LiteYTEmbed {
     const iframeHTML = `<iframe allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen src="https://www.youtube-nocookie.com/embed/${this.videoID}?${params.join("&")}" style="width:100%;height:100%;border:none;"></iframe>`;
     this.element.removeChild(this.anchor);
     this.element.insertAdjacentHTML('beforeend', iframeHTML);
-    this.element.classList.add(`${LiteYTEmbed.classname()}--activated`);
+    this.element.classList.add(`${liteYTEmbedClass}--activated`);
   }
 
   /**
@@ -103,18 +106,10 @@ class LiteYTEmbed {
       // The botguard script is fetched off from google.com
       this.addPrefetch('preconnect', 'https://www.google.com');
   }
-
-  static classname() {
-    return 'n-ham-c-lite-yt'
-  }
-
-  static selector() {
-    return `.${LiteYTEmbed.classname()}`
-  }
 }
 
 OnLoad(function() {
-  const ytElements = document.querySelectorAll<HTMLElement>(LiteYTEmbed.selector());
+  const ytElements = document.querySelectorAll<HTMLElement>(liteYTEmbedSelector);
   for (const e of ytElements) {
     new LiteYTEmbed(e);
   }
