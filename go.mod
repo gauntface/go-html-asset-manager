@@ -12,8 +12,8 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.7.0
-	github.com/schollz/progressbar/v3 v3.10.1
-	golang.org/x/net v0.0.0-20220907135653-1e95f45603a7
+	github.com/schollz/progressbar/v3 v3.11.0
+	golang.org/x/net v0.0.0-20220909164309-bea034e7d591
 )
 
 require github.com/tdewolff/parse/v2 v2.6.1 // indirect
