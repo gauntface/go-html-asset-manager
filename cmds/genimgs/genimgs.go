@@ -435,7 +435,10 @@ func (c *client) imgCreatorWorker(id int, jobs <-chan generateImage, results cha
 	ctx := context.Background()
 	for j := range jobs {
 		err := c.createAndUploadImage(ctx, j)
-		results <- fmt.Errorf("failed to create img %q: %w", j.originalPath, err)
+		if err != nil {
+			err = fmt.Errorf("failed to create img %q: %w", j.originalPath, err)
+		}
+		results <- err
 	}
 }
 
@@ -452,9 +455,6 @@ func createImage(img generateImage) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("Orig Image: %v\n", img.originalPath)
-	fmt.Printf("Outp Image: %v\n", img.outputPath)
 
 	ext := filepath.Ext(img.outputPath)
 	switch ext {
