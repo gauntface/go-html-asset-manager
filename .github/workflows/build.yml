@@ -6,8 +6,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Install avif deps
-      run: sudo apt-get install libaom-dev
     - name: Install Go
       uses: actions/setup-go@v3
       with:

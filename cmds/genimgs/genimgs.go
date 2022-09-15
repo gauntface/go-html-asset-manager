@@ -23,6 +23,7 @@ import (
 	"image"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -30,7 +31,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Kagami/go-avif"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -435,7 +435,7 @@ func (c *client) imgCreatorWorker(id int, jobs <-chan generateImage, results cha
 	ctx := context.Background()
 	for j := range jobs {
 		err := c.createAndUploadImage(ctx, j)
-		results <- err
+		results <- fmt.Errorf("failed to create img %q: %w", j.originalPath, err)
 	}
 }
 
@@ -452,6 +452,9 @@ func createImage(img generateImage) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Orig Image: %v\n", img.originalPath)
+	fmt.Printf("Outp Image: %v\n", img.outputPath)
 
 	ext := filepath.Ext(img.outputPath)
 	switch ext {
@@ -523,25 +526,37 @@ func createWebpImage(img generateImage) error {
 }
 
 func createAvifImage(img generateImage) error {
-	// go-avif doesn't support alpha channel
-	if path.Ext(img.originalPath) == ".png" {
-		return nil
-	}
-	srcImg, err := imaging.Open(img.originalPath)
+	tmpDir, err := ioutil.TempDir("", "")
 	if err != nil {
 		return err
 	}
 
-	dst := imaging.Resize(srcImg, img.width, 0, imaging.Lanczos)
+	origExt := path.Ext(img.originalPath)
+	outputExt := path.Ext(img.outputPath)
+	outputFilename := filepath.Base(img.outputPath)
+	tmpFilename := outputFilename[0:len(outputFilename)-len(outputExt)] + origExt
+	tmpPath := path.Join(tmpDir, tmpFilename)
 
-	f, err := os.Create(img.outputPath)
+	err = createImagingImage(generateImage{
+		originalPath: img.originalPath,
+		width:        img.width,
+		outputPath:   tmpPath,
+	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to resize image: %v", err)
 	}
 
-	err = avif.Encode(f, dst, nil)
+	outputDir := filepath.Dir(img.outputPath)
+	err = os.MkdirAll(outputDir, 0777)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to created output directory %q: %w", outputDir, err)
+	}
+
+	cmd := exec.Command("npx", "avif", "--input", tmpPath, "--output", outputDir, "--overwrite")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("Failed to run npx avif: %v\n", output)
+		return fmt.Errorf("npx avif failed: %w", err)
 	}
 	return nil
 }
