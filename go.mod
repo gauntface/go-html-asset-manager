@@ -1,4 +1,4 @@
-module github.com/gauntface/go-html-asset-manager/v3
+module github.com/gauntface/go-html-asset-manager/v4
 
 go 1.19
 
