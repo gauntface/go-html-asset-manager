@@ -8,11 +8,12 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.10
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
+	github.com/gauntface/go-html-asset-manager/v3 v3.1.4
 	github.com/google/go-cmp v0.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.7.0
 	github.com/schollz/progressbar/v3 v3.11.0
-	golang.org/x/net v0.0.0-20220909164309-bea034e7d591
+	golang.org/x/net v0.0.0-20220919232410-f2f64ebce3c1
 )
 
 require github.com/tdewolff/parse/v2 v2.6.1 // indirect
