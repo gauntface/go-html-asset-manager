@@ -19,8 +19,8 @@ package assetstubs
 import (
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v3/assets"
-	"github.com/gauntface/go-html-asset-manager/v3/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v4/assets"
+	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
 )
 
 type Manager struct {

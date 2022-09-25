@@ -20,7 +20,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v3/utils/sets"
+	"github.com/gauntface/go-html-asset-manager/v4/utils/sets"
 	"golang.org/x/net/html"
 )
 
@@ -78,10 +78,9 @@ func AsyncCSSTag(cm CSSMediaPair) *html.Node {
 	attr := []html.Attribute{
 		{Key: "href", Val: cm.URL},
 		{Key: "rel", Val: "stylesheet"},
-		{Key: "media", Val: "ham-async"},
 	}
 	if cm.Media != "" {
-		attr = append(attr, html.Attribute{Key: "ham-media", Val: cm.Media})
+		attr = append(attr, html.Attribute{Key: "media", Val: cm.Media})
 	}
 	return &html.Node{
 		Type: html.ElementNode,

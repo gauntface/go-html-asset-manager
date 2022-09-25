@@ -20,14 +20,12 @@ import (
 	"errors"
 	"fmt"
 	"sort"
-	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v3/assets"
-	"github.com/gauntface/go-html-asset-manager/v3/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/v3/utils/sets"
-	"github.com/gauntface/go-html-asset-manager/v3/utils/stringui"
+	"github.com/gauntface/go-html-asset-manager/v4/assets"
+	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v4/utils/stringui"
 	"golang.org/x/net/html"
 )
 
@@ -51,13 +49,8 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		return fmt.Errorf("%w: failed to find body element", errElementNotFound)
 	}
 
-	inlineCSS := getAssetsForType(keys, runtime.Assets, assets.InlineCSS)
-	err := addInlineCSS(headNode, inlineCSS)
-	if err != nil {
-		return err
-	}
-
 	injectMap := map[assets.Type]addAssetFunc{
+		assets.InlineCSS:  addInlineCSS,
 		assets.SyncCSS:    addSyncCSS,
 		assets.AsyncCSS:   addAsyncCSS,
 		assets.PreloadCSS: addPreloadCSS,
@@ -68,15 +61,34 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		assets.PreloadJS: addPreloadJS,
 	}
 
-	for _, k := range keys.Sorted() {
-		assetsByType := runtime.Assets.WithID(k)
-		assets := toArray(assetsByType)
-		for _, as := range assets {
-			injector, ok := injectMap[as.Type()]
-			if ok {
-				err := injector(headNode, bodyNode, as)
-				if err != nil {
-					return err
+	assetOrder := []assets.Type{
+		assets.InlineCSS,
+		assets.PreloadCSS,
+		assets.InlineJS,
+		assets.SyncJS,
+		assets.AsyncJS,
+		assets.PreloadJS,
+		assets.SyncCSS,
+		assets.AsyncCSS,
+	}
+
+	sortedKeys := keys.Sorted()
+
+	for _, a := range assetOrder {
+		for _, k := range sortedKeys {
+			assetsByType := runtime.Assets.WithID(k)
+			assets := toArray(assetsByType)
+			for _, as := range assets {
+				if as.Type() != a {
+					continue
+				}
+
+				injector, ok := injectMap[as.Type()]
+				if ok {
+					err := injector(headNode, bodyNode, as)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -96,36 +108,12 @@ func toArray(assetsByType map[assets.Type][]assetmanager.Asset) []assetmanager.A
 	return ar
 }
 
-func getAssetsForType(keys sets.StringSet, manager manipulations.AssetManager, aType assets.Type) []assetmanager.Asset {
-	assets := []assetmanager.Asset{}
-	for _, k := range keys.Sorted() {
-		assetsByType := manager.WithID(k)
-		for ty, as := range assetsByType {
-			if ty == aType {
-				assets = append(assets, as...)
-			}
-		}
+func addInlineCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
+	c, err := asset.Contents()
+	if err != nil {
+		return err
 	}
-
-	sortAssets(assets)
-
-	return assets
-}
-
-func addInlineCSS(headNode *html.Node, assets []assetmanager.Asset) error {
-	if len(assets) == 0 {
-		return nil
-	}
-
-	contents := []string{}
-	for _, a := range assets {
-		c, err := a.Contents()
-		if err != nil {
-			return err
-		}
-		contents = append(contents, c)
-	}
-	headNode.AppendChild(htmlparsing.InlineCSSTag(strings.Join(contents, "\n\n")))
+	headNode.AppendChild(htmlparsing.InlineCSSTag(c))
 	return nil
 }
 
@@ -135,10 +123,16 @@ func addSyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
 		return err
 	}
 
-	headNode.AppendChild(htmlparsing.SyncCSSTag(htmlparsing.CSSMediaPair{
+	node := headNode
+	if asset.Media() != "" {
+		node = bodyNode
+	}
+
+	node.AppendChild(htmlparsing.SyncCSSTag(htmlparsing.CSSMediaPair{
 		URL:   u,
 		Media: asset.Media(),
 	}))
+
 	return nil
 }
 
@@ -148,7 +142,7 @@ func addAsyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error 
 		return err
 	}
 
-	headNode.AppendChild(
+	bodyNode.AppendChild(
 		htmlparsing.AsyncCSSTag(
 			htmlparsing.CSSMediaPair{
 				URL:   u,
@@ -165,7 +159,7 @@ func addPreloadCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) erro
 		return err
 	}
 
-	headNode.AppendChild(htmlparsing.PreloadTag("style", u))
+	bodyNode.AppendChild(htmlparsing.PreloadTag("style", u))
 	return nil
 }
 
@@ -201,7 +195,7 @@ func addPreloadJS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error
 	if err != nil {
 		return err
 	}
-	headNode.AppendChild(htmlparsing.PreloadTag("script", u))
+	bodyNode.AppendChild(htmlparsing.PreloadTag("script", u))
 	return nil
 }
 

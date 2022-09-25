@@ -23,11 +23,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v3/assets"
-	"github.com/gauntface/go-html-asset-manager/v3/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v3/assets/assetstubs"
-	"github.com/gauntface/go-html-asset-manager/v3/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v4/assets"
+	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v4/assets/assetstubs"
+	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )
@@ -165,6 +165,17 @@ func TestManipulator(t *testing.T) {
 								URLReturn:      "/example-1-inline.1.css",
 							},
 						},
+						assets.SyncCSS: []assetmanager.Asset{
+							&assetstubs.Asset{
+								TypeReturn: assets.SyncCSS,
+								URLReturn:  "/example-1-sync.css",
+							},
+							&assetstubs.Asset{
+								TypeReturn:  assets.SyncCSS,
+								MediaReturn: "print",
+								URLReturn:   "/example-1-sync.print.css",
+							},
+						},
 						assets.AsyncCSS: []assetmanager.Asset{
 							&assetstubs.Asset{
 								TypeReturn: assets.AsyncCSS,
@@ -189,9 +200,7 @@ func TestManipulator(t *testing.T) {
 					},
 				},
 			},
-			wantHTML: `<html><head><style>example-1 inline contents 1
-
-example-1 inline contents 2</style><link href="/example-1-async.css" rel="stylesheet" media="ham-async"/><link href="/example-1-async.print.css" rel="stylesheet" media="ham-async" ham-media="print"/></head><body><div class="example-1 example-2"></div></body></html>`,
+			wantHTML: `<html><head><style>example-1 inline contents 1</style><style>example-1 inline contents 2</style><link href="/example-1-sync.css" rel="stylesheet"/></head><body><div class="example-1 example-2"></div><link href="/example-1-sync.print.css" rel="stylesheet" media="print"/><link href="/example-1-async.css" rel="stylesheet"/><link href="/example-1-async.print.css" rel="stylesheet" media="print"/></body></html>`,
 		},
 		{
 			description: "add preload assets",
@@ -217,7 +226,7 @@ example-1 inline contents 2</style><link href="/example-1-async.css" rel="styles
 					},
 				},
 			},
-			wantHTML: `<html><head><link rel="preload" as="style" href="/div-preload.css"/><link rel="preload" as="script" href="/div-preload.js"/></head><body><div></div></body></html>`,
+			wantHTML: `<html><head></head><body><div></div><link rel="preload" as="style" href="/div-preload.css"/><link rel="preload" as="script" href="/div-preload.js"/></body></html>`,
 		},
 		{
 			description: "log keys if html file matches debug key",
@@ -276,25 +285,21 @@ example-1 inline contents 2</style><link href="/example-1-async.css" rel="styles
 func TestAddInlineCSS(t *testing.T) {
 	tests := []struct {
 		description string
-		assets      []assetmanager.Asset
+		asset       assetmanager.Asset
 		want        string
 		wantError   error
 	}{
 		{
 			description: "return error if getting contents fails",
-			assets: []assetmanager.Asset{
-				&assetstubs.Asset{
-					ContentsError: errInjected,
-				},
+			asset: &assetstubs.Asset{
+				ContentsError: errInjected,
 			},
 			wantError: errInjected,
 		},
 		{
 			description: "add asset to head",
-			assets: []assetmanager.Asset{
-				&assetstubs.Asset{
-					ContentsReturn: `Example Content`,
-				},
+			asset: &assetstubs.Asset{
+				ContentsReturn: `Example Content`,
 			},
 			want: `<html><head><style>Example Content</style></head><body></body></html>`,
 		},
@@ -305,7 +310,7 @@ func TestAddInlineCSS(t *testing.T) {
 			doc := MustGetNode(t, "")
 			head := htmlparsing.FindNodeByTag("head", doc)
 
-			err := addInlineCSS(head, tt.assets)
+			err := addInlineCSS(head, nil, tt.asset)
 			if !errors.Is(err, tt.wantError) {
 				t.Errorf("Unexpected error; got %v, want %v", err, tt.wantError)
 			}
@@ -376,7 +381,7 @@ func TestAddInlineJS(t *testing.T) {
 			wantError: errInjected,
 		},
 		{
-			description: "add asset to head",
+			description: "add asset to page",
 			asset: &assetstubs.Asset{
 				ContentsReturn: "Example Content",
 			},
@@ -415,7 +420,7 @@ func TestAddSyncJS(t *testing.T) {
 		wantError   error
 	}{
 		{
-			description: "add asset to head",
+			description: "add asset to page",
 			asset: &assetstubs.Asset{
 				URLReturn: "http://example.com/url.js",
 			},
@@ -454,7 +459,7 @@ func TestAddAsyncJS(t *testing.T) {
 		wantError   error
 	}{
 		{
-			description: "add asset to head",
+			description: "add asset to page",
 			asset: &assetstubs.Asset{
 				URLReturn: "http://example.com/url.js",
 			},
@@ -493,11 +498,11 @@ func TestAddPreloadCSS(t *testing.T) {
 		wantError   error
 	}{
 		{
-			description: "add asset to head",
+			description: "add asset to page",
 			asset: &assetstubs.Asset{
 				URLReturn: "http://example.com/url.css",
 			},
-			want: `<html><head><link rel="preload" as="style" href="http://example.com/url.css"/></head><body></body></html>`,
+			want: `<html><head></head><body><link rel="preload" as="style" href="http://example.com/url.css"/></body></html>`,
 		},
 	}
 
@@ -532,11 +537,11 @@ func TestAddPreloadJS(t *testing.T) {
 		wantError   error
 	}{
 		{
-			description: "add asset to head",
+			description: "add asset to page",
 			asset: &assetstubs.Asset{
 				URLReturn: "http://example.com/url.js",
 			},
-			want: `<html><head><link rel="preload" as="script" href="http://example.com/url.js"/></head><body></body></html>`,
+			want: `<html><head></head><body><link rel="preload" as="script" href="http://example.com/url.js"/></body></html>`,
 		},
 	}
 
