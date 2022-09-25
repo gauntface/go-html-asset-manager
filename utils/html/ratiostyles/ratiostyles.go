@@ -19,7 +19,7 @@ package ratiostyles
 import (
 	"fmt"
 
-	"github.com/gauntface/go-html-asset-manager/v3/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
 	"golang.org/x/net/html"
 )
 

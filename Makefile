@@ -4,7 +4,6 @@ typescript:
 	npx esbuild static/js/components/n-ham-c-lite-yt-async.ts --minify --bundle --outfile=embedassets/assets/js/components/n-ham-c-lite-yt-async.js --format=cjs
 	npx esbuild static/js/components/n-ham-c-lite-vi-async.ts --minify --bundle --outfile=embedassets/assets/js/components/n-ham-c-lite-vi-async.js --format=cjs
 	npx esbuild static/js/bootstrap/always-async.ts --minify --bundle --outfile=embedassets/assets/js/bootstrap/always-async.js --format=cjs
-	npx esbuild static/js/bootstrap/always-preload.ts --minify --bundle --outfile=embedassets/assets/js/bootstrap/always-preload.js --format=cjs
 
 build: clean format typescript
 	export GO111MODULE=on

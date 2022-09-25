@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v3/assets"
+	"github.com/gauntface/go-html-asset-manager/v4/assets"
 )
 
 const (

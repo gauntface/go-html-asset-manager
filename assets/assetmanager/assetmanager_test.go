@@ -24,8 +24,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v3/assets"
-	"github.com/gauntface/go-html-asset-manager/v3/assets/assetid"
+	"github.com/gauntface/go-html-asset-manager/v4/assets"
+	"github.com/gauntface/go-html-asset-manager/v4/assets/assetid"
 	"github.com/google/go-cmp/cmp"
 )
 
