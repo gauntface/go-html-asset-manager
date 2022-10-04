@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "@gauntface/logger": "3.0.37"
+    "@gauntface/logger": "3.0.38"
   },
   "dependencies": {
     "avif": "0.4.0"
