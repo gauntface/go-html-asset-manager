@@ -200,7 +200,7 @@ func TestManipulator(t *testing.T) {
 					},
 				},
 			},
-			wantHTML: `<html><head><style>example-1 inline contents 1</style><style>example-1 inline contents 2</style><link href="/example-1-sync.css" rel="stylesheet"/></head><body><div class="example-1 example-2"></div><link href="/example-1-sync.print.css" rel="stylesheet" media="print"/><link href="/example-1-async.css" rel="stylesheet"/><link href="/example-1-async.print.css" rel="stylesheet" media="print"/></body></html>`,
+			wantHTML: `<html><head><style>example-1 inline contents 1</style><style>example-1 inline contents 2</style><link href="/example-1-sync.css" rel="stylesheet"/></head><body><div class="example-1 example-2"></div><link href="/example-1-async.css" rel="stylesheet" media="print" onload="this.media=&#39;all&#39;"/><link href="/example-1-async.print.css" rel="stylesheet" media="print"/><link href="/example-1-sync.print.css" rel="stylesheet" media="print"/></body></html>`,
 		},
 		{
 			description: "add preload assets",

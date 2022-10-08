@@ -63,13 +63,16 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 
 	assetOrder := []assets.Type{
 		assets.InlineCSS,
-		assets.PreloadCSS,
 		assets.InlineJS,
-		assets.SyncJS,
-		assets.AsyncJS,
+
+		assets.PreloadCSS,
 		assets.PreloadJS,
-		assets.SyncCSS,
+
 		assets.AsyncCSS,
+		assets.AsyncJS,
+
+		assets.SyncCSS,
+		assets.SyncJS,
 	}
 
 	sortedKeys := keys.Sorted()
