@@ -39,4 +39,4 @@ function run() {
   addJSLoadedSignal();
 }
 
-OnLoad(run);
+OnLoad(() => run);

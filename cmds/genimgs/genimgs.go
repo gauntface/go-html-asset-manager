@@ -385,16 +385,12 @@ func (c *client) generateImageSet(imgPath string) ([]generateImage, error) {
 				width:        s,
 				outputPath:   path.Join(outputDir, fmt.Sprintf("%v%v", s, ".webp")),
 			},
-		)
-
-		// avif library doesn't support alpha channel
-		if !strings.HasSuffix(imgPath, ".png") {
-			genImgs = append(genImgs, generateImage{
+			generateImage{
 				originalPath: imgPath,
 				width:        s,
 				outputPath:   path.Join(outputDir, fmt.Sprintf("%v%v", s, ".avif")),
-			})
-		}
+			},
+		)
 	}
 
 	return genImgs, nil

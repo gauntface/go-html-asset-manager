@@ -17,6 +17,7 @@
 package htmlparsing
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -78,10 +79,19 @@ func AsyncCSSTag(cm CSSMediaPair) *html.Node {
 	attr := []html.Attribute{
 		{Key: "href", Val: cm.URL},
 		{Key: "rel", Val: "stylesheet"},
+		{Key: "media", Val: "print"},
 	}
-	if cm.Media != "" {
-		attr = append(attr, html.Attribute{Key: "media", Val: cm.Media})
+	if cm.Media != "print" {
+		finalMedia := "all"
+		if cm.Media != "" {
+			finalMedia = cm.Media
+		}
+		attr = append(attr, html.Attribute{
+			Key: "onload",
+			Val: fmt.Sprintf(`this.media='%v'`, finalMedia),
+		})
 	}
+
 	return &html.Node{
 		Type: html.ElementNode,
 		Data: "link",
