@@ -4,15 +4,15 @@ go 1.19
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.17.8
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.34
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.11
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.35
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.28.0
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/google/go-cmp v0.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.7.0
 	github.com/schollz/progressbar/v3 v3.11.0
-	golang.org/x/net v0.0.0-20221017152216-f25eb7ecb193
+	golang.org/x/net v0.1.0
 )
 
 require github.com/tdewolff/parse/v2 v2.6.1 // indirect
@@ -43,8 +43,8 @@ require (
 	github.com/tdewolff/minify/v2 v2.12.0 // indirect
 	golang.org/x/crypto v0.0.0-20220824171710-5757bc0c5503 // indirect
 	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69 // indirect
-	golang.org/x/sys v0.0.0-20221010170243-090e33056c14 // indirect
-	golang.org/x/term v0.0.0-20220919170432-7a66f970e087 // indirect
+	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/term v0.1.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
