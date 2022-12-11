@@ -18,6 +18,7 @@ package opengraphimg
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"sync"
@@ -63,7 +64,8 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 
 		img, err := getSuitableImg(runtime, c.Val)
 		if err != nil {
-			return err
+			log.Printf("Warning: Unable to find suitable image for %q: %v", c.Val, err)
+			continue
 		}
 
 		if img == nil {
