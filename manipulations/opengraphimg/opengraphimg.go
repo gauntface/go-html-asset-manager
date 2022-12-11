@@ -18,12 +18,21 @@ package opengraphimg
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gauntface/go-html-asset-manager/v4/assets/genimgs"
 	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
 	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
 	"golang.org/x/net/html"
+)
+
+const (
+	RECOMMENDED_OG_IMG_WIDTH = 1200
+)
+
+var (
+	genimgsLookupSizes = genimgs.LookupSizes
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
@@ -49,7 +58,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			continue
 		}
 
-		imgs, err := genimgs.LookupSizes(runtime.S3, runtime.Config, c.Val)
+		imgs, err := genimgsLookupSizes(runtime.S3, runtime.Config, c.Val)
 		if err != nil {
 			return err
 		}
@@ -57,12 +66,23 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		imgsByTypes := genimgs.GroupByType(imgs)
 		imgsByType := imgsByTypes[""]
 		if len(imgsByType) == 0 {
-			return nil
+			continue
 		}
 
-		largestImg := imgsByType[len(imgsByType)-1]
+		var img *genimgs.GenImg = nil
+		for _, i := range imgs {
+			if i.Size <= RECOMMENDED_OG_IMG_WIDTH {
+				img = &i
+				break
+			}
+		}
 
-		c.Val = fmt.Sprintf("%v%v", runtime.Config.BaseURL, largestImg.URL)
+		if img == nil {
+			continue
+		}
+
+		log.Printf("HELLO -> %v", img.URL)
+		c.Val = fmt.Sprintf("%v%v", runtime.Config.BaseURL, img.URL)
 		attributes["content"] = c
 		ele.Attr = htmlparsing.AttributesList(attributes)
 	}
