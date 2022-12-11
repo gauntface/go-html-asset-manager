@@ -115,25 +115,6 @@ func TestManipulator(t *testing.T) {
 			},
 			wantHTML: `<html><head><meta content="http://base-url.com/images/default-social.1200xabc.png" property="og:image"/></head><body></body></html>`,
 		},
-
-		/* {
-			description: "remove script tag",
-			findNodes:   htmlparsing.FindNodesByTag,
-			doc:         MustGetNode(t, `<script></script>`),
-			wantHTML:    `<html><head></head><body></body></html>`,
-		},
-		{
-			description: "remove stylesheet link tag",
-			findNodes:   htmlparsing.FindNodesByTag,
-			doc:         MustGetNode(t, `<link rel="stylesheet"></link>`),
-			wantHTML:    `<html><head></head><body></body></html>`,
-		},
-		{
-			description: "leave non-stylesheet link tag",
-			findNodes:   htmlparsing.FindNodesByTag,
-			doc:         MustGetNode(t, `<link></link>`),
-			wantHTML:    `<html><head><link/></head><body></body></html>`,
-		},*/
 	}
 
 	for _, tt := range tests {
