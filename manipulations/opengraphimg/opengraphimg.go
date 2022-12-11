@@ -26,6 +26,14 @@ import (
 	"golang.org/x/net/html"
 )
 
+const (
+	RECOMMENDED_OG_IMG_WIDTH = 1200
+)
+
+var (
+	genimgsLookupSizes = genimgs.LookupSizes
+)
+
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 	els := htmlparsing.FindNodesByTag("meta", doc)
 	for _, ele := range els {
@@ -49,7 +57,7 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			continue
 		}
 
-		imgs, err := genimgs.LookupSizes(runtime.S3, runtime.Config, c.Val)
+		imgs, err := genimgsLookupSizes(runtime.S3, runtime.Config, c.Val)
 		if err != nil {
 			return err
 		}
@@ -57,12 +65,22 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		imgsByTypes := genimgs.GroupByType(imgs)
 		imgsByType := imgsByTypes[""]
 		if len(imgsByType) == 0 {
-			return nil
+			continue
 		}
 
-		largestImg := imgsByType[len(imgsByType)-1]
+		var img *genimgs.GenImg = nil
+		for _, i := range imgs {
+			if i.Size <= RECOMMENDED_OG_IMG_WIDTH {
+				img = &i
+				break
+			}
+		}
 
-		c.Val = fmt.Sprintf("%v%v", runtime.Config.BaseURL, largestImg.URL)
+		if img == nil {
+			continue
+		}
+
+		c.Val = fmt.Sprintf("%v%v", runtime.Config.BaseURL, img.URL)
 		attributes["content"] = c
 		ele.Attr = htmlparsing.AttributesList(attributes)
 	}
