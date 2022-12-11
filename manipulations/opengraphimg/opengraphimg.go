@@ -18,7 +18,9 @@ package opengraphimg
 
 import (
 	"fmt"
+	"sort"
 	"strings"
+	"sync"
 
 	"github.com/gauntface/go-html-asset-manager/v4/assets/genimgs"
 	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
@@ -32,6 +34,8 @@ const (
 
 var (
 	genimgsLookupSizes = genimgs.LookupSizes
+	imgCache           = map[string]genimgs.GenImg{}
+	imgCacheLock       = sync.RWMutex{}
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
@@ -57,23 +61,9 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			continue
 		}
 
-		imgs, err := genimgsLookupSizes(runtime.S3, runtime.Config, c.Val)
+		img, err := getSuitableImg(runtime, c.Val)
 		if err != nil {
 			return err
-		}
-
-		imgsByTypes := genimgs.GroupByType(imgs)
-		imgsByType := imgsByTypes[""]
-		if len(imgsByType) == 0 {
-			continue
-		}
-
-		var img *genimgs.GenImg = nil
-		for _, i := range imgs {
-			if i.Size <= RECOMMENDED_OG_IMG_WIDTH {
-				img = &i
-				break
-			}
 		}
 
 		if img == nil {
@@ -85,4 +75,47 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		ele.Attr = htmlparsing.AttributesList(attributes)
 	}
 	return nil
+}
+
+func getSuitableImg(runtime manipulations.Runtime, imgPath string) (*genimgs.GenImg, error) {
+	imgCacheLock.Lock()
+	defer imgCacheLock.Unlock()
+
+	if img := lookupImgCache(imgPath); img != nil {
+		return img, nil
+	}
+
+	imgs, err := genimgsLookupSizes(runtime.S3, runtime.Config, imgPath)
+	if err != nil {
+		return nil, err
+	}
+
+	imgsByTypes := genimgs.GroupByType(imgs)
+	imgsByType := imgsByTypes[""]
+	if len(imgsByType) == 0 {
+		return nil, nil
+	}
+
+	sort.Slice(imgs, func(i, j int) bool {
+		return imgs[i].Size > imgs[j].Size
+	})
+	for _, i := range imgs {
+		if i.Size <= RECOMMENDED_OG_IMG_WIDTH {
+			addImgCache(imgPath, i)
+			return &i, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func lookupImgCache(imgPath string) *genimgs.GenImg {
+	if img, ok := imgCache[imgPath]; ok {
+		return &img
+	}
+	return nil
+}
+
+func addImgCache(imgPath string, img genimgs.GenImg) {
+	imgCache[imgPath] = img
 }

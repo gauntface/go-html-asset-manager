@@ -54,7 +54,9 @@ import (
 	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlencoding"
 	"github.com/gauntface/go-html-asset-manager/v4/utils/vimeoapi"
 	"github.com/mitchellh/go-homedir"
+	"github.com/schollz/progressbar/v3"
 	"golang.org/x/net/html"
+	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -216,15 +218,25 @@ func (c *client) manipulations(manager assetmanagerManager, manipulators []manip
 }
 
 func (c *client) manipulateHTMLFiles(assets []assetmanagerLocalAsset, manager assetmanagerManager, manipulators []manipulations.Manipulator) []error {
-	var wg sync.WaitGroup
-	wg.Add(len(assets))
+	ctx := context.Background()
 
 	errs := []error{}
 	var errMu sync.Mutex
 
+	maxWorkers := int64(24)
+	sem := semaphore.NewWeighted(maxWorkers)
+	bar := progressbar.Default(int64(len(assets)), "HTML files processed")
+
 	for _, htmlAsset := range assets {
+		if err := sem.Acquire(ctx, 1); err != nil {
+			errMu.Lock()
+			defer errMu.Unlock()
+			errs = append(errs, fmt.Errorf("%w %q: %v", errManipulate, htmlAsset.Path(), err))
+		}
+
 		go func(htmlAsset assetmanagerLocalAsset) {
-			defer wg.Done()
+			defer sem.Release(1)
+			defer bar.Add(1)
 
 			err := c.manipulateHTMLFile(htmlAsset, manager, manipulators)
 			if err != nil {
@@ -235,7 +247,7 @@ func (c *client) manipulateHTMLFiles(assets []assetmanagerLocalAsset, manager as
 		}(htmlAsset)
 	}
 
-	wg.Wait()
+	sem.Acquire(ctx, maxWorkers)
 
 	return errs
 }
