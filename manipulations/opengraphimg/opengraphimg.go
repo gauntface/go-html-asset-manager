@@ -18,7 +18,6 @@ package opengraphimg
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/gauntface/go-html-asset-manager/v4/assets/genimgs"
@@ -81,7 +80,6 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 			continue
 		}
 
-		log.Printf("HELLO -> %v", img.URL)
 		c.Val = fmt.Sprintf("%v%v", runtime.Config.BaseURL, img.URL)
 		attributes["content"] = c
 		ele.Attr = htmlparsing.AttributesList(attributes)
