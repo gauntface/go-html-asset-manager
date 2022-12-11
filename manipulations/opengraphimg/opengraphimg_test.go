@@ -58,13 +58,13 @@ func TestManipulator(t *testing.T) {
 			wantHTML:    `<html><head><meta property="og:image"/></head><body></body></html>`,
 		},
 		{
-			description: "return error if getting images fails",
+			description: "do nothing if getting images fails",
 			findNodes:   htmlparsing.FindNodesByTag,
 			doc:         MustGetNode(t, `<meta property="og:image" content="/images/default-social.png" />`),
 			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return nil, errInjected
 			},
-			wantError: errInjected,
+			wantHTML: `<html><head><meta property="og:image" content="/images/default-social.png"/></head><body></body></html>`,
 		},
 		{
 			description: "do nothing when no images",
