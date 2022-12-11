@@ -13,7 +13,7 @@ require (
 	github.com/otiai10/copy v1.9.0
 	github.com/schollz/progressbar/v3 v3.12.2
 	golang.org/x/net v0.4.0
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	golang.org/x/sync v0.1.0
 )
 
 require (
