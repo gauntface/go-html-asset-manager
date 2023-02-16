@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # v3
       with:
         go-version: '^1.17.3'
     - name: NPM Deps
