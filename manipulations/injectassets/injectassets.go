@@ -116,7 +116,13 @@ func addInlineCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error
 	if err != nil {
 		return err
 	}
-	headNode.AppendChild(htmlparsing.InlineCSSTag(c))
+	style := htmlparsing.FindNodeByTag("style", headNode)
+	if style == nil {
+		headNode.AppendChild(htmlparsing.InlineCSSTag(c))
+	} else {
+		style.FirstChild.Data += " " + c
+	}
+
 	return nil
 }
 
