@@ -4,13 +4,13 @@ go 1.19
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.21
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.62
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.31.3
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.63
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.32.0
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/google/go-cmp v0.5.9
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/otiai10/copy v1.10.0
+	github.com/otiai10/copy v1.11.0
 	github.com/schollz/progressbar/v3 v3.13.1
 	golang.org/x/net v0.9.0
 	golang.org/x/sync v0.1.0
