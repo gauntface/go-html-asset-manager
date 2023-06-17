@@ -19,8 +19,9 @@ package assetstubs
 import (
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v4/assets"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v5/assets"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetmanager"
+	"golang.org/x/net/html"
 )
 
 type Manager struct {
@@ -64,6 +65,8 @@ type Asset struct {
 	URLReturn string
 	URLError  error
 
+	AttributesReturn []html.Attribute
+
 	ContentsReturn string
 	ContentsError  error
 
@@ -90,6 +93,10 @@ func (a *Asset) Media() string {
 
 func (a *Asset) URL() (string, error) {
 	return a.URLReturn, a.URLError
+}
+
+func (a *Asset) Attributes() []html.Attribute {
+	return a.AttributesReturn
 }
 
 func (a *Asset) Contents() (string, error) {

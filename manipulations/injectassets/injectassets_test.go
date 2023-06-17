@@ -23,11 +23,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v4/assets"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetstubs"
-	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v5/assets"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetstubs"
+	"github.com/gauntface/go-html-asset-manager/v5/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/html/htmlparsing"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )
@@ -335,9 +335,26 @@ func TestSyncCSS(t *testing.T) {
 		wantError   error
 	}{
 		{
-			description: "add asset to head",
+			description: "add asset to head with url only",
 			asset: &assetstubs.Asset{
 				URLReturn: "http://example.com/url.css",
+			},
+			want: `<html><head><link href="http://example.com/url.css" rel="stylesheet"/></head><body></body></html>`,
+		},
+		{
+			description: "add asset to head with url and attributes",
+			asset: &assetstubs.Asset{
+				URLReturn: "http://example.com/url.css",
+				AttributesReturn: []html.Attribute{
+					{
+						Key: "example",
+						Val: "test",
+					},
+					{
+						Key: "example-2",
+						Val: "test-2",
+					},
+				},
 			},
 			want: `<html><head><link href="http://example.com/url.css" rel="stylesheet"/></head><body></body></html>`,
 		},

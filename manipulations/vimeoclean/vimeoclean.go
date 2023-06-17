@@ -26,12 +26,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/config"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/css"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/html/ratiostyles"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/vimeoapi"
+	"github.com/gauntface/go-html-asset-manager/v5/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/css"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/html/ratiostyles"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/vimeoapi"
 	"golang.org/x/net/html"
 )
 

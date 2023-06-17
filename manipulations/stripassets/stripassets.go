@@ -17,8 +17,8 @@
 package stripassets
 
 import (
-	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v5/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/html/htmlparsing"
 	"golang.org/x/net/html"
 )
 

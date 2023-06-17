@@ -8,10 +8,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/genimgs"
-	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/config"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/genimgs"
+	"github.com/gauntface/go-html-asset-manager/v5/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/html/htmlparsing"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )

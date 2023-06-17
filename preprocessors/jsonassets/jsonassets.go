@@ -21,9 +21,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gauntface/go-html-asset-manager/v4/assets"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v4/preprocessors"
+	"github.com/gauntface/go-html-asset-manager/v5/assets"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v5/preprocessors"
+	"golang.org/x/net/html"
 )
 
 var (
@@ -38,7 +39,7 @@ func Preprocessor(runtime preprocessors.Runtime) error {
 			return err
 		}
 
-		types := map[assets.Type][]string{
+		types := map[assets.Type][]htmlAsset{
 			assets.SyncCSS:    remoteURLs.CSS.Sync,
 			assets.AsyncCSS:   remoteURLs.CSS.Async,
 			assets.PreloadCSS: remoteURLs.CSS.Preload,
@@ -47,9 +48,18 @@ func Preprocessor(runtime preprocessors.Runtime) error {
 			assets.AsyncJS:   remoteURLs.JS.Async,
 			assets.PreloadJS: remoteURLs.JS.Preload,
 		}
-		for t, urls := range types {
-			for _, u := range urls {
-				runtime.Assets.AddRemote(assetmanager.NewRemoteAsset(a.ID(), u, t))
+		for t, htmlAssets := range types {
+			for _, ha := range htmlAssets {
+				attrs := []html.Attribute{}
+				for _, a := range ha.attributes {
+					attrs = append(attrs, html.Attribute{
+						Key: a.key,
+						Val: a.value,
+					})
+				}
+				runtime.Assets.AddRemote(
+					assetmanager.NewRemoteAsset(a.ID(), ha.src, attrs, t),
+				)
 			}
 		}
 	}
@@ -76,7 +86,17 @@ type jsonAssets struct {
 }
 
 type jsonAssetGroup struct {
-	Sync    []string
-	Async   []string
-	Preload []string
+	Sync    []htmlAsset
+	Async   []htmlAsset
+	Preload []htmlAsset
+}
+
+type htmlAsset struct {
+	src        string          `json:"src"`
+	attributes []htmlAttribute `json:"attributes,omitempty"`
+}
+
+type htmlAttribute struct {
+	key   string
+	value string
 }

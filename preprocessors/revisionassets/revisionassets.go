@@ -22,10 +22,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/gauntface/go-html-asset-manager/v4/assets"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v4/preprocessors"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/files"
+	"github.com/gauntface/go-html-asset-manager/v5/assets"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v5/preprocessors"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/files"
 )
 
 var (

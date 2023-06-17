@@ -27,12 +27,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v4/assets"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetstubs"
-	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v4/preprocessors"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/config"
+	"github.com/gauntface/go-html-asset-manager/v5/assets"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetstubs"
+	"github.com/gauntface/go-html-asset-manager/v5/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v5/preprocessors"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/config"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/mitchellh/go-homedir"
@@ -324,9 +324,9 @@ func Test_manipulations(t *testing.T) {
 			description: "return errors if processing file fails",
 			manager: &assetstubs.Manager{
 				WithTypeReturn: map[assets.Type][]assetmanager.Asset{
-					assets.HTML: []assetmanager.Asset{
+					assets.HTML: {
 						assetstubs.MustNewLocalAsset(t, "/example/", "/example/example-1.html"),
-						assetmanager.NewRemoteAsset("example", "http://example.com/123", assets.Unknown),
+						assetmanager.NewRemoteAsset("example", "http://example.com/123", []html.Attribute{}, assets.Unknown),
 					},
 				},
 			},

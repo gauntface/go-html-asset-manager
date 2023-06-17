@@ -24,9 +24,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v4/assets"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetid"
+	"github.com/gauntface/go-html-asset-manager/v5/assets"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetid"
 	"github.com/google/go-cmp/cmp"
+	"golang.org/x/net/html"
 )
 
 var errInjected = errors.New("injected error")
@@ -1096,6 +1097,7 @@ func TestNewRemoteAsset(t *testing.T) {
 		description string
 		id          string
 		url         string
+		attributes  []html.Attribute
 		assetType   assets.Type
 		want        *RemoteAsset
 	}{
@@ -1103,10 +1105,30 @@ func TestNewRemoteAsset(t *testing.T) {
 			description: "return new remote asset",
 			id:          "example-id",
 			url:         "http://example.com/example.css",
-			assetType:   assets.InlineCSS,
+			attributes: []html.Attribute{
+				{
+					Key: "example",
+					Val: "test",
+				},
+				{
+					Key: "example-2",
+					Val: "another test",
+				},
+			},
+			assetType: assets.InlineCSS,
 			want: &RemoteAsset{
-				id:        "example-id",
-				url:       "http://example.com/example.css",
+				id:  "example-id",
+				url: "http://example.com/example.css",
+				attributes: []html.Attribute{
+					{
+						Key: "example",
+						Val: "test",
+					},
+					{
+						Key: "example-2",
+						Val: "another test",
+					},
+				},
 				assetType: assets.InlineCSS,
 			},
 		},
@@ -1114,7 +1136,7 @@ func TestNewRemoteAsset(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got := NewRemoteAsset(tt.id, tt.url, tt.assetType)
+			got := NewRemoteAsset(tt.id, tt.url, tt.attributes, tt.assetType)
 			opts := []cmp.Option{
 				cmp.AllowUnexported(RemoteAsset{}),
 			}
@@ -1180,7 +1202,7 @@ func TestRemoteAsset_String(t *testing.T) {
 			asset: &RemoteAsset{
 				url: "http://example.com/url.html",
 			},
-			want: `<Remote Asset: "http://example.com/url.html">`,
+			want: `<Remote Asset: "http://example.com/url.html" Attributes: []>`,
 		},
 	}
 

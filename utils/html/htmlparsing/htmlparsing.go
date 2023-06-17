@@ -21,7 +21,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v4/utils/sets"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/sets"
 	"golang.org/x/net/html"
 )
 
@@ -60,14 +60,17 @@ func InlineCSSTag(contents string) *html.Node {
 	}
 }
 
-func SyncCSSTag(cm CSSMediaPair) *html.Node {
-	attr := []html.Attribute{
+func SyncCSSTag(cm CSSTagData) *html.Node {
+	attr := cm.Attributes
+	attr = append(attr, []html.Attribute{
 		{Key: "href", Val: cm.URL},
 		{Key: "rel", Val: "stylesheet"},
-	}
+	}...)
+
 	if cm.Media != "" {
 		attr = append(attr, html.Attribute{Key: "media", Val: cm.Media})
 	}
+
 	return &html.Node{
 		Type: html.ElementNode,
 		Data: "link",
@@ -75,12 +78,14 @@ func SyncCSSTag(cm CSSMediaPair) *html.Node {
 	}
 }
 
-func AsyncCSSTag(cm CSSMediaPair) *html.Node {
-	attr := []html.Attribute{
+func AsyncCSSTag(cm CSSTagData) *html.Node {
+	attr := cm.Attributes
+	attr = append(attr, []html.Attribute{
 		{Key: "href", Val: cm.URL},
 		{Key: "rel", Val: "stylesheet"},
 		{Key: "media", Val: "print"},
-	}
+	}...)
+
 	if cm.Media != "print" {
 		finalMedia := "all"
 		if cm.Media != "" {
@@ -110,25 +115,29 @@ func InlineJSTag(contents string) *html.Node {
 	}
 }
 
-func SyncJSTag(url string) *html.Node {
+func SyncJSTag(jm JSTagData) *html.Node {
+	attr := jm.Attributes
+	attr = append(attr, []html.Attribute{
+		{Key: "src", Val: jm.URL},
+	}...)
 	return &html.Node{
 		Type: html.ElementNode,
 		Data: "script",
-		Attr: []html.Attribute{
-			{Key: "src", Val: url},
-		},
+		Attr: attr,
 	}
 }
 
-func AsyncJSTag(url string) *html.Node {
+func AsyncJSTag(jm JSTagData) *html.Node {
+	attr := jm.Attributes
+	attr = append(attr, []html.Attribute{
+		{Key: "src", Val: jm.URL},
+		{Key: "async"},
+		{Key: "defer"},
+	}...)
 	return &html.Node{
 		Type: html.ElementNode,
 		Data: "script",
-		Attr: []html.Attribute{
-			{Key: "src", Val: url},
-			{Key: "async"},
-			{Key: "defer"},
-		},
+		Attr: attr,
 	}
 }
 
@@ -221,7 +230,13 @@ func AttributesList(attrs map[string]html.Attribute) []html.Attribute {
 	return attributes
 }
 
-type CSSMediaPair struct {
-	URL   string
-	Media string
+type CSSTagData struct {
+	URL        string
+	Attributes []html.Attribute
+	Media      string
+}
+
+type JSTagData struct {
+	URL        string
+	Attributes []html.Attribute
 }
