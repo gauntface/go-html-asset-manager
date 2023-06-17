@@ -138,8 +138,9 @@ func addSyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
 	}
 
 	node.AppendChild(htmlparsing.SyncCSSTag(htmlparsing.CSSTagData{
-		URL:   u,
-		Media: asset.Media(),
+		URL:        u,
+		Attributes: asset.Attributes(),
+		Media:      asset.Media(),
 	}))
 
 	return nil
@@ -154,8 +155,9 @@ func addAsyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error 
 	bodyNode.AppendChild(
 		htmlparsing.AsyncCSSTag(
 			htmlparsing.CSSTagData{
-				URL:   u,
-				Media: asset.Media(),
+				URL:        u,
+				Attributes: asset.Attributes(),
+				Media:      asset.Media(),
 			},
 		),
 	)

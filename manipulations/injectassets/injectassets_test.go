@@ -356,7 +356,7 @@ func TestSyncCSS(t *testing.T) {
 					},
 				},
 			},
-			want: `<html><head><link href="http://example.com/url.css" rel="stylesheet"/></head><body></body></html>`,
+			want: `<html><head><link example="test" example-2="test-2" href="http://example.com/url.css" rel="stylesheet"/></head><body></body></html>`,
 		},
 	}
 
