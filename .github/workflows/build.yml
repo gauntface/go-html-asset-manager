@@ -3,6 +3,8 @@ on:
     branches:
       - main
   pull_request:
+    branches:
+      - main
 
 name: Test
 jobs:
@@ -19,3 +21,9 @@ jobs:
       run: npm install
     - name: Run Test
       run: make test
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v2
+      with:
+        format: golang
+        file: coverage/cover.out
+        github-token: ${{ secrets.GITHUB_TOKEN }}

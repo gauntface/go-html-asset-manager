@@ -25,10 +25,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gauntface/go-html-asset-manager/v4/assets"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetid"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/files"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/stringui"
+	"github.com/gauntface/go-html-asset-manager/v5/assets"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetid"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/files"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/stringui"
+	"golang.org/x/net/html"
 )
 
 var (
@@ -306,7 +307,10 @@ func (l *LocalAsset) URL() (string, error) {
 	}
 
 	return path.Join("/", relPath), nil
+}
 
+func (l *LocalAsset) Attributes() []html.Attribute {
+	return nil
 }
 
 func (l *LocalAsset) IsLocal() bool {
@@ -325,16 +329,18 @@ func (l *LocalAsset) String() string {
 }
 
 type RemoteAsset struct {
-	id        string
-	url       string
-	assetType assets.Type
+	id         string
+	url        string
+	attributes []html.Attribute
+	assetType  assets.Type
 }
 
-func NewRemoteAsset(ID, url string, ty assets.Type) *RemoteAsset {
+func NewRemoteAsset(ID, src string, attributes []html.Attribute, ty assets.Type) *RemoteAsset {
 	return &RemoteAsset{
-		id:        ID,
-		url:       url,
-		assetType: ty,
+		id:         ID,
+		url:        src,
+		attributes: attributes,
+		assetType:  ty,
 	}
 }
 
@@ -354,6 +360,10 @@ func (r *RemoteAsset) URL() (string, error) {
 	return r.url, nil
 }
 
+func (r *RemoteAsset) Attributes() []html.Attribute {
+	return r.attributes
+}
+
 func (r *RemoteAsset) Contents() (string, error) {
 	return "", fmt.Errorf("%w for %q", errNoContents, r.url)
 }
@@ -363,7 +373,11 @@ func (r *RemoteAsset) IsLocal() bool {
 }
 
 func (r *RemoteAsset) String() string {
-	return fmt.Sprintf("<Remote Asset: %q>", r.url)
+	attrs := []string{}
+	for _, a := range r.attributes {
+		attrs = append(attrs, fmt.Sprintf("%v=%q", a.Key, a.Val))
+	}
+	return fmt.Sprintf("<Remote Asset: %q Attributes: [%v]>", r.url, strings.Join(attrs, ", "))
 }
 
 func (r *RemoteAsset) Debug(d string) bool {
@@ -397,6 +411,7 @@ type Asset interface {
 	Media() string
 	URL() (string, error)
 	Contents() (string, error)
+	Attributes() []html.Attribute
 	IsLocal() bool
 	String() string
 	Debug(d string) bool

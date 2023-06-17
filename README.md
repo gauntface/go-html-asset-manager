@@ -39,13 +39,13 @@ You will need to install golang to use this tool. Learn more at [go.dev](https:/
 Once go is installed, you can install the `htmlassets` tool with:
 
 ```bash
-go install github.com/gauntface/go-html-asset-manager/v4/cmds/htmlassets@latest
+go install github.com/gauntface/go-html-asset-manager/v5/cmds/htmlassets@latest
 ```
 
 If you'd like to generate image sizes, you can install the `genimgs` tool with:
 
 ```bash
-go install github.com/gauntface/go-html-asset-manager/v4/cmds/genimgs@latest
+go install github.com/gauntface/go-html-asset-manager/v5/cmds/genimgs@latest
 ```
 
 ## Usage

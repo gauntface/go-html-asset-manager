@@ -1,9 +1,9 @@
 package hamassets
 
 import (
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v4/embedassets"
-	"github.com/gauntface/go-html-asset-manager/v4/preprocessors"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v5/embedassets"
+	"github.com/gauntface/go-html-asset-manager/v5/preprocessors"
 )
 
 func Preprocessor(runtime preprocessors.Runtime) error {

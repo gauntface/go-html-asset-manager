@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/gauntface/go-html-asset-manager/v4/assets"
-	"github.com/gauntface/go-html-asset-manager/v4/assets/assetmanager"
-	"github.com/gauntface/go-html-asset-manager/v4/manipulations"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/html/htmlparsing"
-	"github.com/gauntface/go-html-asset-manager/v4/utils/stringui"
+	"github.com/gauntface/go-html-asset-manager/v5/assets"
+	"github.com/gauntface/go-html-asset-manager/v5/assets/assetmanager"
+	"github.com/gauntface/go-html-asset-manager/v5/manipulations"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/html/htmlparsing"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/stringui"
 	"golang.org/x/net/html"
 )
 
@@ -137,9 +137,10 @@ func addSyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
 		node = bodyNode
 	}
 
-	node.AppendChild(htmlparsing.SyncCSSTag(htmlparsing.CSSMediaPair{
-		URL:   u,
-		Media: asset.Media(),
+	node.AppendChild(htmlparsing.SyncCSSTag(htmlparsing.CSSTagData{
+		URL:        u,
+		Attributes: asset.Attributes(),
+		Media:      asset.Media(),
 	}))
 
 	return nil
@@ -153,9 +154,10 @@ func addAsyncCSS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error 
 
 	bodyNode.AppendChild(
 		htmlparsing.AsyncCSSTag(
-			htmlparsing.CSSMediaPair{
-				URL:   u,
-				Media: asset.Media(),
+			htmlparsing.CSSTagData{
+				URL:        u,
+				Attributes: asset.Attributes(),
+				Media:      asset.Media(),
 			},
 		),
 	)
@@ -186,7 +188,10 @@ func addSyncJS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
 	if err != nil {
 		return err
 	}
-	bodyNode.AppendChild(htmlparsing.SyncJSTag(u))
+	bodyNode.AppendChild(htmlparsing.SyncJSTag(htmlparsing.JSTagData{
+		URL:        u,
+		Attributes: asset.Attributes(),
+	}))
 	return nil
 }
 
@@ -195,7 +200,10 @@ func addAsyncJS(headNode, bodyNode *html.Node, asset assetmanager.Asset) error {
 	if err != nil {
 		return err
 	}
-	bodyNode.AppendChild(htmlparsing.AsyncJSTag(u))
+	bodyNode.AppendChild(htmlparsing.AsyncJSTag(htmlparsing.JSTagData{
+		URL:        u,
+		Attributes: asset.Attributes(),
+	}))
 	return nil
 }
 

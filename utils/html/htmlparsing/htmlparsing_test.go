@@ -18,16 +18,13 @@ package htmlparsing
 
 import (
 	"bytes"
-	"errors"
 	"strings"
 	"testing"
 
-	"github.com/gauntface/go-html-asset-manager/v4/utils/sets"
+	"github.com/gauntface/go-html-asset-manager/v5/utils/sets"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 )
-
-var errInjected = errors.New("injected error")
 
 func Test_GetKeys(t *testing.T) {
 	tests := []struct {
@@ -122,19 +119,36 @@ func Test_InlineCSSTag(t *testing.T) {
 func Test_SyncCSSTag(t *testing.T) {
 	tests := []struct {
 		description string
-		cm          CSSMediaPair
+		cm          CSSTagData
 		want        string
 	}{
 		{
-			description: "return link tag without media",
-			cm: CSSMediaPair{
+			description: "return basic link tag",
+			cm: CSSTagData{
 				URL: "/example.css",
 			},
 			want: `<link href="/example.css" rel="stylesheet"/>`,
 		},
 		{
+			description: "return link tag with attributes",
+			cm: CSSTagData{
+				URL: "/example.css",
+				Attributes: []html.Attribute{
+					{
+						Key: "example",
+						Val: "test",
+					},
+					{
+						Key: "example-2",
+						Val: "test 2",
+					},
+				},
+			},
+			want: `<link example="test" example-2="test 2" href="/example.css" rel="stylesheet"/>`,
+		},
+		{
 			description: "return link tag with media",
-			cm: CSSMediaPair{
+			cm: CSSTagData{
 				URL:   "/example.css",
 				Media: "print",
 			},
@@ -178,19 +192,38 @@ func Test_InlineJSTag(t *testing.T) {
 func Test_SyncJSTag(t *testing.T) {
 	tests := []struct {
 		description string
-		url         string
+		jsData      JSTagData
 		want        string
 	}{
 		{
-			description: "return script tag",
-			url:         "/example.js",
-			want:        `<script src="/example.js"></script>`,
+			description: "return basic script tag",
+			jsData: JSTagData{
+				URL: "/example.js",
+			},
+			want: `<script src="/example.js"></script>`,
+		},
+		{
+			description: "return script tag attributes",
+			jsData: JSTagData{
+				URL: "/example.js",
+				Attributes: []html.Attribute{
+					{
+						Key: "example",
+						Val: "test",
+					},
+					{
+						Key: "example-2",
+						Val: "test 2",
+					},
+				},
+			},
+			want: `<script example="test" example-2="test 2" src="/example.js"></script>`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got := SyncJSTag(tt.url)
+			got := SyncJSTag(tt.jsData)
 			if diff := cmp.Diff(MustRenderNode(t, got), tt.want); diff != "" {
 				t.Fatalf("Unexpected result; diff %v", diff)
 			}
@@ -201,19 +234,38 @@ func Test_SyncJSTag(t *testing.T) {
 func Test_AsyncJSTag(t *testing.T) {
 	tests := []struct {
 		description string
-		url         string
+		jsData      JSTagData
 		want        string
 	}{
 		{
-			description: "return script tag",
-			url:         "/example.js",
-			want:        `<script src="/example.js" async="" defer=""></script>`,
+			description: "return basic script tag",
+			jsData: JSTagData{
+				URL: "/example.js",
+			},
+			want: `<script src="/example.js" async="" defer=""></script>`,
+		},
+		{
+			description: "return script tag with attributes",
+			jsData: JSTagData{
+				URL: "/example.js",
+				Attributes: []html.Attribute{
+					{
+						Key: "example",
+						Val: "test",
+					},
+					{
+						Key: "example-2",
+						Val: "test 2",
+					},
+				},
+			},
+			want: `<script example="test" example-2="test 2" src="/example.js" async="" defer=""></script>`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			got := AsyncJSTag(tt.url)
+			got := AsyncJSTag(tt.jsData)
 			if diff := cmp.Diff(MustRenderNode(t, got), tt.want); diff != "" {
 				t.Fatalf("Unexpected result; diff %v", diff)
 			}
