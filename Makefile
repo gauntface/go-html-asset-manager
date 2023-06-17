@@ -13,8 +13,8 @@ build: clean format typescript
 # NOTE: Add the `-test.v` flag for verbose logging.
 test: gomodget build
 	mkdir -p coverage/
-	go test ./... -covermode=atomic -coverprofile ./coverage/cover.out
-	go tool cover -html=./coverage/cover.out -o ./coverage/cover.html
+	go test ./... -covermode=atomic -coverprofile ./coverage/coverage.out
+	go tool cover -html=./coverage/coverage.out -o ./coverage/coverage.html
 
 clean:
 	rm -rf ./bin ./vendor Gopkg.lock ./embedassets/assets
