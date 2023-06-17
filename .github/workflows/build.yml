@@ -24,6 +24,5 @@ jobs:
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@c7885c00cb7ec0b8f9f5ff3f53cddb980f7a4412 # v2
       with:
-        format: gcov
-        file: coverage/cover.out
+        file: ./coverage/cover.out
         github-token: ${{ secrets.GITHUB_TOKEN }}
