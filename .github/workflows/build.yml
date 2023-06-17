@@ -21,13 +21,10 @@ jobs:
       run: npm install
     - name: Run Test
       run: make test
-    - name: Covert gcov to lcov
-      uses: jandelgado/gcov2lcov-action@v1
-      with:
-        infile: ./coverage/coverage.out
-    - name: Coveralls GitHub Action
+
+    - name: Install goveralls
+      run: go install github.com/mattn/goveralls@latest
+    - name: Send coverage
       env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      uses: coverallsapp/github-action@c7885c00cb7ec0b8f9f5ff3f53cddb980f7a4412 # v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: goveralls -coverprofile=covprofile -service=github
