@@ -13,7 +13,7 @@ build: clean format typescript
 # NOTE: Add the `-test.v` flag for verbose logging.
 test: gomodget build
 	mkdir -p coverage/
-	go test ./... -covermode=atomic -coverprofile ./coverage/coverage.out
+	go test -covermode=atomic -coverprofile=./coverage/coverage.out ./...
 	go tool cover -html=./coverage/coverage.out -o ./coverage/coverage.html
 
 clean:
