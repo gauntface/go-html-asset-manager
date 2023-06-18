@@ -51,14 +51,14 @@ func Preprocessor(runtime preprocessors.Runtime) error {
 		for t, htmlAssets := range types {
 			for _, ha := range htmlAssets {
 				attrs := []html.Attribute{}
-				for _, a := range ha.attributes {
+				for _, a := range ha.Attributes {
 					attrs = append(attrs, html.Attribute{
-						Key: a.key,
-						Val: a.value,
+						Key: a.Key,
+						Val: a.Value,
 					})
 				}
 				runtime.Assets.AddRemote(
-					assetmanager.NewRemoteAsset(a.ID(), ha.src, attrs, t),
+					assetmanager.NewRemoteAsset(a.ID(), ha.Src, attrs, t),
 				)
 			}
 		}
@@ -92,11 +92,11 @@ type jsonAssetGroup struct {
 }
 
 type htmlAsset struct {
-	src        string          `json:"src"`
-	attributes []htmlAttribute `json:"attributes,omitempty"`
+	Src        string          `json:"src"`
+	Attributes []htmlAttribute `json:"attributes,omitempty"`
 }
 
 type htmlAttribute struct {
-	key   string
-	value string
+	Key   string
+	Value string
 }
