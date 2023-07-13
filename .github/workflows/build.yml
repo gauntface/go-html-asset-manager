@@ -22,7 +22,7 @@ jobs:
     - name: Run Test
       run: make test
     - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@c7885c00cb7ec0b8f9f5ff3f53cddb980f7a4412 # v2
+      uses: coverallsapp/github-action@95b1a2355bd0e526ad2fd62da9fd386ad4c98474 # v2
       with:
         file: ./coverage/cover.out
         github-token: ${{ secrets.GITHUB_TOKEN }}
