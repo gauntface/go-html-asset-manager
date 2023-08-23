@@ -3,8 +3,8 @@ module github.com/gauntface/go-html-asset-manager/v5
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go-v2/config v1.18.36
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.80
+	github.com/aws/aws-sdk-go-v2/config v1.18.37
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.81
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.5
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
