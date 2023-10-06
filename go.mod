@@ -12,8 +12,8 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.14.0
 	github.com/schollz/progressbar/v3 v3.13.1
-	golang.org/x/net v0.15.0
-	golang.org/x/sync v0.3.0
+	golang.org/x/net v0.16.0
+	golang.org/x/sync v0.4.0
 )
 
 require (
@@ -39,8 +39,8 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	golang.org/x/image v0.8.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
-	golang.org/x/term v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/term v0.13.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
