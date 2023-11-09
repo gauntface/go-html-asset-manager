@@ -3,15 +3,15 @@ module github.com/gauntface/go-html-asset-manager/v5
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go-v2/config v1.22.3
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.13.4
+	github.com/aws/aws-sdk-go-v2/config v1.23.0
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.13.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.42.1
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/google/go-cmp v0.6.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.14.0
-	github.com/schollz/progressbar/v3 v3.14.0
+	github.com/schollz/progressbar/v3 v3.14.1
 	golang.org/x/net v0.18.0
 	golang.org/x/sync v0.5.0
 )
@@ -23,7 +23,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.3 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.2 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.2 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.5.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.6.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.2.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.2.2 // indirect
