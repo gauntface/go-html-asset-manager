@@ -3,8 +3,8 @@ module github.com/gauntface/go-html-asset-manager/v5
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go-v2/config v1.25.1
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.13.8
+	github.com/aws/aws-sdk-go-v2/config v1.25.2
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.13.9
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.42.2
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
@@ -23,7 +23,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.3 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.3 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.0 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.2.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.2.3 // indirect
