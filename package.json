@@ -3,6 +3,6 @@
     "@gauntface/logger": "^3.0.63"
   },
   "dependencies": {
-    "avif": "0.5.0"
+    "avif": "0.5.1"
   }
 }
