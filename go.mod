@@ -12,7 +12,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.14.0
 	github.com/schollz/progressbar/v3 v3.14.2
-	golang.org/x/net v0.22.0
+	golang.org/x/net v0.23.0
 	golang.org/x/sync v0.6.0
 )
 
