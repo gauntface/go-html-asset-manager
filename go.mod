@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.27.23
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.3
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.57.1
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.4
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.58.0
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/google/go-cmp v0.6.0
