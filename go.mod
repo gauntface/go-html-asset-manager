@@ -5,8 +5,8 @@ go 1.21
 toolchain go1.23.0
 
 require (
-	github.com/aws/aws-sdk-go-v2/config v1.27.29
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.13
+	github.com/aws/aws-sdk-go-v2/config v1.27.30
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.14
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.60.1
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
