@@ -724,6 +724,8 @@ github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.24 h1:WEiv2o2tjSx9tv5jP7rC
 github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.24/go.mod h1:mhxj3DJiOXogLRZ/wlGmI9VHiCW2kzHjHTJLxexOtEk=
 github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.25 h1:HkpHeZMM39sGtMHVYG1buAg93vhj5d7F81y6G0OAbGc=
 github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.25/go.mod h1:j3Vz04ZjaWA6kygOsZRpmWe4CyGqfqq2u3unDTU0QGA=
+github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.26 h1:BTfwWNFVGLxW2bih/V2xhgCsYDQwG1cAWhWoW9Jx7wE=
+github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.26/go.mod h1:LA1/FxoEFFmv7XpkB8KKqLAUz8AePdK9H0Ec7PUKazs=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.34 h1:A5UqQEmPaCFpedKouS4v+dHCTUo2sKqhoKO9U5kxyWo=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.34/go.mod h1:wZpTEecJe0Btj3IYnDx/VlUzor9wm3fJHyvLpQF0VwY=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.35 h1:hMUCiE3Zi5AHrRNGf5j985u0WyqI6r2NULhUfo0N/No=
@@ -1442,6 +1444,8 @@ github.com/aws/aws-sdk-go-v2/service/s3 v1.63.2 h1:1iXmXy8SJzQVMGvo40TSzBYS9ig6B
 github.com/aws/aws-sdk-go-v2/service/s3 v1.63.2/go.mod h1:NLTqRLe3pUNu3nTEHI6XlHLKYmc8fbHUdMxAB6+s41Q=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3 h1:3zt8qqznMuAZWDTDpcwv9Xr11M/lVj2FsRR7oYBt0OA=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3/go.mod h1:NLTqRLe3pUNu3nTEHI6XlHLKYmc8fbHUdMxAB6+s41Q=
+github.com/aws/aws-sdk-go-v2/service/s3 v1.64.0 h1:I0p8knB/IDYSQ3dbanaCr4UhiYQ96bvKRhGYxvLyiD8=
+github.com/aws/aws-sdk-go-v2/service/s3 v1.64.0/go.mod h1:NLTqRLe3pUNu3nTEHI6XlHLKYmc8fbHUdMxAB6+s41Q=
 github.com/aws/aws-sdk-go-v2/service/sso v1.12.12 h1:nneMBM2p79PGWBQovYO/6Xnc2ryRMw3InnDJq1FHkSY=
 github.com/aws/aws-sdk-go-v2/service/sso v1.12.12/go.mod h1:HuCOxYsF21eKrerARYO6HapNeh9GBNq7fius2AcwodY=
 github.com/aws/aws-sdk-go-v2/service/sso v1.12.13 h1:sWDv7cMITPcZ21QdreULwxOOAmE05JjEsT6fCDtDA9k=
