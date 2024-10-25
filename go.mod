@@ -6,14 +6,14 @@ toolchain go1.23.2
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.28.0
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.33
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.66.0
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.34
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.66.1
 	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/google/go-cmp v0.6.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.14.0
-	github.com/schollz/progressbar/v3 v3.16.1
+	github.com/schollz/progressbar/v3 v3.17.0
 	golang.org/x/net v0.30.0
 	golang.org/x/sync v0.8.0
 )
