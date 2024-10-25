@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Install Go
-      uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5
+      uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5
       with:
         go-version: '^1.17.3'
     - name: NPM Deps
@@ -22,7 +22,7 @@ jobs:
     - name: Run Test
       run: make test
     - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@4cdef0b2dbe0c9aa26bed48edb868db738625e79 # v2
+      uses: coverallsapp/github-action@cfd0633edbd2411b532b808ba7a8b5e04f76d2c8 # v2
       with:
         file: ./coverage/cover.out
         github-token: ${{ secrets.GITHUB_TOKEN }}
