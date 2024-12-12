@@ -551,7 +551,7 @@ func createAvifImage(img generateImage) error {
 	cmd := exec.Command("npx", "avif", "--input", tmpPath, "--output", outputDir, "--overwrite")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("Failed to run npx avif: %v\n", output)
+		fmt.Printf("Failed to run npx avif: %v\n", string(output[:]))
 		return fmt.Errorf("npx avif failed: %w", err)
 	}
 	return nil
