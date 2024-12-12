@@ -30,6 +30,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
@@ -466,6 +467,9 @@ func createImage(img generateImage) error {
 }
 
 func (c *client) uploadImage(ctx context.Context, img generateImage) error {
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
 	f, err := os.Open(img.outputPath)
 	if err != nil {
 		return err
@@ -513,12 +517,9 @@ func createWebpImage(img generateImage) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	err = webp.Encode(f, dst, nil)
-	if err != nil {
-		return err
-	}
-	return nil
+	return webp.Encode(f, dst, nil)
 }
 
 func createAvifImage(img generateImage) error {
@@ -526,6 +527,7 @@ func createAvifImage(img generateImage) error {
 	if err != nil {
 		return err
 	}
+	defer os.RemoveAll(tmpDir)  // Clean up temporary directory
 
 	origExt := path.Ext(img.originalPath)
 	outputExt := path.Ext(img.outputPath)
