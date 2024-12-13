@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"image"
 	"io/ioutil"
+	"math"
 	"os"
 	"os/exec"
 	"path"
@@ -239,6 +240,10 @@ func (c *client) createImages(imgs []generateImage) error {
 		return imgs[i].outputPath < imgs[j].outputPath
 	})
 
+	// Print this before the progress bar is displayed
+	workers := int(math.Max(1, float64(runtime.NumCPU())))
+	fmt.Printf("🤖️ Creating %v images using %v workers\n", len(imgs), workers)
+
 	bar := progressbar.NewOptions(
 		len(imgs),
 		progressbar.OptionSetRenderBlankState(true),
@@ -251,7 +256,7 @@ func (c *client) createImages(imgs []generateImage) error {
 	jobs := make(chan generateImage, len(imgs))
 	results := make(chan error, len(imgs))
 
-	for w := 1; w <= runtime.NumCPU(); w++ {
+	for w := 1; w <= workers; w++ {
 		go c.imgCreatorWorker(w, jobs, results)
 	}
 
@@ -527,7 +532,7 @@ func createAvifImage(img generateImage) error {
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(tmpDir)  // Clean up temporary directory
+	defer os.RemoveAll(tmpDir) // Clean up temporary directory
 
 	origExt := path.Ext(img.originalPath)
 	outputExt := path.Ext(img.outputPath)
@@ -550,7 +555,8 @@ func createAvifImage(img generateImage) error {
 		return fmt.Errorf("failed to created output directory %q: %w", outputDir, err)
 	}
 
-	cmd := exec.Command("npx", "avif", "--input", tmpPath, "--output", outputDir, "--overwrite")
+	cmd := exec.Command("npx", "avif", "--input", tmpFilename, "--output", outputDir, "--overwrite")
+	cmd.Dir = tmpDir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Printf("Failed to run npx avif: %v\n", string(output[:]))
