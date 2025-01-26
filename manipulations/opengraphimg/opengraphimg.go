@@ -93,15 +93,15 @@ func getSuitableImg(runtime manipulations.Runtime, imgPath string) (*genimgs.Gen
 	}
 
 	imgsByTypes := genimgs.GroupByType(imgs)
-	originalImages := imgsByTypes[""]
-	if len(originalImages) == 0 {
+	basicImages := imgsByTypes[""]
+	if len(basicImages) == 0 {
 		return nil, nil
 	}
 
-	sort.Slice(originalImages, func(i, j int) bool {
-		return originalImages[i].Size > originalImages[j].Size
+	sort.Slice(basicImages, func(i, j int) bool {
+		return basicImages[i].Size > basicImages[j].Size
 	})
-	for _, i := range originalImages {
+	for _, i := range basicImages {
 		if i.Size <= RECOMMENDED_OG_IMG_WIDTH {
 			addImgCache(imgPath, i)
 			return &i, nil
