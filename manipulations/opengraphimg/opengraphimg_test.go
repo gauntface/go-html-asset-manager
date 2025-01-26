@@ -115,6 +115,31 @@ func TestManipulator(t *testing.T) {
 			},
 			wantHTML: `<html><head><meta content="http://base-url.com/images/default-social.1200xabc.png" property="og:image"/></head><body></body></html>`,
 		},
+
+		{
+			description: "use basic image and not other image",
+			findNodes:   htmlparsing.FindNodesByTag,
+			doc:         MustGetNode(t, `<meta property="og:image" content="/images/default-social.png" />`),
+			genimgsLookupSizes: func(s3 *s3.Client, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+				return []genimgs.GenImg{
+					{
+						Size: RECOMMENDED_OG_IMG_WIDTH,
+						URL:  "/images/default-social.1200xabc.png",
+					},
+					{
+						Size: RECOMMENDED_OG_IMG_WIDTH,
+						Type: "image/webp",
+						URL:  "/images/default-social.1200xabc.webp",
+					},
+					{
+						Size: RECOMMENDED_OG_IMG_WIDTH,
+						Type: "image/avif",
+						URL:  "/images/default-social.1200xabc.avif",
+					},
+				}, nil
+			},
+			wantHTML: `<html><head><meta content="http://base-url.com/images/default-social.1200xabc.png" property="og:image"/></head><body></body></html>`,
+		},
 	}
 
 	for _, tt := range tests {
