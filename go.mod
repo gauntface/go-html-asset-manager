@@ -2,7 +2,7 @@ module github.com/gauntface/go-html-asset-manager/v5
 
 go 1.24.0
 
-toolchain go1.25.5
+toolchain go1.25.6
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.7
