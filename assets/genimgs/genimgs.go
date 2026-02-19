@@ -44,7 +44,11 @@ func Open(conf *config.Config, imgPath string) (image.Image, error) {
 	return imagingOpen(getPath(conf, imgPath))
 }
 
-func LookupSizes(s3Client *s3.Client, conf *config.Config, imgPath string) ([]GenImg, error) {
+type ListObjectsV2APIClient interface {
+	ListObjectsV2(context.Context, *s3.ListObjectsV2Input, ...func(*s3.Options)) (*s3.ListObjectsV2Output, error)
+}
+
+func LookupSizes(s3Client ListObjectsV2APIClient, conf *config.Config, imgPath string) ([]GenImg, error) {
 	res, err, _ := s3Group.Do(imgPath, func() (interface{}, error) {
 		if val, ok := s3Cache.Load(imgPath); ok {
 			return val.([]GenImg), nil
@@ -79,7 +83,7 @@ func LookupSizes(s3Client *s3.Client, conf *config.Config, imgPath string) ([]Ge
 	return copied, nil
 }
 
-func getImageSizes(s3Client *s3.Client, conf *config.Config, srcPath, hash string) ([]GenImg, error) {
+func getImageSizes(s3Client ListObjectsV2APIClient, conf *config.Config, srcPath, hash string) ([]GenImg, error) {
 	filename := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
 	genDirName := fmt.Sprintf("%v.%v", filename, hash)
 	localDirPath := filepath.Join(conf.GenAssets.OutputDir, genDirName)
@@ -130,7 +134,7 @@ func getImageSizes(s3Client *s3.Client, conf *config.Config, srcPath, hash strin
 	return imgs, nil
 }
 
-func lookupS3Images(s3Client *s3.Client, conf *config.Config, dir string) ([]awstypes.Object, error) {
+func lookupS3Images(s3Client ListObjectsV2APIClient, conf *config.Config, dir string) ([]awstypes.Object, error) {
 	ctx := context.Background()
 	if err := s3Sem.Acquire(ctx, 1); err != nil {
 		return nil, err
