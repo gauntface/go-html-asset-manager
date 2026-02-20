@@ -34,7 +34,7 @@ func TestManipulator(t *testing.T) {
 		description        string
 		doc                *html.Node
 		findNodes          func(tag string, node *html.Node) []*html.Node
-		genimgsLookupSizes func(s3 genimgs.ListObjectsV2APIClient, conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
+		genimgsLookupSizes func(s3 genimgs.S3ClientInterface, conf *config.Config, imgPath string) ([]genimgs.GenImg, error)
 		wantError          error
 		wantHTML           string
 	}{
@@ -60,7 +60,7 @@ func TestManipulator(t *testing.T) {
 			description: "do nothing if getting images fails",
 			findNodes:   htmlparsing.FindNodesByTag,
 			doc:         MustGetNode(t, `<meta property="og:image" content="/images/default-social.png" />`),
-			genimgsLookupSizes: func(s3 genimgs.ListObjectsV2APIClient, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 genimgs.S3ClientInterface, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return nil, errInjected
 			},
 			wantHTML: `<html><head><meta property="og:image" content="/images/default-social.png"/></head><body></body></html>`,
@@ -69,7 +69,7 @@ func TestManipulator(t *testing.T) {
 			description: "do nothing when no images",
 			findNodes:   htmlparsing.FindNodesByTag,
 			doc:         MustGetNode(t, `<meta property="og:image" content="/images/default-social.png" />`),
-			genimgsLookupSizes: func(s3 genimgs.ListObjectsV2APIClient, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 genimgs.S3ClientInterface, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{}, nil
 			},
 			wantHTML: `<html><head><meta property="og:image" content="/images/default-social.png"/></head><body></body></html>`,
@@ -78,7 +78,7 @@ func TestManipulator(t *testing.T) {
 			description: "do nothing when no basic images",
 			findNodes:   htmlparsing.FindNodesByTag,
 			doc:         MustGetNode(t, `<meta property="og:image" content="/images/default-social.png" />`),
-			genimgsLookupSizes: func(s3 genimgs.ListObjectsV2APIClient, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 genimgs.S3ClientInterface, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{
 					{
 						Type: "image/webp",
@@ -91,7 +91,7 @@ func TestManipulator(t *testing.T) {
 			description: "do nothing when no images on the right size",
 			findNodes:   htmlparsing.FindNodesByTag,
 			doc:         MustGetNode(t, `<meta property="og:image" content="/images/default-social.png" />`),
-			genimgsLookupSizes: func(s3 genimgs.ListObjectsV2APIClient, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 genimgs.S3ClientInterface, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{
 					{
 						Size: RECOMMENDED_OG_IMG_WIDTH + 1,
@@ -104,7 +104,7 @@ func TestManipulator(t *testing.T) {
 			description: "update the image with the correct size",
 			findNodes:   htmlparsing.FindNodesByTag,
 			doc:         MustGetNode(t, `<meta property="og:image" content="/images/default-social.png" />`),
-			genimgsLookupSizes: func(s3 genimgs.ListObjectsV2APIClient, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 genimgs.S3ClientInterface, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{
 					{
 						Size: RECOMMENDED_OG_IMG_WIDTH,
@@ -119,7 +119,7 @@ func TestManipulator(t *testing.T) {
 			description: "use basic image and not other image",
 			findNodes:   htmlparsing.FindNodesByTag,
 			doc:         MustGetNode(t, `<meta property="og:image" content="/images/default-social.png" />`),
-			genimgsLookupSizes: func(s3 genimgs.ListObjectsV2APIClient, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
+			genimgsLookupSizes: func(s3 genimgs.S3ClientInterface, conf *config.Config, imgPath string) ([]genimgs.GenImg, error) {
 				return []genimgs.GenImg{
 					{
 						Size: RECOMMENDED_OG_IMG_WIDTH,

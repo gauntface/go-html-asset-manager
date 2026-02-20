@@ -17,7 +17,7 @@ import (
 )
 
 type mockS3Client struct {
-	ListObjectsV2APIClient
+	S3ClientInterface
 	callCount int32
 	delay     time.Duration
 	mu        sync.Mutex
