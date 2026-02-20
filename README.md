@@ -126,7 +126,7 @@ For example, `data/code.json` may define:
 {
     "css": {
         "preload": [
-            "https://fonts.googleapis.com/css2?family=Fira+Code&display=swap"
+            {"src": "https://fonts.googleapis.com/css2?family=Fira+Code&display=swap"}
         ]
     }
 }
