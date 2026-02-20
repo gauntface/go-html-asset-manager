@@ -51,7 +51,7 @@ go install github.com/gauntface/go-html-asset-manager/v5/cmds/genimgs@latest
 ## Usage
 To use this tool, create an `asset-manager.json` file at the root of your project. This file will be used by both `htmlassets` and `genimgs`.
 
-```
+```json
 {
     "html-dir": "public/",
     "base-url": "https://www.gaunt.dev",
@@ -87,6 +87,7 @@ The next step is to name your CSS and JS files in the following structure:
 ```
 <HTML Element | CSS Classname>[-<inline | sync | async | preload>][.<media>].<css | js>
 ```
+
 For example, your styles for `<h1>` elements might be:
 
 - `h1.css`: Primary CSS that you want to be inlined (**If no loading strategy is defined, inline is the default**)
@@ -98,7 +99,7 @@ If it's still unclear what is happening ![this image may help](explainer.png).
 
 ### Config
 
-###### html-dir
+##### html-dir
 
 This field is required and needs to be the path of the final HTML files. These files will be altered by `htmlassets`.
 
@@ -120,6 +121,8 @@ For example, if the `static-dir` was `public/static/` and there was a JS file `p
 
 You can define JSON files to describe assets you don't serve locally but should be injected into your HTML. A typical example is web fonts.
 
+Each entry is an object with a required `src` field and an optional `attributes` array. Assets can be placed under `sync`, `async`, or `preload` within either `css` or `js`.
+
 For example, `data/code.json` may define:
 
 ```json
@@ -136,7 +139,7 @@ For example, `data/code.json` may define:
 
 If you want to convert `<img>` elements to `<picture>`, you can provide an array of queries with information on the appropriate sizes to apply.
 
-```
+```json
 "img-to-picture": [
       {
         "id": "c-project-item__img",
@@ -153,8 +156,7 @@ If you want to convert `<img>` elements to `<picture>`, you can provide an array
           "(min-width: 620px) 200px",
           "100vw"
         ]
-      },
-      ....
+      }
 ]
 ```
 
