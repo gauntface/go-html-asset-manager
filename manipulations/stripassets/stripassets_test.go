@@ -75,6 +75,18 @@ func TestManipulator(t *testing.T) {
 			doc:         MustGetNode(t, `<link></link>`),
 			wantHTML:    `<html><head><link/></head><body></body></html>`,
 		},
+		{
+			description: "remove alternate stylesheet link tag",
+			findNodes:   htmlparsing.FindNodesByTag,
+			doc:         MustGetNode(t, `<link rel="alternate stylesheet"></link>`),
+			wantHTML:    `<html><head></head><body></body></html>`,
+		},
+		{
+			description: "remove stylesheet link tag with uppercase rel",
+			findNodes:   htmlparsing.FindNodesByTag,
+			doc:         MustGetNode(t, `<link rel="STYLESHEET"></link>`),
+			wantHTML:    `<html><head></head><body></body></html>`,
+		},
 	}
 
 	for _, tt := range tests {
