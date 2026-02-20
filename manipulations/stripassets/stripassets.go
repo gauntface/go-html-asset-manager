@@ -17,6 +17,8 @@
 package stripassets
 
 import (
+	"strings"
+
 	"github.com/gauntface/go-html-asset-manager/v5/manipulations"
 	"github.com/gauntface/go-html-asset-manager/v5/utils/html/htmlparsing"
 	"golang.org/x/net/html"
@@ -38,8 +40,13 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 	linkNodes := htmlparsingFindNodesByTag("link", doc)
 	for _, l := range linkNodes {
 		a := htmlparsing.Attributes(l)
-		if v, ok := a["rel"]; ok && v.Val == "stylesheet" {
-			l.Parent.RemoveChild(l)
+		if v, ok := a["rel"]; ok {
+			for _, token := range strings.Fields(strings.ToLower(v.Val)) {
+				if token == "stylesheet" {
+					l.Parent.RemoveChild(l)
+					break
+				}
+			}
 		}
 	}
 
