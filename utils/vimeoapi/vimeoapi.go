@@ -65,6 +65,7 @@ func (c *Client) Video(videoID string) (*Video, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	body, err := c.ioutilReadAll(res.Body)
 	if err != nil {
