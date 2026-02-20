@@ -56,11 +56,19 @@ func Generate(path string) string {
 
 	switch ext {
 	case ".css", ".js":
+		// Split on first dot to handle dot-suffixed filenames (e.g. "example-sync.braille")
+		parts := strings.SplitN(id, ".", 2)
+		base := parts[0]
 		for _, pr := range prefixesToTrim {
-			if strings.HasSuffix(id, pr) {
-				id = strings.TrimSuffix(id, pr)
+			if strings.HasSuffix(base, pr) {
+				base = strings.TrimSuffix(base, pr)
 				break
 			}
+		}
+		if len(parts) > 1 {
+			id = base + "." + parts[1]
+		} else {
+			id = base
 		}
 	}
 
@@ -106,8 +114,11 @@ func typeFromSyncSet(fn, media string, inline, sync, async, preload assets.Type)
 		asyncPrefix:   async,
 		preloadPrefix: preload,
 	}
+	// Use only the part before the first dot to detect type prefixes,
+	// so that dot-suffixed filenames like "example-sync.braille" are handled correctly.
+	base := strings.SplitN(fn, ".", 2)[0]
 	for pr, ty := range prefixes {
-		if strings.HasSuffix(fn, pr) {
+		if strings.HasSuffix(base, pr) {
 			t = ty
 			break
 		}

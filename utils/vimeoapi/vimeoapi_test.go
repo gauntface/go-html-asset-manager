@@ -97,7 +97,9 @@ func TestVideo(t *testing.T) {
 			},
 			httpClient: &HTTPClientStub{
 				DoReturn: map[string]*http.Response{
-					"https://api.vimeo.com/videos/abcd1234": {},
+					"https://api.vimeo.com/videos/abcd1234": {
+						Body: ioutil.NopCloser(strings.NewReader("")),
+					},
 				},
 			},
 			wantError: errInjected,
