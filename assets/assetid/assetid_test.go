@@ -70,6 +70,18 @@ func TestTypeFromSyncSet(t *testing.T) {
 			async:       assets.AsyncCSS,
 			want:        assets.AsyncCSS,
 		},
+		{
+			description: "return sync if filename has sync prefix before dot suffix",
+			filename:    "example-sync.braille",
+			sync:        assets.SyncCSS,
+			want:        assets.SyncCSS,
+		},
+		{
+			description: "return async if filename has async prefix before dot suffix",
+			filename:    "example-async.screen",
+			async:       assets.AsyncCSS,
+			want:        assets.AsyncCSS,
+		},
 	}
 
 	for _, tt := range tests {
@@ -341,6 +353,18 @@ func TestIdentifyType(t *testing.T) {
 			wantMedia:   "print",
 			wantType:    assets.SyncCSS,
 		},
+		{
+			description: "return sync js for js with sync prefix and dot suffix",
+			path:        "example-sync.braille.js",
+			wantMedia:   "",
+			wantType:    assets.SyncJS,
+		},
+		{
+			description: "return async js for js with async prefix and dot suffix",
+			path:        "example-async.screen (min-width: 200px).js",
+			wantMedia:   "",
+			wantType:    assets.AsyncJS,
+		},
 	}
 
 	for _, tt := range tests {
@@ -426,6 +450,21 @@ func TestGenerate(t *testing.T) {
 			description: "return filename without last prefix only",
 			path:        "example-inline-sync-async.js",
 			want:        "example-inline-sync",
+		},
+		{
+			description: "return filename without sync prefix for js with dot suffix",
+			path:        "example-sync.braille.js",
+			want:        "example.braille",
+		},
+		{
+			description: "return filename without async prefix for js with dot suffix",
+			path:        "example-async.screen (min-width: 200px).js",
+			want:        "example.screen (min-width: 200px)",
+		},
+		{
+			description: "return filename with dot suffix for js without prefix",
+			path:        "example.print.js",
+			want:        "example.print",
 		},
 	}
 
