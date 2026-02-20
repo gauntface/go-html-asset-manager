@@ -47,6 +47,11 @@ import (
 	"github.com/gauntface/go-html-asset-manager/v5/utils/sets"
 	"github.com/mitchellh/go-homedir"
 	"github.com/schollz/progressbar/v3"
+	"golang.org/x/sync/semaphore"
+)
+
+const (
+	maxS3ParallelRequests = 2
 )
 
 var (
@@ -79,6 +84,7 @@ type client struct {
 	generatedManager *assetmanager.Manager
 	s3               *s3.Client
 	s3Manager        *s3manager.Uploader
+	s3Sem            *semaphore.Weighted
 }
 
 func newClient(ctx context.Context) (*client, error) {
@@ -134,6 +140,7 @@ func newClient(ctx context.Context) (*client, error) {
 		generatedManager: generatedManager,
 		s3:               s3Client,
 		s3Manager:        s3Manager,
+		s3Sem:            semaphore.NewWeighted(maxS3ParallelRequests),
 	}, nil
 }
 
@@ -185,6 +192,11 @@ func (c *client) run(ctx context.Context) error {
 }
 
 func (c *client) getS3GenImages(ctx context.Context) ([]awstypes.Object, error) {
+	if err := c.s3Sem.Acquire(ctx, 1); err != nil {
+		return nil, err
+	}
+	defer c.s3Sem.Release(1)
+
 	params := &s3.ListObjectsV2Input{
 		Bucket: &c.s3Bucket,
 		Prefix: &c.s3BucketDir,
@@ -472,6 +484,11 @@ func createImage(img generateImage) error {
 }
 
 func (c *client) uploadImage(ctx context.Context, img generateImage) error {
+	if err := c.s3Sem.Acquire(ctx, 1); err != nil {
+		return err
+	}
+	defer c.s3Sem.Release(1)
+
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 

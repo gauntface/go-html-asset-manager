@@ -21,7 +21,6 @@ import (
 	"log"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/gauntface/go-html-asset-manager/v5/assets/genimgs"
 	"github.com/gauntface/go-html-asset-manager/v5/manipulations"
@@ -35,8 +34,6 @@ const (
 
 var (
 	genimgsLookupSizes = genimgs.LookupSizes
-	imgCache           = map[string]genimgs.GenImg{}
-	imgCacheLock       = sync.RWMutex{}
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
@@ -80,13 +77,6 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 }
 
 func getSuitableImg(runtime manipulations.Runtime, imgPath string) (*genimgs.GenImg, error) {
-	imgCacheLock.Lock()
-	defer imgCacheLock.Unlock()
-
-	if img := lookupImgCache(imgPath); img != nil {
-		return img, nil
-	}
-
 	imgs, err := genimgsLookupSizes(runtime.S3, runtime.Config, imgPath)
 	if err != nil {
 		return nil, err
@@ -103,21 +93,9 @@ func getSuitableImg(runtime manipulations.Runtime, imgPath string) (*genimgs.Gen
 	})
 	for _, i := range basicImages {
 		if i.Size <= RECOMMENDED_OG_IMG_WIDTH {
-			addImgCache(imgPath, i)
 			return &i, nil
 		}
 	}
 
 	return nil, nil
-}
-
-func lookupImgCache(imgPath string) *genimgs.GenImg {
-	if img, ok := imgCache[imgPath]; ok {
-		return &img
-	}
-	return nil
-}
-
-func addImgCache(imgPath string, img genimgs.GenImg) {
-	imgCache[imgPath] = img
 }

@@ -9,12 +9,19 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/disintegration/imaging"
 	"github.com/gauntface/go-html-asset-manager/v5/utils/config"
 	"github.com/gauntface/go-html-asset-manager/v5/utils/files"
+	"golang.org/x/sync/semaphore"
+	"golang.org/x/sync/singleflight"
+)
+
+const (
+	maxS3ParallelRequests = 2
 )
 
 var (
@@ -23,6 +30,10 @@ var (
 
 	imagingOpen = imaging.Open
 	filesHash   = files.Hash
+
+	s3Sem   = semaphore.NewWeighted(maxS3ParallelRequests)
+	s3Group singleflight.Group
+	s3Cache sync.Map
 )
 
 func getPath(conf *config.Config, imgPath string) string {
@@ -33,23 +44,46 @@ func Open(conf *config.Config, imgPath string) (image.Image, error) {
 	return imagingOpen(getPath(conf, imgPath))
 }
 
-func LookupSizes(s3Client *s3.Client, conf *config.Config, imgPath string) ([]GenImg, error) {
-	srcPath := getPath(conf, imgPath)
+type S3ClientInterface interface {
+	ListObjectsV2(context.Context, *s3.ListObjectsV2Input, ...func(*s3.Options)) (*s3.ListObjectsV2Output, error)
+}
 
-	hash, err := filesHash(srcPath)
-	if err != nil {
-		return nil, fmt.Errorf("%w for img %q", errFileHash, srcPath)
-	}
+func LookupSizes(s3Client S3ClientInterface, conf *config.Config, imgPath string) ([]GenImg, error) {
+	res, err, _ := s3Group.Do(imgPath, func() (interface{}, error) {
+		if val, ok := s3Cache.Load(imgPath); ok {
+			return val.([]GenImg), nil
+		}
 
-	// Get available sizes of the image
-	sizes, err := getImageSizes(s3Client, conf, srcPath, hash)
+		srcPath := getPath(conf, imgPath)
+
+		hash, err := filesHash(srcPath)
+		if err != nil {
+			return nil, fmt.Errorf("%w for img %q", errFileHash, srcPath)
+		}
+
+		// Get available sizes of the image
+		sizes, err := getImageSizes(s3Client, conf, srcPath, hash)
+		if err != nil {
+			return nil, err
+		}
+
+		s3Cache.Store(imgPath, sizes)
+
+		return sizes, nil
+	})
 	if err != nil {
 		return nil, err
 	}
-	return sizes, nil
+
+	// Always return a copy of the slice to avoid data races when callers
+	// sort the result.
+	original := res.([]GenImg)
+	copied := make([]GenImg, len(original))
+	copy(copied, original)
+	return copied, nil
 }
 
-func getImageSizes(s3Client *s3.Client, conf *config.Config, srcPath, hash string) ([]GenImg, error) {
+func getImageSizes(s3Client S3ClientInterface, conf *config.Config, srcPath, hash string) ([]GenImg, error) {
 	filename := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
 	genDirName := fmt.Sprintf("%v.%v", filename, hash)
 	localDirPath := filepath.Join(conf.GenAssets.OutputDir, genDirName)
@@ -100,8 +134,13 @@ func getImageSizes(s3Client *s3.Client, conf *config.Config, srcPath, hash strin
 	return imgs, nil
 }
 
-func lookupS3Images(s3Client *s3.Client, conf *config.Config, dir string) ([]awstypes.Object, error) {
+func lookupS3Images(s3Client S3ClientInterface, conf *config.Config, dir string) ([]awstypes.Object, error) {
 	ctx := context.Background()
+	if err := s3Sem.Acquire(ctx, 1); err != nil {
+		return nil, err
+	}
+	defer s3Sem.Release(1)
+
 	params := &s3.ListObjectsV2Input{
 		Bucket: &conf.GenAssets.OutputBucket,
 		Prefix: &dir,
