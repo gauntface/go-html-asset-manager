@@ -1,6 +1,6 @@
 module github.com/gauntface/go-html-asset-manager/v5
 
-go 1.24.0
+go 1.25.0
 
 toolchain go1.26.0
 
@@ -14,7 +14,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.14.1
 	github.com/schollz/progressbar/v3 v3.19.0
-	golang.org/x/net v0.50.0
+	golang.org/x/net v0.51.0
 	golang.org/x/sync v0.19.0
 )
 
