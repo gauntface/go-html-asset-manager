@@ -59,6 +59,8 @@ var (
 	configPath      = flag.String("config", "asset-manager.json", "The path of the Config file.")
 	cacheControlAge = flag.Int64("cache_control", 31104000, "The max age for caching images")
 	homedirExpand   = homedir.Expand
+
+	imagingOpen = imaging.Open
 )
 
 func main() {
@@ -383,8 +385,21 @@ func (c *client) generateImageList(imgs []assetmanager.Asset) ([]generateImage, 
 	return genImgs, nil
 }
 
+// safeOpenImage wraps imagingOpen with a panic recovery, since
+// disintegration/imaging has a known, unpatched panic-on-crafted-TIFF bug
+// (CVE-2023-36308) and Go's image decoders can panic on other malformed
+// input too. Turns a crash of the whole batch run into a per-image error.
+func safeOpenImage(path string) (img image.Image, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic while decoding image %q: %v", path, r)
+		}
+	}()
+	return imagingOpen(path)
+}
+
 func (c *client) generateImageSet(imgPath string) ([]generateImage, error) {
-	srcImg, err := imaging.Open(imgPath)
+	srcImg, err := safeOpenImage(imgPath)
 	if err != nil {
 		return nil, err
 	}
@@ -526,7 +541,7 @@ func (c *client) uploadImage(ctx context.Context, img generateImage) error {
 }
 
 func createImagingImage(img generateImage) error {
-	srcImg, err := imaging.Open(img.originalPath)
+	srcImg, err := safeOpenImage(img.originalPath)
 	if err != nil {
 		return err
 	}
@@ -540,7 +555,7 @@ func createImagingImage(img generateImage) error {
 }
 
 func createWebpImage(img generateImage) error {
-	srcImg, err := imaging.Open(img.originalPath)
+	srcImg, err := safeOpenImage(img.originalPath)
 	if err != nil {
 		return err
 	}
