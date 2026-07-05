@@ -483,6 +483,10 @@ func createImage(img generateImage) error {
 	}
 }
 
+func cacheControlHeader(maxAgeSeconds int64) string {
+	return fmt.Sprintf("max-age=%v", maxAgeSeconds)
+}
+
 func (c *client) uploadImage(ctx context.Context, img generateImage) error {
 	if err := c.s3Sem.Acquire(ctx, 1); err != nil {
 		return err
@@ -501,7 +505,7 @@ func (c *client) uploadImage(ctx context.Context, img generateImage) error {
 	key := strings.TrimPrefix(img.outputPath, c.staticdir)
 	key = strings.TrimPrefix(key, "/")
 
-	cc := fmt.Sprintf("max-age=%v", cacheControlAge)
+	cc := cacheControlHeader(*cacheControlAge)
 
 	_, err = c.s3Manager.Upload(ctx, &s3.PutObjectInput{
 		Bucket:       &c.s3Bucket,
