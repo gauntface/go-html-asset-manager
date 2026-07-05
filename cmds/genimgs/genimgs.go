@@ -34,7 +34,8 @@ import (
 	"time"
 
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
-	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	transfermanager "github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
+	transfermanagertypes "github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -83,7 +84,7 @@ type client struct {
 	staticManager    *assetmanager.Manager
 	generatedManager *assetmanager.Manager
 	s3               *s3.Client
-	s3Manager        *s3manager.Uploader
+	s3Manager        *transfermanager.Client
 	s3Sem            *semaphore.Weighted
 }
 
@@ -128,7 +129,7 @@ func newClient(ctx context.Context) (*client, error) {
 	}
 
 	s3Client := s3.NewFromConfig(cfg)
-	s3Manager := s3manager.NewUploader(s3Client)
+	s3Manager := transfermanager.New(s3Client)
 
 	return &client{
 		staticdir:        c.GenAssets.StaticDir,
@@ -514,9 +515,9 @@ func (c *client) uploadImage(ctx context.Context, img generateImage) error {
 
 	cc := cacheControlHeader(*cacheControlAge)
 
-	_, err = c.s3Manager.Upload(ctx, &s3.PutObjectInput{
+	_, err = c.s3Manager.UploadObject(ctx, &transfermanager.UploadObjectInput{
 		Bucket:       &c.s3Bucket,
-		ACL:          awstypes.ObjectCannedACLPublicRead,
+		ACL:          transfermanagertypes.ObjectCannedACLPublicRead,
 		CacheControl: &cc,
 		Key:          &key,
 		Body:         f,

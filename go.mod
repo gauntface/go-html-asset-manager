@@ -6,7 +6,7 @@ toolchain go1.26.4
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.27
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.22.30
+	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.2.13
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.104.2
 	github.com/chai2010/webp v1.4.0
 	github.com/disintegration/imaging v1.6.2
