@@ -1,6 +1,8 @@
 {
+  "packageManager": "pnpm@11.10.0",
   "devDependencies": {
-    "@gauntface/logger": "^3.0.115"
+    "@gauntface/logger": "^3.0.115",
+    "esbuild": "0.28.1"
   },
   "dependencies": {
     "avif": "0.5.3"

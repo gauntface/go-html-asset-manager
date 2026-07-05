@@ -17,8 +17,10 @@ jobs:
       uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
       with:
         go-version: '^1.17.3'
-    - name: NPM Deps
-      run: npm install
+    - name: Install pnpm
+      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+    - name: Install JS Deps
+      run: pnpm install --frozen-lockfile
     - name: Run Test
       run: make test
     - name: Coveralls GitHub Action
