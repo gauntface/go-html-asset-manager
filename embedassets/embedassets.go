@@ -50,7 +50,7 @@ func CopyAssets(staticDir string) ([]string, error) {
 			}
 
 			fp := path.Join(outputDir, currentDir, d.Name())
-			err = os.WriteFile(fp, data, 0755)
+			err = os.WriteFile(fp, data, 0644)
 			if err != nil {
 				return nil, fmt.Errorf("%w: %v", errWriteFailed, err)
 			}
