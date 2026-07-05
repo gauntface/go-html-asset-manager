@@ -155,8 +155,22 @@ If you want to convert `<img>` elements to `<picture>`, you can provide an array
         "source-sizes": [
           "(min-width: 620px) 200px",
           "100vw"
-        ]
+        ],
+        "class": "c-picture"
       }
+]
+```
+
+`id` is the classname or tag of the elements to convert. `max-width` and `source-sizes` control the generated `sizes`/`srcset` attributes. `class` is optional and, if set, is applied as the CSS class of the generated `<picture>` element.
+
+##### ratio-wrapper
+
+An array of tag names or CSS classnames. Any `<img>` or `<iframe>` found inside a matching element (or matching the tag/classname itself) will have its `width`/`height` attributes replaced with a wrapping element sized via `aspect-ratio`, so the space is reserved before the asset loads.
+
+```json
+"ratio-wrapper": [
+  "c-project-item",
+  "iframe"
 ]
 ```
 
@@ -192,7 +206,6 @@ The maximum screen density you'd like to account for when generating images.
 
 There are some features/changes I'd like to make.
 
-- Embed JS for async loading + YouTube etc
 - Split the config out for `genimgs` so there is a clear separation.
 - Ability to add styles if one or more elements/classnames are in the page. I.e. if you wanted to add styles for h1-h6, this approach requires 6 files, vs just one file with styles defined as `h1,h2,h3,h4,h5,h6 {...}`.
 
