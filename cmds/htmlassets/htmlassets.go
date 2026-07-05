@@ -230,8 +230,9 @@ func (c *client) manipulateHTMLFiles(assets []assetmanagerLocalAsset, manager as
 	for _, htmlAsset := range assets {
 		if err := sem.Acquire(ctx, 1); err != nil {
 			errMu.Lock()
-			defer errMu.Unlock()
 			errs = append(errs, fmt.Errorf("%w %q: %v", errManipulate, htmlAsset.Path(), err))
+			errMu.Unlock()
+			continue
 		}
 
 		go func(htmlAsset assetmanagerLocalAsset) {
