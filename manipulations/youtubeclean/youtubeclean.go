@@ -17,7 +17,6 @@
 package youtubeclean
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -38,8 +37,6 @@ const (
 var (
 	embedRegex = regexp.MustCompile(`/embed/(.*).*`)
 
-	errURLParse = errors.New("unable to parse URL")
-
 	supportedParams = map[string]bool{
 		"list": true,
 	}
@@ -55,27 +52,27 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		}
 
 		if _, ok := attributes["src"]; !ok {
-			return nil
+			continue
 		}
 
 		src := attributes["src"].Val
 
 		u, err := url.Parse(src)
 		if err != nil {
-			return fmt.Errorf("%w %q: %v", errURLParse, src, err)
+			continue
 		}
 
 		if u.Host == "" {
 			if !strings.Contains(u.Path, "www.youtube.com") {
-				return nil
+				continue
 			}
 		} else if u.Host != "www.youtube.com" {
-			return nil
+			continue
 		}
 
 		matches := embedRegex.FindStringSubmatch(u.Path)
 		if len(matches) == 0 {
-			return nil
+			continue
 		}
 
 		ytElement := ytElement(matches[1], queryParams(u.Query()))

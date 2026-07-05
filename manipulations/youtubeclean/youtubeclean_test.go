@@ -56,10 +56,9 @@ func Test_Manipulator(t *testing.T) {
 			want:        `<html><head></head><body><iframe src="//other.com/example"></iframe></body></html>`,
 		},
 		{
-			description: "return error if src cannot be parsed as a URL",
+			description: "skip iframe if src cannot be parsed as a URL",
 			doc:         MustGetNode(t, `<iframe src=":"></iframe>`),
 			want:        `<html><head></head><body><iframe src=":"></iframe></body></html>`,
-			wantError:   errURLParse,
 		},
 		{
 			description: "do nothing for non embed youtube URL",
@@ -80,6 +79,19 @@ func Test_Manipulator(t *testing.T) {
 			description: "clean attributes and URL for youtube playlist",
 			doc:         MustGetNode(t, `<iframe src="http://www.youtube.com/embed/1234-abcd?list=xyz-5678&random=searchparam" iframeborder="0" other="test"></iframe>`),
 			want:        `<html><head></head><body><div class="n-ham-c-lite-yt" videoid="1234-abcd" videoparams="list=xyz-5678" style="aspect-ratio: auto 4 / 3"><a href="https://www.youtube.com/watch?v=1234-abcd&amp;list=xyz-5678" class="n-ham-c-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></body></html>`,
+		},
+		{
+			// Regression test: a non-matching/malformed iframe used to abort
+			// the loop entirely (via an early `return`), preventing any later
+			// iframes on the page from being processed.
+			description: "still cleans a later youtube iframe after an earlier non-matching one",
+			doc:         MustGetNode(t, `<iframe src="//other.com/example"></iframe><iframe src="www.youtube.com/embed/1234-abcd" iframeborder="0" other="test"></iframe>`),
+			want:        `<html><head></head><body><iframe src="//other.com/example"></iframe><div class="n-ham-c-lite-yt" videoid="1234-abcd" style="aspect-ratio: auto 4 / 3"><a href="https://www.youtube.com/watch?v=1234-abcd" class="n-ham-c-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></body></html>`,
+		},
+		{
+			description: "still cleans a later youtube iframe after an earlier one with an unparseable src",
+			doc:         MustGetNode(t, `<iframe src=":"></iframe><iframe src="www.youtube.com/embed/1234-abcd" iframeborder="0" other="test"></iframe>`),
+			want:        `<html><head></head><body><iframe src=":"></iframe><div class="n-ham-c-lite-yt" videoid="1234-abcd" style="aspect-ratio: auto 4 / 3"><a href="https://www.youtube.com/watch?v=1234-abcd" class="n-ham-c-lite-yt__link" target="_blank"><img src="https://i.ytimg.com/vi/1234-abcd/hqdefault.jpg" style="width: 100%; height: 100%; object-fit: contain;"/></a></div></body></html>`,
 		},
 	}
 
