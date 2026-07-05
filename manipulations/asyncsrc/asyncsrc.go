@@ -25,19 +25,19 @@ import (
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 	allElements := htmlparsing.FindNodesByTag("iframe", doc)
 	for _, ele := range allElements {
-		for i, a := range ele.Attr {
-			if a.Key != "src" {
+		keptAttrs := make([]html.Attribute, 0, len(ele.Attr))
+		dataSrcAttrs := []html.Attribute{}
+		for _, a := range ele.Attr {
+			if a.Key == "src" && a.Val != "" {
+				dataSrcAttrs = append(dataSrcAttrs, html.Attribute{
+					Key: "data-src",
+					Val: a.Val,
+				})
 				continue
 			}
-			if a.Val == "" {
-				continue
-			}
-			ele.Attr = append(ele.Attr, html.Attribute{
-				Key: "data-src",
-				Val: a.Val,
-			})
-			ele.Attr = append(ele.Attr[:i], ele.Attr[i+1:]...)
+			keptAttrs = append(keptAttrs, a)
 		}
+		ele.Attr = append(keptAttrs, dataSrcAttrs...)
 	}
 	return nil
 }
