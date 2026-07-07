@@ -19,7 +19,6 @@ package vimeoclean
 // H/T to @luwes for the idea via https://github.com/luwes/lite-vimeo-embed
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -37,8 +36,6 @@ import (
 
 var (
 	embedRegex = regexp.MustCompile(`/video/(.*).*`)
-
-	errURLParse = errors.New("unable to parse URL")
 )
 
 func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
@@ -55,41 +52,41 @@ func Manipulator(runtime manipulations.Runtime, doc *html.Node) error {
 		}
 
 		if _, ok := attributes["src"]; !ok {
-			return nil
+			continue
 		}
 
 		src := attributes["src"].Val
 
 		u, err := url.Parse(src)
 		if err != nil {
-			return fmt.Errorf("%w %q: %v", errURLParse, src, err)
+			continue
 		}
 
 		if u.Host == "" {
 			if !strings.Contains(u.Path, "player.vimeo.com") {
-				return nil
+				continue
 			}
 		} else if u.Host != "player.vimeo.com" {
-			return nil
+			continue
 		}
 
 		matches := embedRegex.FindStringSubmatch(u.Path)
 		if len(matches) == 0 {
-			return nil
+			continue
 		}
 
 		sizes := getSizes(runtime.Config, ele)
 		if len(sizes) == 0 {
-			return nil
+			continue
 		}
 
 		videoID := matches[1]
 		video, err := runtime.Vimeo.Video(videoID)
 		if err != nil {
-			return err
+			continue
 		}
 		if len(video.Pictures.Sizes) == 0 {
-			return nil
+			continue
 		}
 
 		viElement := vimeoElement(videoID, video, sizes)
