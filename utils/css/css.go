@@ -62,7 +62,7 @@ func WithType(t CSSType) FormatOption {
 	}
 }
 
-func WithNamspace(s string) FormatOption {
+func WithNamespace(s string) FormatOption {
 	return func(o *formationOption) {
 		o.namespace = s
 	}

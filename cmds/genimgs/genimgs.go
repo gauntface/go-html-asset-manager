@@ -181,6 +181,13 @@ func (c *client) run(ctx context.Context) error {
 		return err
 	}
 
+	// Left disabled: toDelete is a list of stale S3 object keys (see
+	// assessAssets below), but deleteImages operates on local filesystem
+	// paths (os.Remove, filepath.Dir), not S3 objects. Uncommenting this
+	// as-is would not clean up stale S3 images - it would call os.Remove
+	// on S3 key strings as if they were local paths. Deleting objects
+	// from a production S3 bucket deserves a deliberate, tested
+	// implementation of its own rather than just flipping this back on.
 	/* err = c.deleteImages(toDelete)
 	if err != nil {
 		return err
@@ -289,7 +296,7 @@ func (c *client) createImages(imgs []generateImage) error {
 	}
 
 	if errCount > 0 {
-		return fmt.Errorf("%v errors occured while creating images", errCount)
+		return fmt.Errorf("%v errors occurred while creating images", errCount)
 	}
 
 	return nil
@@ -479,7 +486,7 @@ func createImage(img generateImage) error {
 	case ".avif":
 		return createAvifImage(img)
 	default:
-		return fmt.Errorf("unsupported file: %q with extension%q", img.outputPath, ext)
+		return fmt.Errorf("unsupported file: %q with extension %q", img.outputPath, ext)
 	}
 }
 

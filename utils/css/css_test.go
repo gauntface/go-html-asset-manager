@@ -41,7 +41,7 @@ func Test_Format(t *testing.T) {
 			typ:         LayoutType,
 			body:        "example-body",
 			opts: []FormatOption{
-				WithNamspace("example-namespace"),
+				WithNamespace("example-namespace"),
 			},
 			want: `n-example-namespace-l-example-body`,
 		},
@@ -50,7 +50,7 @@ func Test_Format(t *testing.T) {
 			typ:         UtilityType,
 			body:        "example-body",
 			opts: []FormatOption{
-				WithNamspace(""),
+				WithNamespace(""),
 				WithElement("example-element"),
 			},
 			want: `u-example-body__example-element`,
@@ -60,7 +60,7 @@ func Test_Format(t *testing.T) {
 			typ:         UtilityType,
 			body:        "example-body",
 			opts: []FormatOption{
-				WithNamspace(""),
+				WithNamespace(""),
 				WithModifier("example-modifier"),
 			},
 			want: `u-example-body--example-modifier`,
@@ -70,7 +70,7 @@ func Test_Format(t *testing.T) {
 			typ:         ComponentType,
 			body:        "example-body",
 			opts: []FormatOption{
-				WithNamspace("example-namespace"),
+				WithNamespace("example-namespace"),
 				WithElement("example-element"),
 				WithModifier("example-modifier"),
 			},
